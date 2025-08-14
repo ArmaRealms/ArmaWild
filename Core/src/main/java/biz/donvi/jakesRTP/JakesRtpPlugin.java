@@ -1,7 +1,9 @@
 package biz.donvi.jakesRTP;
 
-import biz.donvi.argsChecker.Util;
 import biz.donvi.jakesRTP.claimsIntegrations.ClaimsManager;
+import biz.donvi.jakesRTP.commands.CmdForceRtp;
+import biz.donvi.jakesRTP.commands.CmdRtp;
+import biz.donvi.jakesRTP.commands.CmdRtpAdmin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
@@ -90,7 +92,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
         hasEconomy = setupEconomy();
         loadConfigs(); // Loads the default configs if no configs are there
-        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(Util.getImpliedMap(cmdMap, "rtp-admin")));
+        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(cmdMap));
         loadMessageMap(); // Loads all the messages that get sent by the plugin
         loadRandomTeleporter(); // Loads the random teleporter
         loadLocationCacheFiller(); // Loads the location cache filler
@@ -117,7 +119,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
     void reloadCommands() {
         HandlerList.unregisterAll(this);
-        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(Util.getImpliedMap(cmdMap, "rtp-admin")));
+        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(cmdMap));
     }
 
     //<editor-fold desc="Loading Methods">
@@ -182,7 +184,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
             getCommand("rtp").setExecutor(
                     new CmdRtp(theRandomTeleporter));
             getCommand("forcertp").setExecutor(
-                    new CmdForceRtp(theRandomTeleporter, Util.getImpliedMap(cmdMap, "forcertp")));
+                    new CmdForceRtp(theRandomTeleporter, cmdMap));
             getServer().getPluginManager().registerEvents(
                     new RtpOnEvent(theRandomTeleporter), this);
         } catch (final Exception e) {
@@ -317,6 +319,4 @@ public final class JakesRtpPlugin extends JavaPlugin {
             right = msg;
         }
     }
-    //</editor-fold>
-
 }

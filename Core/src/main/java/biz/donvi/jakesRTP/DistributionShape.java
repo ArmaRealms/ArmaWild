@@ -5,12 +5,15 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.ArrayList;
 import java.util.List;
 
-import static biz.donvi.evenDistribution.RandomCords.*;
 import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.DOU_01_SET;
 import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.DOU_02_SET;
 import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.LVL_01_SET;
 import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.LVL_02_SET;
 import static biz.donvi.jakesRTP.MessageStyles.enabledOrDisabled;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.asIntArray2w;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.getRandXyCircle;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.getRandXyRectangle;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.getRandXySquare;
 
 abstract class DistributionShape {
 
