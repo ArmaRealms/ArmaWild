@@ -274,9 +274,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
         Messages.setMap(new Yaml().load(this.getClassLoader().getResourceAsStream(
                 String.format(BLANK_LANG_FILE_NAME, "en"))));
         // Load & add all the messages from the language file
-    lang = (messageOverrides != null && messageOverrides.get("language") != null)
-        ? messageOverrides.get("language")
-        : "en";
+        lang = getLanguageOrDefault(messageOverrides, "en");
         if (!lang.equalsIgnoreCase("en")) {
             languageOverrides = new Yaml().load(this.getClassLoader().getResourceAsStream(
                     String.format(BLANK_LANG_FILE_NAME, lang)));
@@ -342,5 +340,13 @@ public final class JakesRtpPlugin extends JavaPlugin {
         } catch (final Exception ex) {
             getLogger().log(Level.WARNING, "Failed to register executor for command '" + name + "'", ex);
         }
+    }
+
+    private static String getLanguageOrDefault(final Map<String, String> overrides, final String defaultLang) {
+        if (overrides == null) return defaultLang;
+        final String value = overrides.get("language");
+        if (value == null) return defaultLang;
+        final String trimmed = value.trim();
+        return trimmed.isEmpty() ? defaultLang : trimmed;
     }
 }
