@@ -145,6 +145,7 @@ build
 # User-specific files
 /.gradle/
 /.idea/
+/.vscode/
 /.run/
 /build-output-final/
 /cache/

@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     java
     alias(libs.plugins.shadow)
@@ -28,6 +30,7 @@ dependencies {
     compileOnly(libs.worldguard)
     compileOnly(libs.huskTowns)
     compileOnly(libs.landsAPI)
+    implementation(libs.paperlib)
 }
 
 tasks.processResources {
@@ -37,10 +40,11 @@ tasks.processResources {
 }
 
 // ShadowJar config
-tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
-    archiveBaseName.set("JakesRTP-v")
+tasks.named<ShadowJar>("shadowJar") {
+    archiveBaseName.set("JakesRTP")
     archiveClassifier.set("")
     archiveVersion.set(project.version.toString())
+    relocate("io.papermc", "biz.donvi.jakesRTP.libs.io.papermc")
 }
 
 // Shadow plugin already adds the shadowJar artifact by default

@@ -7,9 +7,6 @@ pluginManagement {
 
 dependencyResolutionManagement {
 	repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-	versionCatalogs {
-		create("libs")
-	}
 }
 
 rootProject.name = "JakesRTP"
