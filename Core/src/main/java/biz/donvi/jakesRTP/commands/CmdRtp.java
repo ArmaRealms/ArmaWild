@@ -25,8 +25,10 @@ import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
 public class CmdRtp implements TabExecutor {
 
     private final RandomTeleporter randomTeleporter;
-    // Track scheduled cooldown notifications per player+profile to avoid duplicates
-    private final Map<String, Integer> cooldownNotifyTasks = new ConcurrentHashMap<>();
+    // Track scheduled cooldown notifications per player UUID -> record, inside record map profileName->taskId
+    private final Map<UUID, CooldownNotifyRecord> cooldownNotifies = new ConcurrentHashMap<>();
+
+    private static record CooldownNotifyRecord(Map<String, Integer> perProfileTaskIds) {}
 
     public CmdRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
@@ -90,11 +92,16 @@ public class CmdRtp implements TabExecutor {
         if (msLeft <= 0) return;
         final int ticks = (int) Math.max(1, (msLeft + 49) / 50); // ceil to ticks
         final UUID uuid = player.getUniqueId();
-        final String key = uuid + ":" + profile.name.toLowerCase();
         final BukkitScheduler scheduler = player.getServer().getScheduler();
 
-        // Cancel prior task if any
-        final Integer prev = cooldownNotifyTasks.remove(key);
+        // Ensure record exists
+        final CooldownNotifyRecord record = cooldownNotifies.computeIfAbsent(
+                uuid, u -> new CooldownNotifyRecord(new ConcurrentHashMap<>())
+        );
+        final Map<String, Integer> perProfile = record.perProfileTaskIds();
+        final String profileKey = profile.name.toLowerCase();
+        // Cancel prior task for this profile if any
+        final Integer prev = perProfile.remove(profileKey);
         if (prev != null) scheduler.cancelTask(prev);
 
         final int taskId = scheduler.scheduleSyncDelayedTask(plugin, () -> {
@@ -103,13 +110,18 @@ public class CmdRtp implements TabExecutor {
                 if (p == null || !p.isOnline()) return;
                 // Only notify if cooldown actually ended
                 if (profile.coolDown.timeLeft(p.getName()) <= 0) {
-                    p.sendMessage(Messages.COOLDOWN_OVER.format());
+                    p.sendMessage(Messages.COOLDOWN_OVER.format(profile.name));
                 }
             } finally {
-                cooldownNotifyTasks.remove(key);
+                final CooldownNotifyRecord rec = cooldownNotifies.get(uuid);
+                if (rec != null) {
+                    final Map<String, Integer> m = rec.perProfileTaskIds();
+                    m.remove(profileKey);
+                    if (m.isEmpty()) cooldownNotifies.remove(uuid);
+                }
             }
         }, ticks);
-        if (taskId != -1) cooldownNotifyTasks.put(key, taskId);
+        if (taskId != -1) perProfile.put(profileKey, taskId);
     }
 
     private Runnable makeRunnable(final Player player, final RtpProfile rtpProfile, final boolean calculatedWarmup) {

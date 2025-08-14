@@ -63,7 +63,7 @@ you-were-charged-x: 'Pomyślnie zapłaciłeś {0}'
 # For when an economy error happens. This will most likely not occur.
 #   {0} - The economy error text.
 economy-error: 'Wystąpił błąd ekonomii: {0}'
-cooldown-over: 'Twój cooldown RTP zakończył się.'
+cooldown-over: 'Twój cooldown RTP dla "{0}" zakończył się.'
 # READABLE-TIME - This is a special case message. Whenever a time needs to be displayed, it will use this for
 #   formatting. Also, each 'word' will only be displayed if the associated number value is greater than 0.
 # Example: 8675 seconds will be formatted as such: `2 hours, 24 minutes, 35 seconds.` Note the absence of days.
