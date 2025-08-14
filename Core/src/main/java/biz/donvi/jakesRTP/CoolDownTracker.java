@@ -23,7 +23,7 @@ public class CoolDownTracker {
      * @param playerName Name of the player/user to check.
      * @return If the difference in time between now and the last logged time is greater than the cool down.
      */
-    boolean check(final String playerName) {
+    public boolean check(final String playerName) {
         final Long time = tracker.get(playerName);
         final long currentTime = System.currentTimeMillis();
         return time == null || currentTime - time > coolDownTime;
@@ -61,7 +61,7 @@ public class CoolDownTracker {
      * @param playerName Player to log time for.
      * @param time       The time to log.
      */
-    void log(final String playerName, final long time) {
+    public void log(final String playerName, final long time) {
         tracker.put(playerName, time);
     }
 
@@ -104,7 +104,7 @@ public class CoolDownTracker {
      * @param playerName The player to check.
      * @return A string describing the time left until the cooldown is over. Human readable.
      */
-    String timeLeftWords(final String playerName) {
+    public String timeLeftWords(final String playerName) {
         return GeneralUtil.readableTime(timeLeft(playerName));
     }
 

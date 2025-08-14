@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CmdRtpAdmin implements TabExecutor {
@@ -24,16 +25,12 @@ public class CmdRtpAdmin implements TabExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-
-        final ArgsChecker argsChecker = new ArgsChecker(args);
-
-        if (argsChecker.matches(true, "reload"))
+        final List<String> argsList = new ArrayList<>(Arrays.asList(args));
+        if (argsList.contains("reload"))
             subReload(sender);
-        else if (argsChecker.matches(true, "status"))
-            sender.sendMessage("Incorrect usage. Try:\n/rtp-admin status <#static|name-of-config>");
-        else if (argsChecker.matches(true, "status", null))
-            subStatus(sender, argsChecker.getRemainingArgs());
-        else if (argsChecker.matches(true, "reload-messages"))
+        else if (argsList.contains("status"))
+            subStatus(sender, args);
+        else if (argsList.contains("reload-messages"))
             subReloadMessages(sender);
         else return false;
         return true;
@@ -41,20 +38,7 @@ public class CmdRtpAdmin implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        return ArgsTester.nextCompleteInTree(args, cmdMap, this);
-    }
-
-    @Override
-    public void getPotential(final String[] path) throws ResultAlreadySetException {
-    }
-
-    @Override
-    public void getPotential(final String path) throws ResultAlreadySetException {
-        //noinspection SwitchStatementWithTooFewBranches
-        switch (path) {
-            case "status":
-                setResult(getConfigNames());
-        }
+        return List.of();
     }
 
     private void subReload(final CommandSender sender) {

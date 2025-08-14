@@ -131,8 +131,8 @@ public final class GeneralUtil {
 
     public static String readableTime(final long milliseconds) {
         final int days;
-        int hours;
-        int minutes;
+        final int hours;
+        final int minutes;
         final int seconds;
         seconds = (int) (milliseconds / 1000) % 60;
         minutes = (int) (milliseconds / (1000 * 60)) % 60;
@@ -146,14 +146,14 @@ public final class GeneralUtil {
     }
 
     public static boolean isDirEmpty(final Path directory) throws IOException {
-        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
+        try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
             return !dirStream.iterator().hasNext();
         }
     }
 
-    public static List<Pair<String, FileConfiguration>> getFileConfigFromFile(File[] files) {
-        List<Pair<String, FileConfiguration>> configs = new ArrayList<>();
-        for (File f : files)
+    public static List<Pair<String, FileConfiguration>> getFileConfigFromFile(final File[] files) {
+        final List<Pair<String, FileConfiguration>> configs = new ArrayList<>();
+        for (final File f : files)
             configs.add(new Pair<String, FileConfiguration>(
                     f.getName().substring(0, f.getName().lastIndexOf(".")),
                     YamlConfiguration.loadConfiguration(f)
@@ -168,7 +168,7 @@ public final class GeneralUtil {
      * @param event PlayerRespawnEvent event to check.
      * @return Was this a 1.16+ respawn anchor spawn?
      */
-    public static boolean isAnchorSpawn(PlayerRespawnEvent event) {
+    public static boolean isAnchorSpawn(final PlayerRespawnEvent event) {
         return anchorSupport && event.isAnchorSpawn();
     }
 
@@ -179,18 +179,18 @@ public final class GeneralUtil {
      * @param items The items to list
      * @return The items as comma separated list.
      */
-    public static String listText(List<String> items) {
+    public static String listText(final List<String> items) {
         if (items == null || items.size() == 0) return null;
         if (items.size() == 1) return items.get(0);
-        StringBuilder s = new StringBuilder(items.get(0));
+        final StringBuilder s = new StringBuilder(items.get(0));
         for (int i = 1; i < items.size(); i++)
             s.append(", ").append(items.get(i));
         return s.toString();
     }
 
     public static String timeDifLog() { // Okay, that's a lie, it's used in this method.
-        long time = System.currentTimeMillis(); // But this method is not used anywhere.
-        long dif = time - uselessLong;
+        final long time = System.currentTimeMillis(); // But this method is not used anywhere.
+        final long dif = time - uselessLong;
         uselessLong = time;
         return time + " " + dif;
     }
@@ -199,7 +199,7 @@ public final class GeneralUtil {
         public K key;
         public V value;
 
-        Pair(K key, V value) {
+        public Pair(final K key, final V value) {
             this.key = key;
             this.value = value;
         }

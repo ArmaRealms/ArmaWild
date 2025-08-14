@@ -42,7 +42,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
     //<editor-fold desc="Logging Related">
     private static final Queue<LogMsg> msgLog = new ArrayDeque<>();
     //<editor-fold desc="======== Static Fields ========">
-    static JakesRtpPlugin plugin;
+    public static JakesRtpPlugin plugin;
     static Map<String, Object> cmdMap;
     static LocationCacheFiller locFinderRunnable;
     static WorldBorderPluginHook worldBorderPluginHook;
@@ -92,7 +92,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
         hasEconomy = setupEconomy();
         loadConfigs(); // Loads the default configs if no configs are there
-        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(cmdMap));
+        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin());
         loadMessageMap(); // Loads all the messages that get sent by the plugin
         loadRandomTeleporter(); // Loads the random teleporter
         loadLocationCacheFiller(); // Loads the location cache filler
@@ -117,9 +117,9 @@ public final class JakesRtpPlugin extends JavaPlugin {
         return locCache;
     }
 
-    void reloadCommands() {
+    public void reloadCommands() {
         HandlerList.unregisterAll(this);
-        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(cmdMap));
+        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin());
     }
 
     //<editor-fold desc="Loading Methods">

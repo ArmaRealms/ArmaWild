@@ -3,7 +3,7 @@ package biz.donvi.jakesRTP;
 /**
  * An exception for organizational purposes.
  */
-class JrtpBaseException extends Exception {
+public class JrtpBaseException extends Exception {
 
     public JrtpBaseException() {
         super();
@@ -24,7 +24,7 @@ class JrtpBaseException extends Exception {
     static class PluginDisabledException extends JrtpBaseException {
     }
 
-    static class NotPermittedException extends JrtpBaseException {
+    public static class NotPermittedException extends JrtpBaseException {
         public NotPermittedException(final String message) {
             super(message);
         }

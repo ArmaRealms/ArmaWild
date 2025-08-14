@@ -56,7 +56,7 @@ public class RandomTeleporter {
     // The warmup thing...
     // A player can only be waiting for one rtp, regardless of how many they call.
     // The int stored is the id of the task to cancel it.
-    final Map<UUID, Integer> playersInWarmup = new HashMap<>();
+    public final Map<UUID, Integer> playersInWarmup = new HashMap<>();
     private final ArrayList<RtpProfile> rtpSettings;
     //</editor-fold>
 

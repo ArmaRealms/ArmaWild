@@ -79,7 +79,7 @@ public class RtpProfile {
     /* except these */
     public final boolean warmupEnabled; // Just for convenience (it is mostly redundant)
     public final boolean canUseLocQueue;
-    final CoolDownTracker coolDown;
+    public final CoolDownTracker coolDown;
     //</editor-fold>
 
     /**

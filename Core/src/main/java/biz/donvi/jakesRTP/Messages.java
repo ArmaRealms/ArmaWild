@@ -93,7 +93,7 @@ public enum Messages {
         return mappedValues[this.ordinal()];
     }
 
-    String format(final Object... args) {
+    public String format(final Object... args) {
         return MessageFormat.format(raw(), args);
     }
 }
