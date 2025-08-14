@@ -43,13 +43,13 @@ rtp-settings-no-contain-world: 'Error de Input: La configuración "{0}" no conti
 rtp-settings-must-use-world: 'Error de Input: La configuración "{0}" solo puede teletransportar personas en el mundo "{1}"'
 # For when a player needs to wait for a cooldown before running the command again.
 #   {0} - The cooldown time (uses READABLE-TIME as defined below)
-need-to-wait-for-cooldown:  'Necesitas esperar el cooldown: {0}'
+need-to-wait-for-cooldown: 'Necesitas esperar el cooldown: {0}'
 # READABLE-TIME - This is a special case message. Whenever a time needs to be displayed, it will use this for
 #   formatting. Also, each 'word' will only be displayed if the associated number value is greater than 0.
 # Example: 8675 seconds will be formatted as such: `2 hours, 24 minutes, 35 seconds.` Note the absence of days.
 readable-time: '{0}{1}{2}{3}'
-readable-time-word-days:    '{0} días, '
-readable-time-word-hours:   '{0} horas, '
+readable-time-word-days: '{0} días, '
+readable-time-word-hours: '{0} horas, '
 readable-time-word-minutes: '{0} minutos, '
 readable-time-word-seconds: '{0} segundos.'
 

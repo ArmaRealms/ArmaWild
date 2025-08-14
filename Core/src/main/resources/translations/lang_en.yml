@@ -44,7 +44,7 @@ rtp-settings-no-contain-world: 'Input mismatch: RtpSettings "{0}" does not conta
 rtp-settings-must-use-world: 'Input mismatch: RtpSettings "{0}" can only teleport people in world "{1}"'
 # For when a player needs to wait for a cooldown before running the command again.
 #   {0} - The cooldown time (uses READABLE-TIME as defined below)
-need-to-wait-for-cooldown:  'Need to wait for cooldown: {0}'
+need-to-wait-for-cooldown: 'Need to wait for cooldown: {0}'
 # For when a player is waiting  for the warmup before teleporting. (Only gets used if `warmup.time` is greater than 0)
 #   {0} - The number of seconds remaining
 teleporting-in-x-seconds: 'Teleporting in {0} seconds...'
@@ -70,7 +70,7 @@ economy-error: 'An economy error occurred: {0}'
 #   formatting. Also, each 'word' will only be displayed if the associated number value is greater than 0.
 # Example: 8675 seconds will be formatted as such: `2 hours, 24 minutes, 35 seconds.` Note the absence of days.
 readable-time: '{0}{1}{2}{3}'
-readable-time-word-days:    '{0} days, '
-readable-time-word-hours:   '{0} hours, '
+readable-time-word-days: '{0} days, '
+readable-time-word-hours: '{0} hours, '
 readable-time-word-minutes: '{0} minutes, '
 readable-time-word-seconds: '{0} seconds.'

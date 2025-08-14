@@ -18,7 +18,7 @@ public class LocationCacheFiller implements Runnable {
 
     private boolean keepRunning = true;
 
-    public LocationCacheFiller(JakesRtpPlugin jakesRtpPlugin, long recheckTime, long betweenTime) {
+    public LocationCacheFiller(final JakesRtpPlugin jakesRtpPlugin, final long recheckTime, final long betweenTime) {
         pluginReference = new WeakReference<>(jakesRtpPlugin);
         this.recheckTime = recheckTime;
         this.betweenTime = betweenTime;
@@ -32,20 +32,21 @@ public class LocationCacheFiller implements Runnable {
         try {
             SimpleLagTimer.blockingTimer(pluginMain(), 5000);
             infoLog("[J-RTP] LCF Started.");
-            int issueCounter = 0, issueCounterMax = 10;
+            int issueCounter = 0;
+            final int issueCounterMax = 10;
             while (keepRunning && isPluginLoaded()) {
-                for (RtpProfile settings : getCurrentRtpSettings()) {
+                for (final RtpProfile settings : getCurrentRtpSettings()) {
                     if (!keepRunning) break;
                     else if (settings.canUseLocQueue)
                         try {
                             pluginMain().getRandomTeleporter().fillQueue(settings);
-                        } catch (JrtpBaseException ex) {
+                        } catch (final JrtpBaseException ex) {
                             issueCounter += 2;
                             if (ex instanceof JrtpBaseException.PluginDisabledException) throw ex;
                             if (ex instanceof JrtpBaseException.NotPermittedException)
                                 infoLog(
-                                    "An exception has occurred that should be impossible to occur. Please report this" +
-                                    ".");
+                                        "An exception has occurred that should be impossible to occur. Please report this" +
+                                                ".");
                             else if (issueCounter < issueCounterMax)
                                 infoLog("Something has gone wrong, but this is most likely not an issue.");
                             else
@@ -59,11 +60,11 @@ public class LocationCacheFiller implements Runnable {
 
                 patientlyWait(recheckTime);
             }
-        } catch (JrtpBaseException.PluginDisabledException ignored) {
+        } catch (final JrtpBaseException.PluginDisabledException ignored) {
             infoLog("[J-RTP] Plugin disabled while finding a location. Location scrapped.");
-        } catch (ReferenceNonExistentException ignored) {
+        } catch (final ReferenceNonExistentException ignored) {
             infoLog("[J-RTP] Plugin no longer exists.");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             infoLog("Something unexpected went wrong.");
             e.printStackTrace();
         }
@@ -80,7 +81,7 @@ public class LocationCacheFiller implements Runnable {
     private boolean isPluginLoaded() {
         //noinspection ConstantConditions as the value is checked against null first
         return pluginReference.get() != null &&
-               pluginReference.get().isEnabled();
+                pluginReference.get().isEnabled();
     }
 
     /**
@@ -96,11 +97,12 @@ public class LocationCacheFiller implements Runnable {
     /**
      * Waits for the specified amount of time, returning either then the time has passed or an interrupt has occurred.
      */
-    private synchronized void patientlyWait(long milliseconds) {
+    private synchronized void patientlyWait(final long milliseconds) {
         if (!keepRunning) return;
         try {
             wait(milliseconds);
-        } catch (InterruptedException ignored) {}
+        } catch (final InterruptedException ignored) {
+        }
     }
 
     /**
@@ -141,5 +143,6 @@ public class LocationCacheFiller implements Runnable {
     /**
      * Exists for the sole purpose of identifying when we try to get the plugin's reference, but it is null
      */
-    private static class ReferenceNonExistentException extends Exception {}
+    private static class ReferenceNonExistentException extends Exception {
+    }
 }

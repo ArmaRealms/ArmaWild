@@ -5,9 +5,15 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.ArrayList;
 import java.util.List;
 
-import static biz.donvi.evenDistribution.RandomCords.*;
-import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.*;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.DOU_01_SET;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.DOU_02_SET;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.LVL_01_SET;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.LVL_02_SET;
 import static biz.donvi.jakesRTP.MessageStyles.enabledOrDisabled;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.asIntArray2w;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.getRandXyCircle;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.getRandXyRectangle;
+import static biz.donvi.jakesRTP.evendistribuition.RandomCords.getRandXySquare;
 
 abstract class DistributionShape {
 
@@ -24,20 +30,20 @@ abstract class DistributionShape {
     \* ================================================== */
 
     public static abstract class Symmetric extends DistributionShape {
-        final int     radiusMax;
-        final int     radiusMin;
+        final int radiusMax;
+        final int radiusMin;
         final boolean gaussianDistribution;
-        final double  gaussianShrink;
-        final double  gaussianCenter;
+        final double gaussianShrink;
+        final double gaussianCenter;
 
-        public Symmetric(int rMax, int rMin) {
+        public Symmetric(final int rMax, final int rMin) {
             radiusMax = rMax;
             radiusMin = rMin;
             gaussianDistribution = false;
             gaussianShrink = gaussianCenter = 0;
         }
 
-        public Symmetric(ConfigurationSection settings) {
+        public Symmetric(final ConfigurationSection settings) {
             radiusMax = settings.getInt("radius.max");
             radiusMin = settings.getInt("radius.min");
             gaussianDistribution = settings.getBoolean("gaussian-distribution.enabled");
@@ -47,8 +53,8 @@ abstract class DistributionShape {
 
 
         @Override
-        public List<String> infoStrings(boolean mcFormat) {
-            ArrayList<String> list = new ArrayList<>();
+        public List<String> infoStrings(final boolean mcFormat) {
+            final ArrayList<String> list = new ArrayList<>();
             list.add(LVL_01_SET.format(mcFormat, "Distribution shape", shape()));
             list.add(DOU_01_SET.format(mcFormat, "Radius max", radiusMax, "Radius min", radiusMin));
             list.add(LVL_01_SET.format(mcFormat, "Gaussian Distribution", enabledOrDisabled(gaussianDistribution)));
@@ -61,12 +67,18 @@ abstract class DistributionShape {
     }
 
     public static class Circle extends Symmetric {
-        public Circle(int rMax, int rMin) {super(rMax, rMin);}
+        public Circle(final int rMax, final int rMin) {
+            super(rMax, rMin);
+        }
 
-        public Circle(ConfigurationSection settings) {super(settings);}
+        public Circle(final ConfigurationSection settings) {
+            super(settings);
+        }
 
         @Override
-        public String shape() {return "Circle";}
+        public String shape() {
+            return "Circle";
+        }
 
         @Override
         public int getArea() {
@@ -76,18 +88,24 @@ abstract class DistributionShape {
         @Override
         public int[] getCords() {
             return asIntArray2w(
-                getRandXyCircle(radiusMax, radiusMin, gaussianShrink, gaussianCenter)
+                    getRandXyCircle(radiusMax, radiusMin, gaussianShrink, gaussianCenter)
             );
         }
     }
 
     public static class Square extends Symmetric {
-        public Square(int rMax, int rMin) {super(rMax, rMin);}
+        public Square(final int rMax, final int rMin) {
+            super(rMax, rMin);
+        }
 
-        public Square(ConfigurationSection settings) {super(settings);}
+        public Square(final ConfigurationSection settings) {
+            super(settings);
+        }
 
         @Override
-        public String shape() {return "Square";}
+        public String shape() {
+            return "Square";
+        }
 
         @Override
         public int getArea() {
@@ -97,31 +115,31 @@ abstract class DistributionShape {
         @Override
         public int[] getCords() {
             return asIntArray2w(
-                !gaussianDistribution
-                    ? getRandXySquare(radiusMax, radiusMin)
-                    : getRandXySquare(radiusMax, radiusMin, gaussianShrink, gaussianCenter)
+                    !gaussianDistribution
+                            ? getRandXySquare(radiusMax, radiusMin)
+                            : getRandXySquare(radiusMax, radiusMin, gaussianShrink, gaussianCenter)
             );
         }
     }
 
     public static class Rectangle extends DistributionShape {
 
-        final int     xRadius;
-        final int     zRadius;
+        final int xRadius;
+        final int zRadius;
         final boolean gapEnabled;
-        final int     gapXRadius;
-        final int     gapZRadius;
-        final int     gapXCenter;
-        final int     gapZCenter;
+        final int gapXRadius;
+        final int gapZRadius;
+        final int gapXCenter;
+        final int gapZCenter;
 
-        public Rectangle(int xRad, int zRad) {
+        public Rectangle(final int xRad, final int zRad) {
             xRadius = xRad;
             zRadius = zRad;
             gapEnabled = false;
             gapXRadius = gapZRadius = gapXCenter = gapZCenter = 0;
         }
 
-        public Rectangle(ConfigurationSection settings) {
+        public Rectangle(final ConfigurationSection settings) {
             xRadius = settings.getInt("size.x-width") / 2;
             zRadius = settings.getInt("size.z-width") / 2;
             gapEnabled = settings.getBoolean("gap.enabled");
@@ -136,7 +154,9 @@ abstract class DistributionShape {
         }
 
         @Override
-        public String shape() {return "Rectangle";}
+        public String shape() {
+            return "Rectangle";
+        }
 
         @Override
         public int getArea() {
@@ -146,15 +166,15 @@ abstract class DistributionShape {
         @Override
         public int[] getCords() {
             return asIntArray2w(
-                !gapEnabled
-                    ? getRandXyRectangle(xRadius, zRadius)
-                    : getRandXyRectangle(xRadius, zRadius, gapZRadius, gapZRadius, gapXCenter, gapZCenter)
+                    !gapEnabled
+                            ? getRandXyRectangle(xRadius, zRadius)
+                            : getRandXyRectangle(xRadius, zRadius, gapZRadius, gapZRadius, gapXCenter, gapZCenter)
             );
         }
 
         @Override
-        public List<String> infoStrings(boolean mcFormat) {
-            ArrayList<String> list = new ArrayList<>();
+        public List<String> infoStrings(final boolean mcFormat) {
+            final ArrayList<String> list = new ArrayList<>();
             list.add(LVL_01_SET.format(mcFormat, "Distribution shape", shape()));
             list.add(DOU_01_SET.format(mcFormat, "X radius", xRadius, "Z radius", zRadius));
             if (gapEnabled) {

@@ -7,7 +7,9 @@ public interface SafeLocationUtils_Patch {
 
     int getPatchVersion();
 
-    default boolean matchesPatchVersion(int minor) {return getPatchVersion() == minor; }
+    default boolean matchesPatchVersion(final int minor) {
+        return getPatchVersion() == minor;
+    }
 
     boolean isSafeToBeIn(Material mat);
 
@@ -25,22 +27,22 @@ public interface SafeLocationUtils_Patch {
         }
 
         @Override
-        public boolean isSafeToBeIn(Material mat) {
+        public boolean isSafeToBeIn(final Material mat) {
             return false;
         }
 
         @Override
-        public boolean isSafeToBeOn(Material mat) {
+        public boolean isSafeToBeOn(final Material mat) {
             return false;
         }
 
         @Override
-        public boolean isTreeLeaves(Material mat) {
+        public boolean isTreeLeaves(final Material mat) {
             return false;
         }
 
         @Override
-        public Material chunkLocMatFromSnapshot(int inX, int y, int inZ, ChunkSnapshot chunk) {
+        public Material chunkLocMatFromSnapshot(final int inX, final int y, final int inZ, final ChunkSnapshot chunk) {
             return null;
         }
     }

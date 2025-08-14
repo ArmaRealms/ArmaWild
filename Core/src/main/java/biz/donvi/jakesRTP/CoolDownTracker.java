@@ -4,16 +4,15 @@ import java.util.HashMap;
 
 public class CoolDownTracker {
 
-    private final HashMap<String, Long> tracker = new HashMap<>();
-
     final long coolDownTime;
+    private final HashMap<String, Long> tracker = new HashMap<>();
 
     /**
      * Creates a CoolDownTracker object, and sets the coolDownTime.
      *
      * @param coolDownTimeInSeconds The amount of time that must be waited to get True from a check.
      */
-    CoolDownTracker(double coolDownTimeInSeconds) {
+    CoolDownTracker(final double coolDownTimeInSeconds) {
         coolDownTime = (long) (coolDownTimeInSeconds * 1000);
     }
 
@@ -24,9 +23,9 @@ public class CoolDownTracker {
      * @param playerName Name of the player/user to check.
      * @return If the difference in time between now and the last logged time is greater than the cool down.
      */
-    boolean check(String playerName) {
-        Long time = tracker.get(playerName);
-        long currentTime = System.currentTimeMillis();
+    public boolean check(final String playerName) {
+        final Long time = tracker.get(playerName);
+        final long currentTime = System.currentTimeMillis();
         return time == null || currentTime - time > coolDownTime;
     }
 
@@ -37,9 +36,9 @@ public class CoolDownTracker {
      * @param playerName Name of the player/user to check.
      * @return If the difference in time between now and the last logged time is greater than the cool down.
      */
-    boolean checkAndLog(String playerName) {
-        Long time = tracker.get(playerName);
-        long currentTime = System.currentTimeMillis();
+    boolean checkAndLog(final String playerName) {
+        final Long time = tracker.get(playerName);
+        final long currentTime = System.currentTimeMillis();
         if (time == null || currentTime - time > coolDownTime) {
             tracker.put(playerName, currentTime);
             return true;
@@ -52,7 +51,7 @@ public class CoolDownTracker {
      *
      * @param playerName Player to log time for.
      */
-    void log(String playerName) {
+    void log(final String playerName) {
         log(playerName, System.currentTimeMillis());
     }
 
@@ -62,7 +61,7 @@ public class CoolDownTracker {
      * @param playerName Player to log time for.
      * @param time       The time to log.
      */
-    void log(String playerName, long time) {
+    public void log(final String playerName, final long time) {
         tracker.put(playerName, time);
     }
 
@@ -72,7 +71,7 @@ public class CoolDownTracker {
      * @param playerName The player to check.
      * @return The amount of time between now and the last logged time, or -1 if no time was ever logged.
      */
-    long timeDifference(String playerName) {
+    long timeDifference(final String playerName) {
         return timeDifference(playerName, System.currentTimeMillis());
     }
 
@@ -82,8 +81,8 @@ public class CoolDownTracker {
      * @param playerName The player to check.
      * @return The amount of time between given time and the last logged time, or -1 if no time was ever logged.
      */
-    long timeDifference(String playerName, long time) {
-        Long oldTime = tracker.get(playerName);
+    long timeDifference(final String playerName, final long time) {
+        final Long oldTime = tracker.get(playerName);
         if (oldTime == null) return -1;
         return time - oldTime;
     }
@@ -95,7 +94,7 @@ public class CoolDownTracker {
      * @param playerName The player to check.
      * @return Returns the minimum amount of time to wait before being able to call a successful check.
      */
-    long timeLeft(String playerName) {
+    long timeLeft(final String playerName) {
         return coolDownTime - timeDifference(playerName);
     }
 
@@ -105,12 +104,16 @@ public class CoolDownTracker {
      * @param playerName The player to check.
      * @return A string describing the time left until the cooldown is over. Human readable.
      */
-    String timeLeftWords(String playerName) { return GeneralUtil.readableTime(timeLeft(playerName)); }
+    public String timeLeftWords(final String playerName) {
+        return GeneralUtil.readableTime(timeLeft(playerName));
+    }
 
     /**
      * Returns the amount of time that a player must wait between rtp calls, formatted in a reasonable manor.
      *
      * @return A human readable string of the cooldown time.
      */
-    String coolDownTime() { return coolDownTime == 0 ? "None." : GeneralUtil.readableTime(coolDownTime); }
+    String coolDownTime() {
+        return coolDownTime == 0 ? "None." : GeneralUtil.readableTime(coolDownTime);
+    }
 }

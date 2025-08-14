@@ -15,7 +15,12 @@ import java.util.regex.Pattern;
 
 import static biz.donvi.jakesRTP.JakesRtpPlugin.infoLog;
 import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
-import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.*;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.DOU_01_SET;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.HEADER_END;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.HEADER_MID;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.HEADER_TOP;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.LVL_01_SET;
+import static biz.donvi.jakesRTP.MessageStyles.DebugDisplayLines.LVL_02_SET;
 import static biz.donvi.jakesRTP.MessageStyles.enabledOrDisabled;
 import static biz.donvi.jakesRTP.RandomTeleporter.EXPLICIT_PERM_PREFIX;
 
@@ -25,22 +30,22 @@ public class RtpProfile {
      * An instance of RtpSettings with all the default values.
      */
     static final RtpProfile DEFAULT_SETTINGS = new RtpProfile(
-        "__INTERNAL_DEFAULT_SETTINGS__",
-        true,
-        false,
-        1,
-        null, null, /* DO NOT USE | NULL NOT SAFE */
-        null, /* DO NOT USE | NULL NOT SAFE */
-        new CoolDownTracker(30), // DO NOT USE
-        0, true, true,
-        32, 255,
-        2, 2,
-        10,
-        10,
-        false,
-        LocCheckProfiles.AUTO,
-        new String[0],
-        0
+            "__INTERNAL_DEFAULT_SETTINGS__",
+            true,
+            false,
+            1,
+            null, null, /* DO NOT USE | NULL NOT SAFE */
+            null, /* DO NOT USE | NULL NOT SAFE */
+            new CoolDownTracker(30), // DO NOT USE
+            0, true, true,
+            32, 255,
+            2, 2,
+            10,
+            10,
+            false,
+            LocCheckProfiles.AUTO,
+            new String[0],
+            0
     );
 
     /**
@@ -51,30 +56,30 @@ public class RtpProfile {
 
     //<editor-fold desc="Config Values">
     /* All settings below are read directly from the config */
-    public final String               name;
-    public final boolean              commandEnabled;
-    public final boolean              requireExplicitPermission;
-    public final float                priority;
-    public final World                landingWorld;
-    public final List<World>          callFromWorlds;
+    public final String name;
+    public final boolean commandEnabled;
+    public final boolean requireExplicitPermission;
+    public final float priority;
+    public final World landingWorld;
+    public final List<World> callFromWorlds;
     public final DistributionSettings distribution;
-    final        CoolDownTracker      coolDown;
-    public final int                  warmup;
-    public final boolean              warmupCancelOnMove;
-    public final boolean              warmupCountDown;
-    public final int                  lowBound;
-    public final int                  highBound;
-    public final int                  checkRadiusXZ;
-    public final int                  checkRadiusVert;
-    public final int                  maxAttempts;
-    public final int                  cacheLocationCount;
+    public final int warmup;
+    public final boolean warmupCancelOnMove;
+    public final boolean warmupCountDown;
+    public final int lowBound;
+    public final int highBound;
+    public final int checkRadiusXZ;
+    public final int checkRadiusVert;
+    public final int maxAttempts;
+    public final int cacheLocationCount;
     public final boolean preferSyncTpOnCommand;
-    public final LocCheckProfiles     checkProfile;
-    public final String[]             commandsToRun;
-    public final double               cost; // Will be 0 if we can't use economy
+    public final LocCheckProfiles checkProfile;
+    public final String[] commandsToRun;
+    public final double cost; // Will be 0 if we can't use economy
     /* except these */
-    public final boolean              warmupEnabled; // Just for convenience (it is mostly redundant)
-    public final boolean              canUseLocQueue;
+    public final boolean warmupEnabled; // Just for convenience (it is mostly redundant)
+    public final boolean canUseLocQueue;
+    public final CoolDownTracker coolDown;
     //</editor-fold>
 
     /**
@@ -86,11 +91,11 @@ public class RtpProfile {
      */
     @SuppressWarnings("ConstantConditions")
     RtpProfile(
-        final ConfigurationSection config, String name, Map<String, DistributionSettings> distributions,
-        RtpProfile defaults
+            final ConfigurationSection config, final String name, final Map<String, DistributionSettings> distributions,
+            final RtpProfile defaults
     ) throws JrtpBaseException {
         this.name = name;
-        String nameInLog = "[" + this.name + "] ";
+        final String nameInLog = "[" + this.name + "] ";
         infoLog("Loading rtpSettings...");
 
         // Command Enabled
@@ -99,7 +104,7 @@ public class RtpProfile {
 
         // Require Explicit Permission
         requireExplicitPermission = config.getBoolean(
-            "require-explicit-permission", defaults.requireExplicitPermission);
+                "require-explicit-permission", defaults.requireExplicitPermission);
         infoLog(nameInLog + infoStringRequireExplicitPermission(false));
 
         // Priority
@@ -108,25 +113,25 @@ public class RtpProfile {
 
         // Landing World
         World landingWorld = config.getString("landing-world", null) == null ? null
-            : plugin.getServer().getWorld(config.getString("landing-world", null));
+                : plugin.getServer().getWorld(config.getString("landing-world", null));
         if (landingWorld == null) landingWorld = defaults.landingWorld;
         if (landingWorld == null) throw new JrtpBaseException("Landing world not recognised.");
         this.landingWorld = landingWorld;
         infoLog(nameInLog + infoStringDestinationWorld(false));
 
         // Call From Worlds
-        ArrayList<World> tempCallFromWorlds = new ArrayList<>();
-        for (String callFromWorld : config.getStringList("call-from-worlds"))
-            for (World testByWorld : plugin.getServer().getWorlds())
+        final ArrayList<World> tempCallFromWorlds = new ArrayList<>();
+        for (final String callFromWorld : config.getStringList("call-from-worlds"))
+            for (final World testByWorld : plugin.getServer().getWorlds())
                 if (!tempCallFromWorlds.contains(testByWorld) &&
-                    Pattern.compile(callFromWorld).matcher(testByWorld.getName()).matches()
+                        Pattern.compile(callFromWorld).matcher(testByWorld.getName()).matches()
                 ) tempCallFromWorlds.add(testByWorld);
         if (tempCallFromWorlds.size() == 0)
             if (defaults.callFromWorlds != null) tempCallFromWorlds.addAll(defaults.callFromWorlds);
             else tempCallFromWorlds.add(landingWorld);
         callFromWorlds = Collections.unmodifiableList(tempCallFromWorlds);
 
-        for (String s : infoStringsCallFromWorlds(false)) infoLog(nameInLog + s);
+        for (final String s : infoStringsCallFromWorlds(false)) infoLog(nameInLog + s);
 
         // Distribution
         String distName = config.getString("distribution", null);
@@ -137,13 +142,13 @@ public class RtpProfile {
             distribution = distributions.get(distName);
         }
         if (distribution == null) {
-            StringBuilder strb = new StringBuilder();
-            for (String s : distributions.keySet()) strb.append(" ").append(s);
+            final StringBuilder strb = new StringBuilder();
+            for (final String s : distributions.keySet()) strb.append(" ").append(s);
             throw new JrtpBaseException(
-                "Distribution not found. Distribution given: '" + config.getString("distribution") +
-                "', distributions available:" + strb.toString());
+                    "Distribution not found. Distribution given: '" + config.getString("distribution") +
+                            "', distributions available:" + strb.toString());
         }
-        for (String s : distribution.shape.infoStrings(false)) infoLog(nameInLog + s);
+        for (final String s : distribution.shape.infoStrings(false)) infoLog(nameInLog + s);
         infoLog(nameInLog + infoStringRegionCenter(false)); // double log!
 
         // Cool-Down
@@ -155,7 +160,7 @@ public class RtpProfile {
         warmupEnabled = warmup > 0;
         warmupCancelOnMove = config.getBoolean("warmup.cancel-on-move", defaults.warmupCancelOnMove);
         warmupCountDown = config.getBoolean("warmup.count-down", defaults.warmupCountDown);
-        for (String s : infoStringsWarmup(false)) infoLog(nameInLog + s);
+        for (final String s : infoStringsWarmup(false)) infoLog(nameInLog + s);
 
         // Cost
         cost = plugin.canUseEconomy() ? config.getDouble("cost", defaults.cost) : 0;
@@ -182,40 +187,40 @@ public class RtpProfile {
         // Location Caching
         cacheLocationCount = config.getInt("preparations.cache-locations", defaults.cacheLocationCount);
         checkProfile = config.getString("location-checking-profile", null) == null
-            ? defaults.checkProfile
-            : LocCheckProfiles.values()[config.getString("location-checking-profile").toLowerCase().charAt(0) - 'a'];
-        infoLog( nameInLog + infoStringLocationCheckProfile(false));
+                ? defaults.checkProfile
+                : LocCheckProfiles.values()[config.getString("location-checking-profile").toLowerCase().charAt(0) - 'a'];
+        infoLog(nameInLog + infoStringLocationCheckProfile(false));
         commandsToRun = config.getStringList("then-execute").size() == 0
-            ? defaults.commandsToRun
-            : config.getStringList("then-execute").toArray(new String[0]);
+                ? defaults.commandsToRun
+                : config.getStringList("then-execute").toArray(new String[0]);
         canUseLocQueue = distribution.center != DistributionSettings.CenterTypes.PLAYER_LOCATION &&
-                         cacheLocationCount > 0;
+                cacheLocationCount > 0;
         infoLog(nameInLog + infoStringLocationCaching(false));
 
     }
 
     private RtpProfile(
-        String name,
-        boolean commandEnabled,
-        boolean requireExplicitPermission,
-        float priority,
-        World landingWorld,
-        List<World> callFromWorlds,
-        DistributionSettings distribution,
-        CoolDownTracker coolDown,
-        int warmup,
-        boolean warmupCancelOnMove,
-        boolean warmupCountDown,
-        int lowBound,
-        int highBound,
-        int checkRadiusXZ,
-        int checkRadiusVert,
-        int maxAttempts,
-        int cacheLocationCount,
-        boolean preferSyncTpOnCommand,
-        LocCheckProfiles checkProfile,
-        String[] commandsToRun,
-        double cost
+            final String name,
+            final boolean commandEnabled,
+            final boolean requireExplicitPermission,
+            final float priority,
+            final World landingWorld,
+            final List<World> callFromWorlds,
+            final DistributionSettings distribution,
+            final CoolDownTracker coolDown,
+            final int warmup,
+            final boolean warmupCancelOnMove,
+            final boolean warmupCountDown,
+            final int lowBound,
+            final int highBound,
+            final int checkRadiusXZ,
+            final int checkRadiusVert,
+            final int maxAttempts,
+            final int cacheLocationCount,
+            final boolean preferSyncTpOnCommand,
+            final LocCheckProfiles checkProfile,
+            final String[] commandsToRun,
+            final double cost
     ) {
         this.name = name;
         this.commandEnabled = commandEnabled;
@@ -240,13 +245,13 @@ public class RtpProfile {
         this.cost = cost;
         warmupEnabled = warmup > 0;
         canUseLocQueue = distribution != null &&
-                         distribution.center != DistributionSettings.CenterTypes.PLAYER_LOCATION &&
-                         cacheLocationCount > 0;
+                distribution.center != DistributionSettings.CenterTypes.PLAYER_LOCATION &&
+                cacheLocationCount > 0;
     }
 
-    public List<String> infoStringAll(boolean mcFormat, boolean full) {
-        String name = "[" + this.name + "] ";
-        ArrayList<String> lines = new ArrayList<>();
+    public List<String> infoStringAll(final boolean mcFormat, final boolean full) {
+        final String name = "[" + this.name + "] ";
+        final ArrayList<String> lines = new ArrayList<>();
         if (mcFormat) {
             lines.add(HEADER_TOP.format(true));
             lines.add(HEADER_MID.format(true, "RtpSettings for " + name));
@@ -282,16 +287,16 @@ public class RtpProfile {
         switch (distribution.center) {
             case WORLD_SPAWN:
                 return MessageFormat.format(
-                    "World Spawn {0}({1}, {2}){0}",
-                    mcFormat ? "\u00A7o" : "",
-                    (int) landingWorld.getSpawnLocation().getX(),
-                    (int) landingWorld.getSpawnLocation().getZ());
+                        "World Spawn {0}({1}, {2}){0}",
+                        mcFormat ? "\u00A7o" : "",
+                        (int) landingWorld.getSpawnLocation().getX(),
+                        (int) landingWorld.getSpawnLocation().getZ());
             case PRESET_VALUE:
                 return MessageFormat.format(
-                    "Specified in Config {0}({1}, {2}){0}",
-                    mcFormat ? "\u00A7o" : "",
-                    distribution.centerX,
-                    distribution.centerZ);
+                        "Specified in Config {0}({1}, {2}){0}",
+                        mcFormat ? "\u00A7o" : "",
+                        distribution.centerX,
+                        distribution.centerZ);
             case PLAYER_LOCATION:
                 return "Player's Location";
         }
@@ -307,25 +312,25 @@ public class RtpProfile {
     \* ================================================== */
 
     //<editor-fold desc="Info Strings...">
-    public String infoStringCommandEnabled(boolean mcFormat) {
+    public String infoStringCommandEnabled(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "Command", enabledOrDisabled(commandEnabled));
     }
 
-    public String infoStringRequireExplicitPermission(boolean mcFormat) {
+    public String infoStringRequireExplicitPermission(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "Require explicit permission node", requireExplicitPermission
-            ? "True (" + EXPLICIT_PERM_PREFIX + this.name + ")" : "False");
+                ? "True (" + EXPLICIT_PERM_PREFIX + this.name + ")" : "False");
     }
 
-    public String infoStringPriority(boolean mcFormat) {
+    public String infoStringPriority(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "Priority", String.valueOf(priority));
     }
 
-    public String infoStringDestinationWorld(boolean mcFormat) {
+    public String infoStringDestinationWorld(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "The user will land in the following world", landingWorld.getName());
     }
 
-    public List<String> infoStringsCallFromWorlds(boolean mcFormat) {
-        ArrayList<String> lines = new ArrayList<>();
+    public List<String> infoStringsCallFromWorlds(final boolean mcFormat) {
+        final ArrayList<String> lines = new ArrayList<>();
         lines.add(LVL_01_SET.format(mcFormat, "Call from worlds", ""));
         for (int i = 0; i < callFromWorlds.size(); i++) {
             lines.add(LVL_02_SET.format(mcFormat, i, callFromWorlds.get(i).getName()));
@@ -333,58 +338,58 @@ public class RtpProfile {
         return lines;
     }
 
-    public String infoStringRegionCenter(boolean mcFormat) { // redundant? Look at `distribution.shape.infoStrings()`
+    public String infoStringRegionCenter(final boolean mcFormat) { // redundant? Look at `distribution.shape.infoStrings()`
         return LVL_01_SET.format(mcFormat, "Rtp Region center is set to", getRtpRegionCenterAsString(false));
     }
 
-    public String infoStringCooldown(boolean mcFormat) {
+    public String infoStringCooldown(final boolean mcFormat) {
         return coolDown.coolDownTime == 0
-            ? LVL_01_SET.format(mcFormat, "Cooldown", "Disabled")
-            : LVL_01_SET.format(mcFormat, "Cooldown time", coolDown.coolDownTime / 1000 + " seconds.");
+                ? LVL_01_SET.format(mcFormat, "Cooldown", "Disabled")
+                : LVL_01_SET.format(mcFormat, "Cooldown time", coolDown.coolDownTime / 1000 + " seconds.");
     }
 
-    public List<String> infoStringsWarmup(boolean mcFormat) {
-        ArrayList<String> lines = new ArrayList<>();
+    public List<String> infoStringsWarmup(final boolean mcFormat) {
+        final ArrayList<String> lines = new ArrayList<>();
         if (warmupEnabled) {
             lines.add(DOU_01_SET.format(mcFormat, "Warmup", "Enabled", "Seconds", warmup));
             lines.add(LVL_02_SET.format(mcFormat, "Cancel warmup on player move",
-                                        enabledOrDisabled(warmupCancelOnMove)));
+                    enabledOrDisabled(warmupCancelOnMove)));
             lines.add(LVL_02_SET.format(mcFormat, "Count down to teleport",
-                                        enabledOrDisabled(warmupCountDown)));
+                    enabledOrDisabled(warmupCountDown)));
         } else lines.add(LVL_01_SET.format(mcFormat, "Warmup", "Disabled"));
         return lines;
     }
 
-    public String infoStringCost(boolean mcFormat) {
+    public String infoStringCost(final boolean mcFormat) {
         return cost > 0
-            ? LVL_01_SET.format(mcFormat, "Cost", cost)
-            : LVL_01_SET.format(mcFormat, "Cost", "Disabled");
+                ? LVL_01_SET.format(mcFormat, "Cost", cost)
+                : LVL_01_SET.format(mcFormat, "Cost", "Disabled");
     }
 
-    public String infoStringVertBounds(boolean mcFormat) {
+    public String infoStringVertBounds(final boolean mcFormat) {
         return DOU_01_SET.format(mcFormat, "Low bound", lowBound, "High bound", highBound);
     }
 
-    public String infoStringCheckRadius(boolean mcFormat) {
+    public String infoStringCheckRadius(final boolean mcFormat) {
         return DOU_01_SET.format(mcFormat, "Check radius x and z", checkRadiusXZ, "Vert", checkRadiusVert);
     }
 
-    public String infoStringMaxAttempts(boolean mcFormat) {
+    public String infoStringMaxAttempts(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "Max attempts set to", maxAttempts);
     }
 
-    public String infoStringLocationCheckProfile(boolean mcFormat) {
-        return LVL_01_SET.format(mcFormat, "Location check profile", checkProfile.toString() + " (" + (char)(checkProfile.ordinal() + 'a') + ")");
+    public String infoStringLocationCheckProfile(final boolean mcFormat) {
+        return LVL_01_SET.format(mcFormat, "Location check profile", checkProfile.toString() + " (" + (char) (checkProfile.ordinal() + 'a') + ")");
     }
 
-    public String infoStringPreferSyncTpOnCommand(boolean mcFormat) {
+    public String infoStringPreferSyncTpOnCommand(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "Prefer sync tp on command", preferSyncTpOnCommand);
     }
 
-    public String infoStringLocationCaching(boolean mcFormat) {
+    public String infoStringLocationCaching(final boolean mcFormat) {
         return canUseLocQueue
-            ? DOU_01_SET.format(mcFormat, "Location caching", "Enabled", "Num", locationQueue.size() + "/" + cacheLocationCount)
-            : LVL_01_SET.format(mcFormat, "Location caching", "Disabled");
+                ? DOU_01_SET.format(mcFormat, "Location caching", "Enabled", "Num", locationQueue.size() + "/" + cacheLocationCount)
+                : LVL_01_SET.format(mcFormat, "Location caching", "Disabled");
     }
     //</editor-fold>
 }

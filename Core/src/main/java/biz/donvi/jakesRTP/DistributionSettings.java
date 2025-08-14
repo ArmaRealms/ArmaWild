@@ -5,23 +5,23 @@ import org.bukkit.configuration.ConfigurationSection;
 public class DistributionSettings {
 
     public final DistributionShape shape;
-    public final CenterTypes       center;
-    public final int               centerX;
-    public final int               centerZ;
+    public final CenterTypes center;
+    public final int centerX;
+    public final int centerZ;
 
 
-    DistributionSettings(DistributionShape shape, int centerX, int centerZ) {
+    DistributionSettings(final DistributionShape shape, final int centerX, final int centerZ) {
         this.shape = shape;
         center = CenterTypes.PRESET_VALUE;
         this.centerX = centerX;
         this.centerZ = centerZ;
     }
 
-    DistributionSettings(ConfigurationSection settings) throws JrtpBaseException.ConfigurationException {
+    DistributionSettings(final ConfigurationSection settings) throws JrtpBaseException.ConfigurationException {
         String shapeString = null;
         try {
             shapeString = settings.getString("shape").toLowerCase();
-        } catch (NullPointerException npe) {
+        } catch (final NullPointerException npe) {
             throw new JrtpBaseException.ConfigurationException("Configuration shape not properly defined.");
         }
         switch (shapeString) {
@@ -29,12 +29,12 @@ public class DistributionSettings {
             case "circle" -> shape = new DistributionShape.Circle(settings);
             case "rectangle" -> shape = new DistributionShape.Rectangle(settings);
             default -> throw new JrtpBaseException.ConfigurationException(
-                "Distribution shape not properly defined: " + shapeString);
+                    "Distribution shape not properly defined: " + shapeString);
         }
         try {
-            char centerChar = settings.getString("center.option").toLowerCase().charAt(0);
+            final char centerChar = settings.getString("center.option").toLowerCase().charAt(0);
             center = CenterTypes.values()[centerChar - 'a'];
-        } catch (NullPointerException npe) {
+        } catch (final NullPointerException npe) {
             throw new JrtpBaseException.ConfigurationException("Configuration center not properly defined.");
         }
         if (center == CenterTypes.PRESET_VALUE) {

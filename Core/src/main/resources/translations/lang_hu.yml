@@ -66,8 +66,8 @@ you-were-charged-x: 'Fizettél {0}, mostmár csak {1} tartózkodik az egyenleged
 #   formatting. Also, each 'word' will only be displayed if the associated number value is greater than 0.
 # Example: 8675 seconds will be formatted as such: `2 hours, 24 minutes, 35 seconds.` Note the absence of days.
 readable-time: '{0}{1}{2}{3}'
-readable-time-word-days:    '{0} nap, '
-readable-time-word-hours:   '{0} óra, '
+readable-time-word-days: '{0} nap, '
+readable-time-word-hours: '{0} óra, '
 readable-time-word-minutes: '{0} perc, '
 readable-time-word-seconds: '{0} másodperc.'
 
