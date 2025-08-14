@@ -15,15 +15,22 @@ import java.util.Map;
 public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
 
     Map<String, Object> cmdMap;
+    /**
+     * The result of {@code getConfigNames()}, stored with an expiration time. If the data has not expired, the method
+     * should return the value of {@code getConfigNamesResults}. If it has expired, it should compute the new value,
+     * save
+     * it here, then return it.
+     */
+    private Pair<Long, List<String>> getConfigNamesResults;
 
-    public CmdRtpAdmin(Map<String, Object> commandMap) {
+    public CmdRtpAdmin(final Map<String, Object> commandMap) {
         cmdMap = commandMap;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
 
-        ArgsChecker argsChecker = new ArgsChecker(args);
+        final ArgsChecker argsChecker = new ArgsChecker(args);
 
         if (argsChecker.matches(true, "reload"))
             subReload(sender);
@@ -38,15 +45,16 @@ public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         return ArgsTester.nextCompleteInTree(args, cmdMap, this);
     }
 
     @Override
-    public void getPotential(String[] path) throws ResultAlreadySetException { }
+    public void getPotential(final String[] path) throws ResultAlreadySetException {
+    }
 
     @Override
-    public void getPotential(String path) throws ResultAlreadySetException {
+    public void getPotential(final String path) throws ResultAlreadySetException {
         //noinspection SwitchStatementWithTooFewBranches
         switch (path) {
             case "status":
@@ -54,25 +62,16 @@ public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
         }
     }
 
-    private void subReload(CommandSender sender) {
+    private void subReload(final CommandSender sender) {
         JakesRtpPlugin.plugin.reloadCommands();
         JakesRtpPlugin.plugin.loadRandomTeleporter();
         JakesRtpPlugin.plugin.loadLocationCacheFiller();
         sender.sendMessage("Reloaded.");
     }
 
-    private void subReloadMessages(CommandSender sender) {
+    private void subReloadMessages(final CommandSender sender) {
         JakesRtpPlugin.plugin.loadMessageMap();
     }
-
-
-    /**
-     * The result of {@code getConfigNames()}, stored with an expiration time. If the data has not expired, the method
-     * should return the value of {@code getConfigNamesResults}. If it has expired, it should compute the new value,
-     * save
-     * it here, then return it.
-     */
-    private Pair<Long, List<String>> getConfigNamesResults;
 
     /**
      * Gets a list of the RTP config names. Because this method is expected to be called multiple times per second,
@@ -83,8 +82,8 @@ public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
      */
     private List<String> getConfigNames() {
         if (getConfigNamesResults == null || getConfigNamesResults.key < System.currentTimeMillis()) {
-            ArrayList<String> settingsNames = new ArrayList<>();
-            for (RtpProfile settings : JakesRtpPlugin.plugin.getRandomTeleporter().getRtpSettings()) {
+            final ArrayList<String> settingsNames = new ArrayList<>();
+            for (final RtpProfile settings : JakesRtpPlugin.plugin.getRandomTeleporter().getRtpSettings()) {
                 settingsNames.add(settings.name);
             }
             getConfigNamesResults = new Pair<>(System.currentTimeMillis() + 1000, settingsNames);
@@ -93,21 +92,21 @@ public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
     }
 
 
-    private void subStatus(CommandSender sender, String[] args) {
-        RandomTeleporter theRandomTeleporter = JakesRtpPlugin.plugin.getRandomTeleporter();
+    private void subStatus(final CommandSender sender, final String[] args) {
+        final RandomTeleporter theRandomTeleporter = JakesRtpPlugin.plugin.getRandomTeleporter();
         if (args.length == 1 && args[0].equalsIgnoreCase("#static")) {
-            StringBuilder msg = new StringBuilder();
-            for (String line : theRandomTeleporter.infoStringAll(true))
+            final StringBuilder msg = new StringBuilder();
+            for (final String line : theRandomTeleporter.infoStringAll(true))
                 msg.append(line).append('\n');
             sender.sendMessage(msg.toString());
         } else try {
-            RtpProfile settings = theRandomTeleporter.getRtpSettingsByName(args[0]);
-            for (String message : settings.infoStringAll(true, true))
+            final RtpProfile settings = theRandomTeleporter.getRtpSettingsByName(args[0]);
+            for (final String message : settings.infoStringAll(true, true))
                 sender.sendMessage(message);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             sender.sendMessage(
-                "Could not find any settings with the name " + args[0] + ", " +
-                GeneralUtil.listText(theRandomTeleporter.getRtpSettingsNames())
+                    "Could not find any settings with the name " + args[0] + ", " +
+                            GeneralUtil.listText(theRandomTeleporter.getRtpSettingsNames())
             );
         }
 

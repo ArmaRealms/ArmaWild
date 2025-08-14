@@ -17,18 +17,17 @@ import static org.bukkit.Bukkit.getServer;
 
 public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
 
+    private final RandomTeleporter randomTeleporter;
     Map<String, Object> cmdMap;
 
-    private final RandomTeleporter randomTeleporter;
-
-    public CmdForceRtp(RandomTeleporter randomTeleporter, Map<String, Object> commandMap) {
+    public CmdForceRtp(final RandomTeleporter randomTeleporter, final Map<String, Object> commandMap) {
         this.randomTeleporter = randomTeleporter;
         this.cmdMap = commandMap;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        ArgsChecker argsChecker = new ArgsChecker(args);
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+        final ArgsChecker argsChecker = new ArgsChecker(args);
 
         try {
             if (argsChecker.matches(true, null, "-c", null))
@@ -36,40 +35,40 @@ public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
             else if (argsChecker.matches(true, null, "-w", null))
                 subForceRtpWithWorld(sender, argsChecker.getRemainingArgs());
             else return false;
-        } catch (JrtpBaseException.NotPermittedException npe) {
+        } catch (final JrtpBaseException.NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
-        } catch (JrtpBaseException e) {
+        } catch (final JrtpBaseException e) {
             sender.sendMessage(e.getMessage());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             sender.sendMessage(Messages.NP_UNEXPECTED_EXCEPTION.format(e.getMessage()));
             e.printStackTrace();
         }
         return true;
     }
 
-    private void subForceRtpWithConfig(CommandSender sender, String[] args) throws Exception {
-        Player playerToTp = sender.getServer().getPlayerExact(args[0]);
+    private void subForceRtpWithConfig(final CommandSender sender, final String[] args) throws Exception {
+        final Player playerToTp = sender.getServer().getPlayerExact(args[0]);
         if (playerToTp == null) {
             sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(args[0]));
             return;
         }
-        RtpProfile rtpProfile = randomTeleporter.getRtpSettingsByName(args[1]);
+        final RtpProfile rtpProfile = randomTeleporter.getRtpSettingsByName(args[1]);
 
         // ↑ Check step | Teleport step ↓
 
         new RandomTeleportAction(
-            randomTeleporter, rtpProfile, playerToTp.getLocation(), true, true,
-            randomTeleporter.logRtpOnForceCommand, "Rtp-from-force-command triggered!"
+                randomTeleporter, rtpProfile, playerToTp.getLocation(), true, true,
+                randomTeleporter.logRtpOnForceCommand, "Rtp-from-force-command triggered!"
         ).teleportAsync(playerToTp);
     }
 
-    private void subForceRtpWithWorld(CommandSender sender, String[] args) throws Exception {
-        Player playerToTp = sender.getServer().getPlayerExact(args[0]);
+    private void subForceRtpWithWorld(final CommandSender sender, final String[] args) throws Exception {
+        final Player playerToTp = sender.getServer().getPlayerExact(args[0]);
         if (playerToTp == null) {
             sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(args[0]));
             return;
         }
-        World destWorld = GeneralUtil.getWorldIgnoreCase(sender.getServer(), args[1]);
+        final World destWorld = GeneralUtil.getWorldIgnoreCase(sender.getServer(), args[1]);
         if ((destWorld) == null) {
             sender.sendMessage(Messages.WORLD_NOT_FOUND.format(args[1]));
             return;
@@ -78,27 +77,27 @@ public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
         // ↑ Check step | Teleport step ↓
 
         new RandomTeleportAction(
-            randomTeleporter,
-            randomTeleporter.getRtpSettingsByWorld(destWorld),
-            playerToTp.getLocation().getWorld() == destWorld
-                ? playerToTp.getLocation()
-                : destWorld.getSpawnLocation(),
-            true,
-            true,
-            randomTeleporter.logRtpOnForceCommand, "Rtp-from-force-command triggered!"
+                randomTeleporter,
+                randomTeleporter.getRtpSettingsByWorld(destWorld),
+                playerToTp.getLocation().getWorld() == destWorld
+                        ? playerToTp.getLocation()
+                        : destWorld.getSpawnLocation(),
+                true,
+                true,
+                randomTeleporter.logRtpOnForceCommand, "Rtp-from-force-command triggered!"
         ).teleportAsync(playerToTp);
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         return ArgsTester.nextCompleteInTree(args, cmdMap, this);
     }
 
     @Override
-    public void getPotential(String[] path) throws ResultAlreadySetException {
+    public void getPotential(final String[] path) throws ResultAlreadySetException {
         if (path.length == 0) {
-            List<String> players = new ArrayList<>();
-            for (Player player : getServer().getOnlinePlayers())
+            final List<String> players = new ArrayList<>();
+            for (final Player player : getServer().getOnlinePlayers())
                 players.add(player.getName());
             setResult(players);
         } else if (path.length == 2) {
@@ -107,8 +106,8 @@ public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
                     setResult(randomTeleporter.getRtpSettingsNames());
                     break;
                 case "-w":
-                    List<String> worldNames = new ArrayList<>();
-                    for (World world : getServer().getWorlds())
+                    final List<String> worldNames = new ArrayList<>();
+                    for (final World world : getServer().getWorlds())
                         worldNames.add(world.getName());
                     setResult(worldNames);
                     break;
@@ -117,7 +116,8 @@ public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
     }
 
     @Override
-    public void getPotential(String path) throws ResultAlreadySetException { }
+    public void getPotential(final String path) throws ResultAlreadySetException {
+    }
 
 
 }

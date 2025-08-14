@@ -4,7 +4,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static biz.donvi.jakesRTP.GeneralUtil.*;
+import static biz.donvi.jakesRTP.GeneralUtil.replaceLegacyColors;
+import static biz.donvi.jakesRTP.GeneralUtil.replaceNewColors;
+import static biz.donvi.jakesRTP.GeneralUtil.replaceWrittenLineBreaks;
 import static java.util.logging.Level.WARNING;
 
 public enum Messages {
@@ -37,27 +39,36 @@ public enum Messages {
     \* ================================================== */
 
     private static final String[] mappedValues = new String[Messages.values().length];
+    final String key;
 
-    static void setMap(Map<String, String> newMap) {
+    Messages(final String key) {
+        this.key = key;
+    }
+
+    static void setMap(final Map<String, String> newMap) {
         final ArrayList<String> emptyValues = new ArrayList<>();
-        for (Messages m : Messages.values()) {
+        for (final Messages m : Messages.values()) {
             mappedValues[m.ordinal()] = reformat(newMap.remove(m.key));
             if (mappedValues[m.ordinal()] == null) emptyValues.add(m.name() + " ~ " + m.key);
         }
         if (newMap.size() > 0) {
             JakesRtpPlugin.log(WARNING, "More mappings were given than expected. Extra keys:");
-            for (String extraValue : newMap.keySet()) JakesRtpPlugin.log(WARNING, extraValue);
+            for (final String extraValue : newMap.keySet()) JakesRtpPlugin.log(WARNING, extraValue);
         }
         if (emptyValues.size() > 0) {
             JakesRtpPlugin.log(WARNING, "Some messages could not be assigned values. Missing keys:");
-            for (String missingValue : emptyValues) JakesRtpPlugin.log(WARNING, missingValue);
+            for (final String missingValue : emptyValues) JakesRtpPlugin.log(WARNING, missingValue);
         }
     }
 
-    static int addMap(Map<String, String> newMap) {
+    /* ================================================== *\
+                          Instance
+    \* ================================================== */
+
+    static int addMap(final Map<String, String> newMap) {
         int numValuesAdded = 0;
-        for (Messages m : Messages.values()) {
-            String value = newMap.remove(m.key);
+        for (final Messages m : Messages.values()) {
+            final String value = newMap.remove(m.key);
             if (value != null) {
                 mappedValues[m.ordinal()] = reformat(value);
                 numValuesAdded++;
@@ -65,26 +76,24 @@ public enum Messages {
         }
         if (newMap.size() > 0) {
             JakesRtpPlugin.log(WARNING, "Some extra keys were found:");
-            for (String extraValue : newMap.keySet()) JakesRtpPlugin.log(WARNING, extraValue);
+            for (final String extraValue : newMap.keySet()) JakesRtpPlugin.log(WARNING, extraValue);
         }
         return numValuesAdded;
     }
 
-    private static String reformat(String s) {
+    private static String reformat(final String s) {
         return s == null ? null : replaceNewColors(replaceLegacyColors(replaceWrittenLineBreaks(s)));
     }
 
-    /* ================================================== *\
-                          Instance
-    \* ================================================== */
+    String getKey() {
+        return key;
+    }
 
-    final String key;
+    String raw() {
+        return mappedValues[this.ordinal()];
+    }
 
-    Messages(String key) { this.key = key; }
-
-    String getKey() { return key; }
-
-    String raw() { return mappedValues[this.ordinal()]; }
-
-    String format(Object... args) { return MessageFormat.format(raw(), args); }
+    String format(final Object... args) {
+        return MessageFormat.format(raw(), args);
+    }
 }

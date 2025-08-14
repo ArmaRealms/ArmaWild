@@ -9,7 +9,16 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,29 +35,41 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class JakesRtpPlugin extends JavaPlugin {
 
 
-    //<editor-fold desc="======== Static Fields ========">
-    static JakesRtpPlugin        plugin;
-    static Map<String, Object>   cmdMap;
-    static LocationCacheFiller   locFinderRunnable;
-    static WorldBorderPluginHook worldBorderPluginHook;
-    static ClaimsManager         claimsManager = null;
-
-    private static       Logger logger;
     private static final String LANG_SETTINGS_FILE_NAME = "language-settings.yml";
-    private static final String BLANK_LANG_FILE_NAME    = "translations/lang_%s.yml";
+    private static final String BLANK_LANG_FILE_NAME = "translations/lang_%s.yml";
+    //<editor-fold desc="Logging Related">
+    private static final Queue<LogMsg> msgLog = new ArrayDeque<>();
+    //<editor-fold desc="======== Static Fields ========">
+    static JakesRtpPlugin plugin;
+    static Map<String, Object> cmdMap;
+    static LocationCacheFiller locFinderRunnable;
+    static WorldBorderPluginHook worldBorderPluginHook;
+    static ClaimsManager claimsManager = null;
     //</editor-fold>
-
+    private static Logger logger;
+    String lang = "en";
+    int customMessageCount = 0;
     //<editor-fold desc="======= NonStatic Fields ========">
     private RandomTeleporter theRandomTeleporter = null;
-
     private Path toRtpSettings;
     private Path toDistSettings;
-
+    //</editor-fold>
     private Economy economy;
     private boolean hasEconomy;
-
     private boolean locCache = false;
-    //</editor-fold>
+
+    public static void log(final Level level, final String msg) {
+        msgLog.add(new LogMsg(level, msg));
+        logger.log(level, msg);
+    }
+
+    /* ================================================== *\
+                    Loading methods
+    \* ================================================== */
+
+    public static void infoLog(final String msg) {
+        log(Level.INFO, msg);
+    }
 
     @Override
     public void onLoad() {
@@ -94,11 +115,6 @@ public final class JakesRtpPlugin extends JavaPlugin {
         return locCache;
     }
 
-    /* ================================================== *\
-                    Loading methods
-    \* ================================================== */
-
-
     void reloadCommands() {
         HandlerList.unregisterAll(this);
         getCommand("rtp-admin").setExecutor(new CmdRtpAdmin(Util.getImpliedMap(cmdMap, "rtp-admin")));
@@ -115,9 +131,9 @@ public final class JakesRtpPlugin extends JavaPlugin {
                 Files.createDirectory(toRtpSettings);
             if (GeneralUtil.isDirEmpty(toRtpSettings))
                 Files.copy(
-                    getClassLoader().getResourceAsStream("rtpSettings/default-settings.yml"),
-                    Paths.get(getDataFolder().getPath(), "rtpSettings", "default-settings.yml"));
-        } catch (IOException e) {
+                        getClassLoader().getResourceAsStream("rtpSettings/default-settings.yml"),
+                        Paths.get(getDataFolder().getPath(), "rtpSettings", "default-settings.yml"));
+        } catch (final IOException e) {
             logger.log(Level.WARNING, "Could not copy default rtpSetting.");
         }
         try {// For the distributions...
@@ -126,13 +142,13 @@ public final class JakesRtpPlugin extends JavaPlugin {
                 Files.createDirectory(toDistSettings);
             if (GeneralUtil.isDirEmpty(toDistSettings)) {
                 Files.copy(
-                    getClassLoader().getResourceAsStream("distributions/default-rectangle.yml"),
-                    Paths.get(getDataFolder().getPath(), "distributions", "default-rectangle.yml"));
+                        getClassLoader().getResourceAsStream("distributions/default-rectangle.yml"),
+                        Paths.get(getDataFolder().getPath(), "distributions", "default-rectangle.yml"));
                 Files.copy(
-                    getClassLoader().getResourceAsStream("distributions/default-symmetric.yml"),
-                    Paths.get(getDataFolder().getPath(), "distributions", "default-symmetric.yml"));
+                        getClassLoader().getResourceAsStream("distributions/default-symmetric.yml"),
+                        Paths.get(getDataFolder().getPath(), "distributions", "default-symmetric.yml"));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.log(Level.WARNING, "Could not copy default rtpSetting.");
         }
 
@@ -142,29 +158,34 @@ public final class JakesRtpPlugin extends JavaPlugin {
         economy = null;
         if (getServer().getPluginManager().getPlugin("Vault") == null)
             return false;
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        final RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null)
             return false;
         economy = rsp.getProvider();
         return true;
     }
+    //</editor-fold>
+
+    /* ================================================== *\
+                   Getters
+    \* ================================================== */
 
     @SuppressWarnings("ConstantConditions")
     public void loadRandomTeleporter() {
         this.reloadConfig();
         try {
             theRandomTeleporter =
-                new RandomTeleporter(
-                    this.getConfig(),
-                    GeneralUtil.getFileConfigFromFile(toRtpSettings.toFile().listFiles()),
-                    GeneralUtil.getFileConfigFromFile(toDistSettings.toFile().listFiles()));
+                    new RandomTeleporter(
+                            this.getConfig(),
+                            GeneralUtil.getFileConfigFromFile(toRtpSettings.toFile().listFiles()),
+                            GeneralUtil.getFileConfigFromFile(toDistSettings.toFile().listFiles()));
             getCommand("rtp").setExecutor(
-                new CmdRtp(theRandomTeleporter));
+                    new CmdRtp(theRandomTeleporter));
             getCommand("forcertp").setExecutor(
-                new CmdForceRtp(theRandomTeleporter, Util.getImpliedMap(cmdMap, "forcertp")));
+                    new CmdForceRtp(theRandomTeleporter, Util.getImpliedMap(cmdMap, "forcertp")));
             getServer().getPluginManager().registerEvents(
-                new RtpOnEvent(theRandomTeleporter), this);
-        } catch (Exception e) {
+                    new RtpOnEvent(theRandomTeleporter), this);
+        } catch (final Exception e) {
             plugin.getLogger().log(Level.WARNING, "RTP Command could not be loaded!");
             e.printStackTrace();
         }
@@ -177,17 +198,13 @@ public final class JakesRtpPlugin extends JavaPlugin {
         if (getConfig().getBoolean("location-cache-filler.enabled", true)) {
             infoLog("Setting up the location caching system.");
             Bukkit.getScheduler().runTaskAsynchronously(this, (
-                locFinderRunnable = new LocationCacheFiller(
-                    this,
-                    (long) (getConfig().getDouble("location-cache-filler.recheck-time", 2) * 1000),
-                    (long) (getConfig().getDouble("location-cache-filler.between-time", 0.5) * 1000))
+                    locFinderRunnable = new LocationCacheFiller(
+                            this,
+                            (long) (getConfig().getDouble("location-cache-filler.recheck-time", 2) * 1000),
+                            (long) (getConfig().getDouble("location-cache-filler.between-time", 0.5) * 1000))
             ));
         }
     }
-
-    String lang = "en";
-
-    int customMessageCount = 0;
 
     @SuppressWarnings("ConstantConditions")
     public void loadMessageMap() {
@@ -195,21 +212,21 @@ public final class JakesRtpPlugin extends JavaPlugin {
         if (!Files.exists(Paths.get(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME)))
             try {
                 Files.copy(
-                    getClassLoader().getResourceAsStream(LANG_SETTINGS_FILE_NAME),
-                    Paths.get(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME));
-            } catch (IOException e) {
+                        getClassLoader().getResourceAsStream(LANG_SETTINGS_FILE_NAME),
+                        Paths.get(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME));
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         else
             try {
-                ArrayList<String> langSettingsHeader = new ArrayList<>();
+                final ArrayList<String> langSettingsHeader = new ArrayList<>();
 
                 // All file related variables
-                InputStream defaultLangSettings = getClassLoader().getResourceAsStream(LANG_SETTINGS_FILE_NAME);
-                File currentLangSettings = new File(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME);
+                final InputStream defaultLangSettings = getClassLoader().getResourceAsStream(LANG_SETTINGS_FILE_NAME);
+                final File currentLangSettings = new File(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME);
 
                 // Add the default headers to the arrayList
-                try (BufferedReader defaultIn = new BufferedReader(new InputStreamReader(defaultLangSettings, UTF_8))) {
+                try (final BufferedReader defaultIn = new BufferedReader(new InputStreamReader(defaultLangSettings, UTF_8))) {
                     String line;
                     while ((line = defaultIn.readLine()) != null && line.startsWith("#"))
                         langSettingsHeader.add(line);
@@ -217,8 +234,8 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
                 // Add everything after the headers from the current langSettings file to the arrayList
                 try (
-                    BufferedReader actualIn = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(currentLangSettings), UTF_8))
+                        final BufferedReader actualIn = new BufferedReader(new InputStreamReader(
+                                new FileInputStream(currentLangSettings), UTF_8))
                 ) {
                     String line;
                     boolean inHeader = true;
@@ -230,15 +247,15 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
                 // Write everything to the file.
                 try (
-                    BufferedWriter actualOut = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(currentLangSettings), UTF_8))
+                        final BufferedWriter actualOut = new BufferedWriter(new OutputStreamWriter(
+                                new FileOutputStream(currentLangSettings), UTF_8))
                 ) {
-                    for (String line : langSettingsHeader)
+                    for (final String line : langSettingsHeader)
                         actualOut.write(line + '\n');
                 }
 
-            } catch (IOException ex) {
-                for (Throwable subEx : ex.getSuppressed()) subEx.printStackTrace();
+            } catch (final IOException ex) {
+                for (final Throwable subEx : ex.getSuppressed()) subEx.printStackTrace();
                 ex.printStackTrace();
             }
 
@@ -248,18 +265,18 @@ public final class JakesRtpPlugin extends JavaPlugin {
         Map<String, String> messageOverrides = null;
         try {
             messageOverrides = new Yaml().load(new FileInputStream(new File(getDataFolder(), LANG_SETTINGS_FILE_NAME)));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
         }
         // Load default messages
         infoLog("Setting default messages.");
         Messages.setMap(new Yaml().load(this.getClassLoader().getResourceAsStream(
-            String.format(BLANK_LANG_FILE_NAME, "en"))));
+                String.format(BLANK_LANG_FILE_NAME, "en"))));
         // Load & add all the messages from the language file
         lang = messageOverrides.get("language");
         if (!lang.equalsIgnoreCase("en")) {
             languageOverrides = new Yaml().load(this.getClassLoader().getResourceAsStream(
-                String.format(BLANK_LANG_FILE_NAME, lang)));
+                    String.format(BLANK_LANG_FILE_NAME, lang)));
             infoLog("Overwriting default messages with translated messages.");
             Messages.addMap(languageOverrides);
         }
@@ -268,46 +285,37 @@ public final class JakesRtpPlugin extends JavaPlugin {
         infoLog("Overwriting messages with custom messages.");
         customMessageCount = Messages.addMap(messageOverrides);
     }
-    //</editor-fold>
-
-    /* ================================================== *\
-                   Getters
-    \* ================================================== */
 
     //<editor-fold desc="Getters">
-    public Economy getEconomy() {return economy;}
-
-    public boolean canUseEconomy() {return hasEconomy;}
-
-    public String getCurrentConfigVersion() {return getConfig().getString("config-version");}
-
-    public RandomTeleporter getRandomTeleporter() {return theRandomTeleporter;}
+    public Economy getEconomy() {
+        return economy;
+    }
     //</editor-fold>
 
     /* ================================================== *\
                     Logging Related
     \* ================================================== */
 
-    //<editor-fold desc="Logging Related">
-    private static final Queue<LogMsg> msgLog = new ArrayDeque<>();
+    public boolean canUseEconomy() {
+        return hasEconomy;
+    }
+
+    public String getCurrentConfigVersion() {
+        return getConfig().getString("config-version");
+    }
+
+    public RandomTeleporter getRandomTeleporter() {
+        return theRandomTeleporter;
+    }
 
     private static final class LogMsg {
-        final Level  left;
+        final Level left;
         final String right;
 
-        LogMsg(Level level, String msg) {
+        LogMsg(final Level level, final String msg) {
             left = level;
             right = msg;
         }
-    }
-
-    public static void log(Level level, String msg) {
-        msgLog.add(new LogMsg(level, msg));
-        logger.log(level, msg);
-    }
-
-    public static void infoLog(String msg) {
-        log(Level.INFO, msg);
     }
     //</editor-fold>
 

@@ -14,19 +14,18 @@ import java.util.logging.Level;
  */
 public abstract class SafeLocationFinder {
 
-    public final    Location loc;
-    protected final int      lowBound;
-    protected       int      highBound;
-    protected final boolean  enableSelfChecking;
-    protected final int      checkRadiusXZ;
-    protected final int      checkRadiusVert;
-
+    public final Location loc;
+    protected final int lowBound;
+    protected final boolean enableSelfChecking;
+    protected final int checkRadiusXZ;
+    protected final int checkRadiusVert;
+    protected int highBound;
     /* Small set of variables just for nextInSpiral */
-    protected boolean xNotY    = true;
-    protected int     flip     = 1;
-    protected int     count    = 0;
-    protected int     subCount = 0;
-    protected int     stretch  = 1;
+    protected boolean xNotY = true;
+    protected int flip = 1;
+    protected int count = 0;
+    protected int subCount = 0;
+    protected int stretch = 1;
 
     /**
      * Just constructs the {@code SafeLocationFinder}, use {@code checkSafety} to check if
@@ -34,7 +33,7 @@ public abstract class SafeLocationFinder {
      *
      * @param loc The location that will be checked for safety, and potentially modified.
      */
-    public SafeLocationFinder(Location loc) {
+    public SafeLocationFinder(final Location loc) {
         this.loc = loc;
         enableSelfChecking = false;
         checkRadiusXZ = checkRadiusVert = lowBound = 0;
@@ -52,7 +51,7 @@ public abstract class SafeLocationFinder {
      * @param lowBound        The lowest Y value the location can have.
      * @param highBound       The highest Y value the location can have.
      */
-    public SafeLocationFinder(Location loc, int checkRadiusXZ, int checkRadiusVert, int lowBound, int highBound) {
+    public SafeLocationFinder(final Location loc, final int checkRadiusXZ, final int checkRadiusVert, final int lowBound, final int highBound) {
         this.loc = loc;
         enableSelfChecking = true;
         this.checkRadiusXZ = checkRadiusXZ;
@@ -71,7 +70,7 @@ public abstract class SafeLocationFinder {
      * @param checkProfile Which method to use to find the starting point.
      * @return True if the location is now safe, false if it could not be made safe.
      */
-    public boolean tryAndMakeSafe(LocCheckProfiles checkProfile) throws JrtpBaseException {
+    public boolean tryAndMakeSafe(final LocCheckProfiles checkProfile) throws JrtpBaseException {
         try {
             if (!enableSelfChecking)
                 throw new JrtpBaseException("Tried to use self checking on an object that can not self check.");
@@ -84,9 +83,9 @@ public abstract class SafeLocationFinder {
                     loc.setYaw((float) (360f * Math.random()));
                     return true;
                 } else nextInSpiral();
-        } catch (TimeoutException e) {
+        } catch (final TimeoutException e) {
             JakesRtpPlugin.log(Level.WARNING, "Request to make location safe timed out. " +
-                                              "This is only an issue if this warning is common.");
+                    "This is only an issue if this warning is common.");
         }
         return false;
     }
@@ -99,14 +98,14 @@ public abstract class SafeLocationFinder {
      *            Ex: if {@code avm = 1}, the block itself, 1 up, and 1 down will be checked.
      * @return True if the location is safe, false if it is not.
      */
-    public final boolean checkSafety(int avm) throws JrtpBaseException.PluginDisabledException, TimeoutException {
+    public final boolean checkSafety(final int avm) throws JrtpBaseException.PluginDisabledException, TimeoutException {
         if (avm < 0) throw new IllegalArgumentException("Avm can not be less than 0.");
         // Make a temporary location so we don't edit the main one unless its safe.
-        Location tempLoc = loc.clone().add(0, avm + 1, 0);
+        final Location tempLoc = loc.clone().add(0, avm + 1, 0);
 
         // Since the actual number of blocks to check per location is 3,
         //   we need to start with our range at 3, and add from there.
-        int range = avm * 2 + 3;
+        final int range = avm * 2 + 3;
         int safe = 0;
         // We will ALWAYS loop at least 3 times, even if avm is 0.
         //   Two for air space, one for foot space.
@@ -114,11 +113,11 @@ public abstract class SafeLocationFinder {
             // Only check for safety if were within the valid range, otherwise only move the temp position
             if (tempLoc.getY() < lowBound) break; // We are too low and will never make it back to a valid height
             if (tempLoc.getY() < highBound) { // We are at a valid height. Do stuff...
-                Material mat = getLocMaterial(tempLoc);
+                final Material mat = getLocMaterial(tempLoc);
                 // If either of these conditions are reached, it is not worth checking
                 //   the remaining spaces because the combined result will fail.
                 if ((i == range - 2 && safe == 0) ||
-                    (i == range - 1 && safe != 2)) break;
+                        (i == range - 1 && safe != 2)) break;
                 // This is the part that checks if a player can safely stand and fit.
                 if (safe < 2)
                     if (SafeLocationUtils.util.isSafeToBeIn(mat))
@@ -147,14 +146,14 @@ public abstract class SafeLocationFinder {
      *
      * @param checkProfile The profile setting. This determines which method will be called.
      */
-    private void moveToStart(LocCheckProfiles checkProfile) throws PluginDisabledException, TimeoutException {
+    private void moveToStart(final LocCheckProfiles checkProfile) throws PluginDisabledException, TimeoutException {
         if (checkProfile == LocCheckProfiles.TOP_DOWN)
             dropToGround();
         else if (checkProfile == LocCheckProfiles.MIDDLE_OUT)
             dropToMiddle();
         else {
             assert checkProfile == LocCheckProfiles.AUTO;
-            World world = loc.getWorld();
+            final World world = loc.getWorld();
             if (world != null && world.getEnvironment() == World.Environment.NETHER) {
                 if (highBound > 127) highBound = 127;
                 dropToMiddle();

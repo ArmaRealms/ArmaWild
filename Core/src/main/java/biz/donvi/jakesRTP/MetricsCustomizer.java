@@ -12,11 +12,11 @@ import static biz.donvi.jakesRTP.GeneralUtil.readableTime;
 
 class MetricsCustomizer {
 
-    private final JakesRtpPlugin   p;
+    private final JakesRtpPlugin p;
     private final RandomTeleporter r;
-    private final Metrics          m;
+    private final Metrics m;
 
-    MetricsCustomizer(JakesRtpPlugin plugin, Metrics metrics) {
+    MetricsCustomizer(final JakesRtpPlugin plugin, final Metrics metrics) {
         p = plugin;
         r = plugin.getRandomTeleporter();
         m = metrics;
@@ -32,7 +32,7 @@ class MetricsCustomizer {
         addSimplePie("world-border", () -> JakesRtpPlugin.worldBorderPluginHook.hook.name());//TODO ADD TO bSTATS
 
         addAdvancedPie("rtp-region-shape", r::getRtpSettings,
-                       settings -> settings.distribution.shape.shape()); // TODO MAKE SURE WORKS ON bSTATS
+                settings -> settings.distribution.shape.shape()); // TODO MAKE SURE WORKS ON bSTATS
 //       // Replaced by ↑
 //        m.addCustomChart(new Metrics.AdvancedPie("rtp-region-shape", () -> {
 //            Map<String, Integer> pie = new HashMap<>();
@@ -42,25 +42,25 @@ class MetricsCustomizer {
 //        }));
 
         addAdvancedPie("rtp-cooldown", r::getRtpSettings,
-                       settings -> readableTime(settings.coolDown.coolDownTime)); // TODO ADD TO bSTATS
+                settings -> readableTime(settings.coolDown.coolDownTime)); // TODO ADD TO bSTATS
         addAdvancedPie("rtp-warmup", r::getRtpSettings,
-                       settings -> readableTime(settings.warmup * 1000L)); // TODO ADD TO bSTATS
+                settings -> readableTime(settings.warmup * 1000L)); // TODO ADD TO bSTATS
         addAdvancedPie("rtp-cost", r::getRtpSettings,
-                       settings -> String.valueOf(settings.cost)); // TODO ADD TO bSTATS
+                settings -> String.valueOf(settings.cost)); // TODO ADD TO bSTATS
 
         addDrillDownPie_specific();
 
         m.addCustomChart(new Metrics.SingleLineChart("rtp-per-unit", RandomTeleportAction::getAndClearRtpCount));
     }
 
-    private void addSimplePie(String chartId, Callable<String> callable) {
+    private void addSimplePie(final String chartId, final Callable<String> callable) {
         m.addCustomChart(new Metrics.SimplePie(chartId, callable));
     }
 
-    private <T> void addAdvancedPie(String chartId, Callable<Iterable<T>> iterateOver, Function<T, String> toCount) {
+    private <T> void addAdvancedPie(final String chartId, final Callable<Iterable<T>> iterateOver, final Function<T, String> toCount) {
         m.addCustomChart(new Metrics.AdvancedPie(chartId, () -> {
-            Map<String, Integer> pie = new HashMap<>();
-            for (T t : iterateOver.call()) pie.merge(toCount.apply(t), 1, Integer::sum);
+            final Map<String, Integer> pie = new HashMap<>();
+            for (final T t : iterateOver.call()) pie.merge(toCount.apply(t), 1, Integer::sum);
             return pie;
         }));
     }
@@ -68,12 +68,12 @@ class MetricsCustomizer {
     private void addDrillDownPie_specific() {
         m.addCustomChart(new Metrics.DrilldownPie("location-restrictor-support", () -> {
             // Stuff for the graph itself.
-            boolean isUsed;
-            Map<String, Map<String, Integer>> outerMap = new HashMap<>();
-            Map<String, Integer> innerMap = new HashMap<>();
+            final boolean isUsed;
+            final Map<String, Map<String, Integer>> outerMap = new HashMap<>();
+            final Map<String, Integer> innerMap = new HashMap<>();
             // Stuff specifically for the `if` statement
-            ClaimsManager cm = JakesRtpPlugin.claimsManager;
-            List<String> names = cm == null ? null : cm.enabledLocationRestrictors();
+            final ClaimsManager cm = JakesRtpPlugin.claimsManager;
+            final List<String> names = cm == null ? null : cm.enabledLocationRestrictors();
             // The `if` statement
             if (cm == null) { // This feature is forcibly disabled
                 isUsed = false;
@@ -83,7 +83,7 @@ class MetricsCustomizer {
                 innerMap.put("No supporting plugins found", 1);
             } else { // This means we have support ENABLED and there ARE loaded support things
                 isUsed = true;
-                for (String name : names)
+                for (final String name : names)
                     innerMap.put(name, 1);
             }
             outerMap.put(isUsed ? "Used" : "Not Used", innerMap);

@@ -1,6 +1,5 @@
 package biz.donvi.jakesRTP.claimsIntegrations;
 
-import biz.donvi.jakesRTP.JakesRtpPlugin;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
@@ -22,26 +21,53 @@ import java.util.logging.Logger;
 
 public class LrWorldGuard implements LocationRestrictor {
 
+    private static StateFlag customJrtpFlag = null;
     protected WorldGuardPlugin plugin;
-
-    public LrWorldGuard(WorldGuardPlugin worldGuardPlugin) {
+    //<editor-fold desc="All this caching stuff I probably didn't actually need to write.">
+    // Just some caching of values so quick usage doesn't need to keep finding them.
+    // This is all probably unnecessary, I'm just afraid of persisting something from WorldGuard at the wrong time.
+    private long maxAgeBeforeCacheClear = 60 * 1000; // 60 seconds before we clear the cache
+    private long lastTimeAccessed = 0;
+    private WeakReference<RegionContainer> regionContainer = null;
+    private WeakReference<World> regionManagerIsForWorld = null;
+    private WeakReference<RegionManager> regionManagerWR = null;
+    public LrWorldGuard(final WorldGuardPlugin worldGuardPlugin) {
         if (worldGuardPlugin == null) throw new NullPointerException("worldGuardPlugin must NOT be null!");
         plugin = worldGuardPlugin;
     }
 
+    public static void registerWorldGuardFlag(final Plugin plugin) {
+        // ONLY RUN THIS IF WorldGuard DOES IN FACT EXIST
+        if (plugin.getServer().getPluginManager().getPlugin("WorldGuard") == null) return;
+        // Only needs to be done if it hasn't been done before.
+        if (customJrtpFlag != null) return;
+        // Actual logic.
+        final Logger logger = plugin.getLogger();
+        final FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+        try {
+            final StateFlag flag = new StateFlag("allow-jrtp-landing", true);
+            registry.register(flag);
+            customJrtpFlag = flag; // only set our field if there was no error
+            logger.log(Level.INFO, "Added custom flag to world guard.");
+        } catch (final FlagConflictException e) {
+            final Flag<?> existing = registry.get("allow-jrtp-landing");
+            if (existing instanceof StateFlag) {
+                customJrtpFlag = (StateFlag) existing;
+                logger.log(Level.INFO, "Custom flag was previously loaded.");
+            } else {
+                logger.log(Level.WARNING, "Could not create world-guard flag!");
+            }
+        }
+    }
+
     @Override
-    public Plugin supporterPlugin() {return plugin;}
+    public Plugin supporterPlugin() {
+        return plugin;
+    }
 
-    //<editor-fold desc="All this caching stuff I probably didn't actually need to write.">
-    // Just some caching of values so quick usage doesn't need to keep finding them.
-    // This is all probably unnecessary, I'm just afraid of persisting something from WorldGuard at the wrong time.
-    private long                           maxAgeBeforeCacheClear  = 60 * 1000; // 60 seconds before we clear the cache
-    private long                           lastTimeAccessed        = 0;
-    private WeakReference<RegionContainer> regionContainer         = null;
-    private WeakReference<World>           regionManagerIsForWorld = null;
-    private WeakReference<RegionManager>   regionManagerWR         = null;
-
-    /** Clears the temp variables if they are old, and registers the last time accessed as now.*/
+    /**
+     * Clears the temp variables if they are old, and registers the last time accessed as now.
+     */
     private void clearCacheIfOld() {
         if (System.currentTimeMillis() - lastTimeAccessed > maxAgeBeforeCacheClear) {
             regionContainer = null;
@@ -50,61 +76,40 @@ public class LrWorldGuard implements LocationRestrictor {
         }
         lastTimeAccessed = System.currentTimeMillis();
     }
-    /** Gets a potentially cached regionContainer for the server */
+    //</editor-fold>
+
+    /**
+     * Gets a potentially cached regionContainer for the server
+     */
     private RegionContainer getRegionContainer() {
         if (regionContainer == null || regionContainer.get() == null)
             regionContainer = new WeakReference<>(WorldGuard.getInstance().getPlatform().getRegionContainer());
         return regionContainer.get();
     }
 
-    /** Gets the potentially cached region manager for the specified world */
-    private RegionManager getRegionManager(World world) {
+    /**
+     * Gets the potentially cached region manager for the specified world
+     */
+    private RegionManager getRegionManager(final World world) {
         clearCacheIfOld();
         // If the for-world thing is null or contains null, OR the region-manager is null or contains null
         if (regionManagerIsForWorld == null || regionManagerIsForWorld.get() != world ||
-            regionManagerWR == null || regionManagerWR.get() == null
+                regionManagerWR == null || regionManagerWR.get() == null
         ) { // If any of those, make these new.
             regionManagerIsForWorld = new WeakReference<>(world);
             regionManagerWR = new WeakReference<>(getRegionContainer().get(new BukkitWorld(world)));
         }
         return regionManagerWR.get();
     }
-    //</editor-fold>
 
     @Override
-    public boolean denyLandingAtLocation(Location location) {
+    public boolean denyLandingAtLocation(final Location location) {
         // Get a set of all regions at the location
-        ApplicableRegionSet set = getRegionManager(location.getWorld()).getApplicableRegions(
-            BlockVector3.at(location.getX(), location.getY(), location.getZ())
+        final ApplicableRegionSet set = getRegionManager(location.getWorld()).getApplicableRegions(
+                BlockVector3.at(location.getX(), location.getY(), location.getZ())
         );
         // And test if our flg is allowed.
-        boolean flagStatus = set.testState(null, customJrtpFlag);
+        final boolean flagStatus = set.testState(null, customJrtpFlag);
         return !flagStatus;
-    }
-
-    private static StateFlag customJrtpFlag = null;
-
-    public static void registerWorldGuardFlag(Plugin plugin) {
-        // ONLY RUN THIS IF WorldGuard DOES IN FACT EXIST
-        if (plugin.getServer().getPluginManager().getPlugin("WorldGuard") == null) return;
-        // Only needs to be done if it hasn't been done before.
-        if (customJrtpFlag != null) return;
-        // Actual logic.
-        Logger logger = plugin.getLogger();
-        FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
-        try {
-            StateFlag flag = new StateFlag("allow-jrtp-landing", true);
-            registry.register(flag);
-            customJrtpFlag = flag; // only set our field if there was no error
-            logger.log(Level.INFO, "Added custom flag to world guard.");
-        } catch (FlagConflictException e) {
-            Flag<?> existing = registry.get("allow-jrtp-landing");
-            if (existing instanceof StateFlag) {
-                customJrtpFlag = (StateFlag) existing;
-                logger.log(Level.INFO, "Custom flag was previously loaded.");
-            } else {
-                logger.log(Level.WARNING, "Could not create world-guard flag!");
-            }
-        }
     }
 }

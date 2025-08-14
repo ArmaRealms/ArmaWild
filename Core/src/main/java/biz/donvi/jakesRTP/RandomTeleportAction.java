@@ -19,21 +19,21 @@ import static biz.donvi.jakesRTP.JakesRtpPlugin.infoLog;
  */
 public class RandomTeleportAction {
 
+    // For metrics
+    private static int rtpCount = 0;
     public final RandomTeleporter randomTeleporter;
-    public final RtpProfile       rtpProfile;
-    public final Location         callFromLoc;
-    public final boolean          takeFromQueue;
-    public final boolean          timed;
-    public final boolean          log;
-    public final String           logMessage;
-
+    public final RtpProfile rtpProfile;
+    public final Location callFromLoc;
+    public final boolean takeFromQueue;
+    public final boolean timed;
+    public final boolean log;
+    public final String logMessage;
     private final Map<String, String> placeholders = new HashMap<>();
-
-    private boolean  used      = false;
-    private boolean  completed = false;
-    private long     timeStart;
-    private long     timeEnd;
-    private Player   player;
+    private boolean used = false;
+    private boolean completed = false;
+    private long timeStart;
+    private long timeEnd;
+    private Player player;
     private Location landingLoc;
 
     /**
@@ -45,7 +45,7 @@ public class RandomTeleportAction {
      * or if you just want the location, use {@link #requestLocation()} (which does not require a player).
      *
      * @param randomTeleporter The randomTeleporter instance that does the heavy lifting.
-     * @param rtpProfile      The settings to respect while finding the location.
+     * @param rtpProfile       The settings to respect while finding the location.
      * @param callFromLoc      The initial location.
      * @param takeFromQueue    Take a location from the queue (if possible).
      * @param timed            Should we time this?
@@ -53,8 +53,8 @@ public class RandomTeleportAction {
      * @param logMessage       A prefix to the standard log message. Helpful for which bit of code called this.
      */
     public RandomTeleportAction(
-        RandomTeleporter randomTeleporter, RtpProfile rtpProfile, Location callFromLoc,
-        boolean takeFromQueue, boolean timed, boolean log, String logMessage
+            final RandomTeleporter randomTeleporter, final RtpProfile rtpProfile, final Location callFromLoc,
+            final boolean takeFromQueue, final boolean timed, final boolean log, final String logMessage
     ) {
         this.randomTeleporter = randomTeleporter;
         this.rtpProfile = rtpProfile;
@@ -63,6 +63,20 @@ public class RandomTeleportAction {
         this.timed = timed;
         this.log = log;
         this.logMessage = logMessage;
+    }
+
+    public static int getRtpCount() {
+        return rtpCount;
+    }
+
+    public static void clearRtpCount() {
+        rtpCount = 0;
+    }
+
+    public static int getAndClearRtpCount() {
+        final int count = rtpCount;
+        rtpCount = 0;
+        return count;
     }
 
     /**
@@ -74,7 +88,7 @@ public class RandomTeleportAction {
      * @return A reference to this object.
      * @throws JrtpBaseException If anything goes wrong...
      */
-    public RandomTeleportAction teleportSync(Player player) throws JrtpBaseException {
+    public RandomTeleportAction teleportSync(final Player player) throws JrtpBaseException {
         SafeLocationUtils.requireMainThread();
         preTeleport(player);
         player.teleport(landingLoc);
@@ -89,7 +103,7 @@ public class RandomTeleportAction {
      * @return A reference to this object.
      * @throws JrtpBaseException If anything goes wrong...
      */
-    public RandomTeleportAction teleportSyncNonPrimaryThread(Player player) throws JrtpBaseException {
+    public RandomTeleportAction teleportSyncNonPrimaryThread(final Player player) throws JrtpBaseException {
         preTeleport(player);
         player.getServer().getScheduler().runTask(JakesRtpPlugin.plugin, () -> {
             player.teleport(landingLoc);
@@ -106,7 +120,7 @@ public class RandomTeleportAction {
      * @return A reference to this object.
      * @throws JrtpBaseException If anything goes wrong...
      */
-    public RandomTeleportAction teleportAsync(Player player) throws JrtpBaseException {
+    public RandomTeleportAction teleportAsync(final Player player) throws JrtpBaseException {
         preTeleport(player);
         PaperLib.teleportAsync(player, landingLoc).thenAccept(this::postTeleport);
         return this;
@@ -124,16 +138,21 @@ public class RandomTeleportAction {
         completed = true;
         if (timed) timeEnd = System.currentTimeMillis();
         if (log) infoLog(
-            logMessage +
-            " Generated location: " + locationAsString(landingLoc, 1, false) +
-            " taking " + (timed ? timeEnd - timeStart : "N/A") + " ms.");
+                logMessage +
+                        " Generated location: " + locationAsString(landingLoc, 1, false) +
+                        " taking " + (timed ? timeEnd - timeStart : "N/A") + " ms.");
         return landingLoc;
     }
 
     //<editor-fold desc="======== Getters ========">
-    public boolean isUsed() {return used;}
+    public boolean isUsed() {
+        return used;
+    }
 
-    public boolean isCompleted() { return completed; }
+    public boolean isCompleted() {
+        return completed;
+    }
+    //</editor-fold>
 
     public long getTimeStarted() {
         if (!used) throw new RandomTeleportActionNotYetUsedException();
@@ -154,7 +173,6 @@ public class RandomTeleportAction {
         if (!used) throw new RandomTeleportActionNotYetUsedException();
         return landingLoc;
     }
-    //</editor-fold>
 
     /**
      * This is everything that has to be done <i>before</i> the actual teleport happens. Mainly getting the point,
@@ -163,14 +181,14 @@ public class RandomTeleportAction {
      * @param player The player to get the random location for.
      * @throws JrtpBaseException If something goes wrong...
      */
-    private void preTeleport(Player player) throws JrtpBaseException {
+    private void preTeleport(final Player player) throws JrtpBaseException {
         if (used) throw new RandomTeleportActionAlreadyUsedException();
         else used = true;
         if (timed) timeStart = System.currentTimeMillis();
         landingLoc = randomTeleporter.getRtpLocation(
-            rtpProfile,
-            callFromLoc,
-            takeFromQueue);
+                rtpProfile,
+                callFromLoc,
+                takeFromQueue);
         this.player = player;
         //<editor-fold desc="setPlaceholders();">
         if (rtpProfile.commandsToRun.length != 0) {
@@ -182,7 +200,7 @@ public class RandomTeleportAction {
             if (player == null) return; //Everything from this point on NEEDS a player.
             placeholders.put("player", player.getName());
             placeholders.put("player_display_name", player.getDisplayName());
-            Location playerLoc = player.getLocation();
+            final Location playerLoc = player.getLocation();
             placeholders.put("location_old", locationAsString(playerLoc, 1, false));
             placeholders.put("world_old", Objects.requireNonNull(playerLoc.getWorld()).getName());
             placeholders.put("x_old", String.valueOf(playerLoc.getBlockX()));
@@ -198,39 +216,27 @@ public class RandomTeleportAction {
      *
      * @param teleported If the teleport succeeded or not.
      */
-    private void postTeleport(boolean teleported) {
+    private void postTeleport(final boolean teleported) {
         completed = true;
         if (timed) timeEnd = System.currentTimeMillis();
         if (log)
             if (teleported) infoLog(
-                logMessage +
-                " Teleported player " + player.getName() +
-                " to " + locationAsString(landingLoc, 1, false) +
-                " taking " + (timed ? timeEnd - timeStart : "N/A") + " ms.");
+                    logMessage +
+                            " Teleported player " + player.getName() +
+                            " to " + locationAsString(landingLoc, 1, false) +
+                            " taking " + (timed ? timeEnd - timeStart : "N/A") + " ms.");
             else infoLog(
-                logMessage +
-                "Player did not teleport.");
+                    logMessage +
+                            "Player did not teleport.");
         rtpCount++;
         if (rtpProfile.commandsToRun.length != 0)
-            for (String command : rtpProfile.commandsToRun)
+            for (final String command : rtpProfile.commandsToRun)
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillPlaceholders(command, placeholders));
     }
 
-    static class RandomTeleportActionAlreadyUsedException extends RuntimeException {}
+    static class RandomTeleportActionAlreadyUsedException extends RuntimeException {
+    }
 
-    static class RandomTeleportActionNotYetUsedException extends RuntimeException {}
-
-
-    // For metrics
-    private static int rtpCount = 0;
-
-    public static int getRtpCount() {return rtpCount;}
-
-    public static void clearRtpCount() {rtpCount = 0;}
-
-    public static int getAndClearRtpCount(){
-        int count = rtpCount;
-        rtpCount = 0;
-        return count;
+    static class RandomTeleportActionNotYetUsedException extends RuntimeException {
     }
 }

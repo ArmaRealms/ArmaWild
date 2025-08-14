@@ -28,11 +28,11 @@ public class SimpleLagTimer {
      * ANY TICKS LESS THAN OR EQUAL TO THIS WILL BE DISCARDED as they are considered "make up ticks"  (ticks after a
      * spike in lag that are only quick to make up for lost time)
      */
-    protected static int MIN_REC_TIME         = 48;
+    protected static int MIN_REC_TIME = 48;
     /**
      * The time (in milliseconds) that a tick must be equal to or less than to be considered lag free.
      */
-    protected static int MIN_LAG_TIME         = 55;
+    protected static int MIN_LAG_TIME = 55;
     /**
      * Applicable only to the static {@code blockingTimer()} method, this is how many ticks to wait regardless of
      * whether the server is lagging or not.
@@ -40,14 +40,14 @@ public class SimpleLagTimer {
     protected static int TICKS_TO_ALWAYS_WAIT = 20;
 
 
-    protected final Server          server;
+    protected final Server server;
     protected final Queue<TickInfo> tickInfoQueue;
-    protected final long            startTime;
-    final           int             taskNumber;
+    protected final long startTime;
+    final int taskNumber;
 
     protected TickInfo lastTick;
-    protected long     tickQueueTimeSum;
-    protected boolean  running = true;
+    protected long tickQueueTimeSum;
+    protected boolean running = true;
 
     /**
      * Constructs a new simple lag timer. This registers a repeating task in the bukkit scheduler to measure how long
@@ -59,16 +59,16 @@ public class SimpleLagTimer {
      *                 stay logged.
      */
     @SuppressWarnings("ConstantConditions") // tickInfoQueue.peek() & tickInfoQueue.pull() are never null when checked.
-    public SimpleLagTimer(Plugin plugin, int avgRange) {
+    public SimpleLagTimer(final Plugin plugin, final int avgRange) {
         this.server = plugin.getServer();
         this.tickInfoQueue = new LinkedList<>();
         lastTick = new TickInfo(0);
         startTime = System.currentTimeMillis();
         taskNumber = server.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            TickInfo currentTick = new TickInfo(
-                System.currentTimeMillis(),
-                System.currentTimeMillis() - lastTick.timeOf,
-                lastTick.number + 1);
+            final TickInfo currentTick = new TickInfo(
+                    System.currentTimeMillis(),
+                    System.currentTimeMillis() - lastTick.timeOf,
+                    lastTick.number + 1);
             lastTick = currentTick;
             TickInfo oldestTick;
 
@@ -88,13 +88,42 @@ public class SimpleLagTimer {
     }
 
     /**
+     * Creates a simple tick timer and blocks the calling thread until the tick timer reads a value under {@code
+     * MIN_LAG_TIME} milliseconds. Note: This will always block for at least {@code TICKS_TO_ALWAYS_WAIT} ticks.
+     *
+     * @param plugin   The plugin used to register a task.
+     * @param avgRange The range (in milliseconds) given to the tick timer to average. Example: {@code 250} would make
+     *                 the tick timer average together all ticks that started less than 250ms ago.
+     */
+    public static void blockingTimer(final Plugin plugin, final int avgRange) {
+        final SimpleLagTimer simpleLagTimer;
+        synchronized (simpleLagTimer = new SimpleLagTimer(plugin, avgRange)) {
+            while (simpleLagTimer.getTickNumber() < TICKS_TO_ALWAYS_WAIT) {
+                try {
+                    simpleLagTimer.wait(50);
+                } catch (final InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            while (simpleLagTimer.isRunning() && simpleLagTimer.getAverageTick() > MIN_LAG_TIME) {
+                try {
+                    simpleLagTimer.wait(50);
+                } catch (final InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        simpleLagTimer.end();
+    }
+
+    /**
      * Gets the current tick the timer is on. Note: A tick with value {@code 0} represents the first tick this timer
      * logged, <em>not</em> the first server tick.
      *
      * @return The current tick's number.
      */
     public long getTickNumber() {
-        TickInfo lastInserted = ((Deque<TickInfo>) tickInfoQueue).peekLast();
+        final TickInfo lastInserted = ((Deque<TickInfo>) tickInfoQueue).peekLast();
         return lastInserted != null ? lastInserted.number : 0;
     }
 
@@ -106,8 +135,8 @@ public class SimpleLagTimer {
      */
     public float getAverageTick() {
         return tickInfoQueue.size() == 0
-            ? Float.MAX_VALUE
-            : (float) tickQueueTimeSum / tickInfoQueue.size();
+                ? Float.MAX_VALUE
+                : (float) tickQueueTimeSum / tickInfoQueue.size();
     }
 
     /**
@@ -115,16 +144,8 @@ public class SimpleLagTimer {
      *
      * @return Whether the tick timer is still running.
      */
-    public boolean isRunning() { return running; }
-
-    /**
-     * Stops the tick timer and removes the task from the bukkit scheduler. Make sure to run this method before
-     * discarding the {@code SimpleTickTimer} object.
-     */
-    public void end() {
-        server.getScheduler().cancelTask(taskNumber);
-        running = false;
-//        gnuPlotEnd(); //DEBUG gnuPlotter line
+    public boolean isRunning() {
+        return running;
     }
 
     //<editor-fold desc="GNU PLOT HOOKS">
@@ -146,32 +167,13 @@ public class SimpleLagTimer {
     //</editor-fold>
 
     /**
-     * Creates a simple tick timer and blocks the calling thread until the tick timer reads a value under {@code
-     * MIN_LAG_TIME} milliseconds. Note: This will always block for at least {@code TICKS_TO_ALWAYS_WAIT} ticks.
-     *
-     * @param plugin   The plugin used to register a task.
-     * @param avgRange The range (in milliseconds) given to the tick timer to average. Example: {@code 250} would make
-     *                 the tick timer average together all ticks that started less than 250ms ago.
+     * Stops the tick timer and removes the task from the bukkit scheduler. Make sure to run this method before
+     * discarding the {@code SimpleTickTimer} object.
      */
-    public static void blockingTimer(Plugin plugin, int avgRange) {
-        final SimpleLagTimer simpleLagTimer;
-        synchronized (simpleLagTimer = new SimpleLagTimer(plugin, avgRange)) {
-            while (simpleLagTimer.getTickNumber() < TICKS_TO_ALWAYS_WAIT) {
-                try {
-                    simpleLagTimer.wait(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            while (simpleLagTimer.isRunning() && simpleLagTimer.getAverageTick() > MIN_LAG_TIME) {
-                try {
-                    simpleLagTimer.wait(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        simpleLagTimer.end();
+    public void end() {
+        server.getScheduler().cancelTask(taskNumber);
+        running = false;
+//        gnuPlotEnd(); //DEBUG gnuPlotter line
     }
 
     /**
@@ -196,7 +198,7 @@ public class SimpleLagTimer {
          *
          * @param tickNum The number of the tick
          */
-        TickInfo(long tickNum) {
+        TickInfo(final long tickNum) {
             timeOf = System.currentTimeMillis();
             timeDif = -1;
             number = tickNum;
@@ -209,7 +211,7 @@ public class SimpleLagTimer {
          * @param timeDif The length of the tick (in milliseconds)
          * @param tickNum The number of the tick since the start of the tick timer
          */
-        TickInfo(long timeOf, long timeDif, long tickNum) {
+        TickInfo(final long timeOf, final long timeDif, final long tickNum) {
             this.timeOf = timeOf;
             this.timeDif = timeDif;
             this.number = tickNum;

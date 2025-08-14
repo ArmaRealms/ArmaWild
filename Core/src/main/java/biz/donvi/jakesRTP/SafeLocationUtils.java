@@ -6,10 +6,6 @@ import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-
 public class SafeLocationUtils {
 
     public static final SafeLocationUtils util;
@@ -24,16 +20,16 @@ public class SafeLocationUtils {
             if (PaperLib.getMinecraftVersion() <= 12) {
                 //noinspection unchecked
                 patchClass = (Class<SafeLocationUtils_Patch>) Class
-                    .forName("biz.donvi.jakesRTP.SafeLocationUtils_12")
-                    .asSubclass(SafeLocationUtils_Patch.class);
+                        .forName("biz.donvi.jakesRTP.SafeLocationUtils_12")
+                        .asSubclass(SafeLocationUtils_Patch.class);
             }
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }
         if (patchClass != null)
             try {
                 patchInstance = patchClass.newInstance();
-            } catch (IllegalAccessException | InstantiationException e) {
+            } catch (final IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
             }
         else patchInstance = new SafeLocationUtils_Patch.BlankPatch();
@@ -41,11 +37,24 @@ public class SafeLocationUtils {
     }
 
 
-    private SafeLocationUtils() {}
+    private SafeLocationUtils() {
+    }
 
     /* ================================================== *\
                     Material checking utils
     \* ================================================== */
+
+    static int chunkXZ(final double blockXZ) {
+        return (int) Math.floor((double) blockXZ / 16);
+    }
+
+    /**
+     * Checks if the current thread is the primary Bukkit thread.
+     * If it is, nothing happens, if not, it throws an unchecked exception.
+     */
+    static void requireMainThread() {
+        if (!Bukkit.isPrimaryThread()) throw new AccessFromNonMainThreadError();
+    }
 
     /**
      * Checks the given material against a <u>whitelist</u> of materials deemed to be "safe to be in"
@@ -53,7 +62,7 @@ public class SafeLocationUtils {
      * @param mat The material to check
      * @return Whether it is safe or not to be there
      */
-    boolean isSafeToBeIn(Material mat) {
+    boolean isSafeToBeIn(final Material mat) {
         if (patches.matchesPatchVersion(12)) return patches.isSafeToBeIn(mat);
         switch (mat) {
             case AIR:
@@ -82,7 +91,7 @@ public class SafeLocationUtils {
      * @param mat The material to check
      * @return Whether it is safe or not to be there
      */
-    boolean isSafeToBeOn(Material mat) {
+    boolean isSafeToBeOn(final Material mat) {
         if (patches.matchesPatchVersion(12)) return patches.isSafeToBeOn(mat);
         switch (mat) {
             case LAVA:
@@ -111,13 +120,17 @@ public class SafeLocationUtils {
         }
     }
 
+    /* ================================================== *\
+                    Location checking utils
+    \* ================================================== */
+
     /**
      * Checks if the given material is any type of tree leaf.
      *
      * @param mat The material to check
      * @return Whether it is a type of leaf
      */
-    boolean isTreeLeaves(Material mat) {
+    boolean isTreeLeaves(final Material mat) {
         if (patches.matchesPatchVersion(12)) return patches.isTreeLeaves(mat);
         switch (mat) {
             case ACACIA_LEAVES:
@@ -144,14 +157,14 @@ public class SafeLocationUtils {
      * @param mat The material to check
      * @return Whether it is safe to go through
      */
-    boolean isSafeToGoThrough(Material mat) {
+    boolean isSafeToGoThrough(final Material mat) {
         //At the time of writing this, I can not think of any materials other than leaves that fit this category.
         //I am leaving the method in place though so if I decide to add more materials later, it will be easy.
         return isTreeLeaves(mat);
     }
 
     /* ================================================== *\
-                    Location checking utils
+                    Location moving utils
     \* ================================================== */
 
     /**
@@ -163,9 +176,9 @@ public class SafeLocationUtils {
      */
     boolean isInATree(final Location loc) {
         requireMainThread();
-        for (Material material : new Material[]{
-            loc.clone().add(0, 1, 0).getBlock().getType(),
-            loc.clone().add(0, 2, 0).getBlock().getType()})
+        for (final Material material : new Material[]{
+                loc.clone().add(0, 1, 0).getBlock().getType(),
+                loc.clone().add(0, 2, 0).getBlock().getType()})
             if (isTreeLeaves(material)) return true;
         return false;
     }
@@ -178,17 +191,13 @@ public class SafeLocationUtils {
      * @param chunk The chunk snapshot that contains the {@code Location}'s data.
      * @return True if the location is in a tree.
      */
-    boolean isInTree(final Location loc, ChunkSnapshot chunk) {
-        for (Material material : new Material[]{
-            locMatFromSnapshot(loc.clone().add(0, 1, 0), chunk),
-            locMatFromSnapshot(loc.clone().add(0, 2, 0), chunk)})
+    boolean isInTree(final Location loc, final ChunkSnapshot chunk) {
+        for (final Material material : new Material[]{
+                locMatFromSnapshot(loc.clone().add(0, 1, 0), chunk),
+                locMatFromSnapshot(loc.clone().add(0, 2, 0), chunk)})
             if (isTreeLeaves(material)) return true;
         return false;
     }
-
-    /* ================================================== *\
-                    Location moving utils
-    \* ================================================== */
 
     /**
      * Takes the given location, and moves it downwards until it is no longer inside something that is
@@ -211,7 +220,7 @@ public class SafeLocationUtils {
      * @param loc   The location to modify
      * @param chunk The chunk snapshot that contains the {@code Location}'s data.
      */
-    void dropToGround(final Location loc, ChunkSnapshot chunk) {
+    void dropToGround(final Location loc, final ChunkSnapshot chunk) {
         while (isSafeToBeIn(locMatFromSnapshot(loc, chunk)) || isSafeToGoThrough(locMatFromSnapshot(loc, chunk)))
             loc.add(0, -1, 0);
     }
@@ -224,19 +233,19 @@ public class SafeLocationUtils {
      * @param loc      The location to modify
      * @param lowBound The lowest the location can go
      */
-    void dropToGround(final Location loc, int lowBound, int highBound) {
+    void dropToGround(final Location loc, final int lowBound, final int highBound) {
         requireMainThread();
         // If our location was above the max height, drop us to it.
         if (loc.getY() > highBound) loc.setY(highBound);
         // If we start in a solid block, we need to wait until we get out of it
         while (loc.getBlockY() > lowBound && !(
-            isSafeToBeIn(loc.getBlock().getType())
-            || isSafeToGoThrough(loc.getBlock().getType()))
+                isSafeToBeIn(loc.getBlock().getType())
+                        || isSafeToGoThrough(loc.getBlock().getType()))
         ) loc.add(0, -1, 0);
         // Now we are in something non-solid; we can start looking for the ground
         while (loc.getBlockY() > lowBound && (
-            isSafeToBeIn(loc.getBlock().getType())
-            || isSafeToGoThrough(loc.getBlock().getType()))
+                isSafeToBeIn(loc.getBlock().getType())
+                        || isSafeToGoThrough(loc.getBlock().getType()))
         ) loc.add(0, -1, 0);
     }
 
@@ -249,47 +258,51 @@ public class SafeLocationUtils {
      * @param lowBound The lowest the location can go
      * @param chunk    The chunk snapshot that contains the {@code Location}'s data.
      */
-    void dropToGround(final Location loc, int lowBound, int highBound, ChunkSnapshot chunk) {
+    void dropToGround(final Location loc, final int lowBound, final int highBound, final ChunkSnapshot chunk) {
         // If our location was above the max height, drop us to it.
         if (loc.getY() > highBound) loc.setY(highBound);
         // If we start in a solid block, we need to wait until we get out of it
         while (loc.getBlockY() > lowBound && !(
-            isSafeToBeIn(locMatFromSnapshot(loc, chunk))
-            || isSafeToGoThrough(locMatFromSnapshot(loc, chunk)))
+                isSafeToBeIn(locMatFromSnapshot(loc, chunk))
+                        || isSafeToGoThrough(locMatFromSnapshot(loc, chunk)))
         ) loc.add(0, -1, 0);
         // Now we are in something non-solid; we can start looking for the ground
         while (loc.getBlockY() > lowBound && (
-            isSafeToBeIn(locMatFromSnapshot(loc, chunk))
-            || isSafeToGoThrough(locMatFromSnapshot(loc, chunk)))
+                isSafeToBeIn(locMatFromSnapshot(loc, chunk))
+                        || isSafeToGoThrough(locMatFromSnapshot(loc, chunk)))
         ) loc.add(0, -1, 0);
     }
 
-    void dropToMiddle(final Location loc, int lowBound, int highBound) {
+    /* ================================================== *\
+                    Chunk cache utils
+    \* ================================================== */
+
+    void dropToMiddle(final Location loc, final int lowBound, final int highBound) {
         dropToMiddle(loc, lowBound, highBound, null);
     }
 
-    void dropToMiddle(final Location loc, int lowBound, int highBound, ChunkSnapshot chunk) {
+    void dropToMiddle(final Location loc, final int lowBound, final int highBound, final ChunkSnapshot chunk) {
         loc.setY((highBound + lowBound) / 2d);  //Set starting point
         Material mat = chunk == null            //Set starting material
-            ? loc.getBlock().getType()          //  If we are on the bukkit thread, we should be called without a
-            : locMatFromSnapshot(loc, chunk);   //  snapshot. If we are off it, we should have a snapshot.
+                ? loc.getBlock().getType()          //  If we are on the bukkit thread, we should be called without a
+                : locMatFromSnapshot(loc, chunk);   //  snapshot. If we are off it, we should have a snapshot.
 
         int change = 0;     //For movement control
         int direction = 1;  //For movement control
         boolean upWasSolid = false, //For escaping while
-            downWasAir = false; //For escaping while
+                downWasAir = false; //For escaping while
 
         //While [we are unsafe] check the next spot for partial safety
         while (
-            (direction == -1
-                ? !(upWasSolid && isSafeToBeIn(mat))
-                : !(downWasAir && isSafeToBeOn(mat)))
-            && loc.getY() > 0
-            && loc.getY() < 128
+                (direction == -1
+                        ? !(upWasSolid && isSafeToBeIn(mat))
+                        : !(downWasAir && isSafeToBeOn(mat)))
+                        && loc.getY() > 0
+                        && loc.getY() < 128
         ) {
             mat = (chunk == null)
-                ? loc.getBlock().getType()
-                : locMatFromSnapshot(loc, chunk);
+                    ? loc.getBlock().getType()
+                    : locMatFromSnapshot(loc, chunk);
             //Preparing testing variables
             if (direction == 1)
                 upWasSolid = isSafeToBeOn(mat);
@@ -302,16 +315,12 @@ public class SafeLocationUtils {
             direction *= -1;
             loc.add(0, -change * direction, 0);
             mat = (chunk == null)
-                ? loc.getBlock().getType()
-                : locMatFromSnapshot(loc, chunk);
+                    ? loc.getBlock().getType()
+                    : locMatFromSnapshot(loc, chunk);
         }
     }
 
-    /* ================================================== *\
-                    Chunk cache utils
-    \* ================================================== */
-
-    Material locMatFromSnapshot(Location loc, ChunkSnapshot chunk) {
+    Material locMatFromSnapshot(final Location loc, final ChunkSnapshot chunk) {
         if (!isLocationInsideChunk(loc, chunk))
             throw new RuntimeException("The given location is not within given chunk!");
         int x = loc.getBlockX() % 16;
@@ -321,32 +330,25 @@ public class SafeLocationUtils {
         return chunkLocMatFromSnapshot(x, loc.getBlockY(), z, chunk);
     }
 
-    Material chunkLocMatFromSnapshot(int inX, int y, int inZ, ChunkSnapshot chunk) {
+    Material chunkLocMatFromSnapshot(final int inX, final int y, final int inZ, final ChunkSnapshot chunk) {
         if (patches.matchesPatchVersion(12))
             return patches.chunkLocMatFromSnapshot(inX, y, inZ, chunk);
         return chunk.getBlockData(inX, y, inZ).getMaterial();
     }
 
-    boolean isLocationInsideChunk(Location loc, ChunkSnapshot chunk) {
-        return (int) Math.floor((double) loc.getBlockX() / 16) == chunk.getX() &&
-               (int) Math.floor((double) loc.getBlockZ() / 16) == chunk.getZ();
-    }
-
-    static int chunkXZ(double blockXZ) { return (int) Math.floor((double) blockXZ / 16); }
-
     /* ================================================== *\
                 Misc (but still related) utils
     \* ================================================== */
 
-    /**
-     * Checks if the current thread is the primary Bukkit thread.
-     * If it is, nothing happens, if not, it throws an unchecked exception.
-     */
-    static void requireMainThread() { if (!Bukkit.isPrimaryThread()) throw new AccessFromNonMainThreadError(); }
+    boolean isLocationInsideChunk(final Location loc, final ChunkSnapshot chunk) {
+        return (int) Math.floor((double) loc.getBlockX() / 16) == chunk.getX() &&
+                (int) Math.floor((double) loc.getBlockZ() / 16) == chunk.getZ();
+    }
 
     /**
      * Exists purely to throw an exception before an attempt is made
      * to access the Bukkit API from a thread other than the main
      */
-    private static class AccessFromNonMainThreadError extends RuntimeException {}
+    private static class AccessFromNonMainThreadError extends RuntimeException {
+    }
 }
