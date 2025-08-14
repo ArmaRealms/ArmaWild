@@ -13,31 +13,34 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.bukkit.Bukkit.getServer;
 
 public class CmdForceRtp implements TabExecutor {
 
     private final RandomTeleporter randomTeleporter;
-    Map<String, Object> cmdMap;
 
-    public CmdForceRtp(final RandomTeleporter randomTeleporter, final Map<String, Object> commandMap) {
+    public CmdForceRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
-        this.cmdMap = commandMap;
     }
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        final List<String> argsList = new ArrayList<>(Arrays.asList(args));
         try {
-            if (argsList.contains("-c"))
-                subForceRtpWithConfig(sender, args);
-            else if (argsList.contains("-w"))
-                subForceRtpWithWorld(sender, args);
-            else return false;
+            // Expected: /forcertp <playerName> -c <configName> | -w <worldName>
+            if (args.length < 3) return false;
+
+            final String targetName = args[0];
+            final String flag = args[1];
+
+            if ("-c".equalsIgnoreCase(flag)) {
+                subForceRtpWithConfig(sender, targetName, args[2]);
+            } else if ("-w".equalsIgnoreCase(flag)) {
+                subForceRtpWithWorld(sender, targetName, args[2]);
+            } else {
+                return false;
+            }
         } catch (final JrtpBaseException.NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
         } catch (final JrtpBaseException e) {
@@ -49,13 +52,13 @@ public class CmdForceRtp implements TabExecutor {
         return true;
     }
 
-    private void subForceRtpWithConfig(final CommandSender sender, final String[] args) throws Exception {
-        final Player playerToTp = sender.getServer().getPlayerExact(args[0]);
+    private void subForceRtpWithConfig(final CommandSender sender, final String playerName, final String configName) throws Exception {
+        final Player playerToTp = sender.getServer().getPlayerExact(playerName);
         if (playerToTp == null) {
-            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(args[0]));
+            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(playerName));
             return;
         }
-        final RtpProfile rtpProfile = randomTeleporter.getRtpSettingsByName(args[1]);
+        final RtpProfile rtpProfile = randomTeleporter.getRtpSettingsByName(configName);
 
         // ↑ Check step | Teleport step ↓
 
@@ -65,15 +68,15 @@ public class CmdForceRtp implements TabExecutor {
         ).teleportAsync(playerToTp);
     }
 
-    private void subForceRtpWithWorld(final CommandSender sender, final String[] args) throws Exception {
-        final Player playerToTp = sender.getServer().getPlayerExact(args[0]);
+    private void subForceRtpWithWorld(final CommandSender sender, final String playerName, final String worldName) throws Exception {
+        final Player playerToTp = sender.getServer().getPlayerExact(playerName);
         if (playerToTp == null) {
-            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(args[0]));
+            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(playerName));
             return;
         }
-        final World destWorld = GeneralUtil.getWorldIgnoreCase(sender.getServer(), args[1]);
+        final World destWorld = GeneralUtil.getWorldIgnoreCase(sender.getServer(), worldName);
         if ((destWorld) == null) {
-            sender.sendMessage(Messages.WORLD_NOT_FOUND.format(args[1]));
+            sender.sendMessage(Messages.WORLD_NOT_FOUND.format(worldName));
             return;
         }
 
@@ -93,23 +96,38 @@ public class CmdForceRtp implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        if (args.length == 0) {
+        // Hide suggestions if sender lacks permission
+        if (!sender.hasPermission("jakesrtp.others")) return List.of();
+
+        if (args.length <= 1) {
+            // Suggest player names (prefix-filtered)
+            final String prefix = args.length == 0 ? "" : args[0];
             final List<String> players = new ArrayList<>();
             for (final Player player : getServer().getOnlinePlayers())
                 players.add(player.getName());
-            return players;
+            return filterPrefix(players, prefix);
         } else if (args.length == 2) {
-            switch (args[1]) {
-                case "-c":
-                    return randomTeleporter.getRtpSettingsNames();
-                case "-w":
-                    final List<String> worldNames = new ArrayList<>();
-                    for (final World world : getServer().getWorlds())
-                        worldNames.add(world.getName());
-                    return worldNames;
+            // Suggest flags -c or -w
+            return filterPrefix(List.of("-c", "-w"), args[1]);
+        } else if (args.length == 3) {
+            if ("-c".equalsIgnoreCase(args[1])) {
+                return filterPrefix(randomTeleporter.getRtpSettingsNames(), args[2]);
+            } else if ("-w".equalsIgnoreCase(args[1])) {
+                final List<String> worldNames = new ArrayList<>();
+                for (final World world : getServer().getWorlds())
+                    worldNames.add(world.getName());
+                return filterPrefix(worldNames, args[2]);
             }
         }
         return List.of();
+    }
+
+    private static List<String> filterPrefix(final List<String> items, final String prefix) {
+        final String p = prefix == null ? "" : prefix.toLowerCase();
+        final ArrayList<String> out = new ArrayList<>();
+        for (final String s : items)
+            if (s.toLowerCase().startsWith(p)) out.add(s);
+        return out;
     }
 
 }

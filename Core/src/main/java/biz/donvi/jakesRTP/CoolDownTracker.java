@@ -94,7 +94,7 @@ public class CoolDownTracker {
      * @param playerName The player to check.
      * @return Returns the minimum amount of time to wait before being able to call a successful check.
      */
-    long timeLeft(final String playerName) {
+    public long timeLeft(final String playerName) {
         return coolDownTime - timeDifference(playerName);
     }
 

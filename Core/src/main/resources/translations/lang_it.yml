@@ -48,6 +48,7 @@ need-to-wait-for-cooldown: 'Devi aspettare il cooldown: {0}'
 # For when a player is waiting  for the warmup before teleporting. (Only gets used if `warmup.time` is greater than 0)
 #   {0} - The number of seconds remaining
 teleporting-in-x-seconds: 'Il teletrasporto inizierà tra {0} secondi...'
+cooldown-over: 'Il cooldown di RTP per "{0}" è terminato.'
 # For when a player walks during their rtp warmup canceling it. (Only gets used if `warmup.time` is greater than 0)
 moved-during-warmup: 'Movimento rilevato, RTP cancellato.'
 # For when a player is waiting on the warmup and calls `/rtp` again. (Only gets used if `warmup.time` is greater than 0)

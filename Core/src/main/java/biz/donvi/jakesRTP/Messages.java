@@ -28,6 +28,7 @@ public enum Messages {
     ECON_NO_LONGER_ENOUGH_MONEY("no-longer-enough-money"),
     ECON_YOU_WERE_CHARGED_X("you-were-charged-x"),
     ECON_ERROR("economy-error"),
+    COOLDOWN_OVER("cooldown-over"),
     READABLE_TIME("readable-time"),
     READABLE_TIME_WORD_DAYS("readable-time-word-days"),
     READABLE_TIME_WORD_HOURS("readable-time-word-hours"),

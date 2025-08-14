@@ -13,6 +13,10 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +25,18 @@ import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
 public class CmdRtp implements TabExecutor {
 
     private final RandomTeleporter randomTeleporter;
+    // Track scheduled cooldown notifications per player UUID -> record, inside record map profileName->taskId
+    private final Map<UUID, CooldownNotifyRecord> cooldownNotifies = new ConcurrentHashMap<>();
+
+    private static record CooldownNotifyRecord(Map<String, Integer> perProfileTaskIds) {}
+
+    // Minecraft runs at 20 TPS -> 1 tick = 50 milliseconds
+    private static final int MS_PER_TICK = 50;
+
+    // Convert milliseconds to ticks using ceiling division (avoid magic number 49)
+    private static int millisToTicksCeil(final long ms) {
+        return (int) ((ms + MS_PER_TICK - 1) / MS_PER_TICK);
+    }
 
     public CmdRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
@@ -64,8 +80,11 @@ public class CmdRtp implements TabExecutor {
                         } else player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
                                 relSettings.cost, plugin.getEconomy().getBalance(player)));
                     } else player.sendMessage(Messages.WARMUP_RTP_ALREADY_CALLED.format());
-                } else player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
-                        relSettings.coolDown.timeLeftWords(player.getName())));
+                } else {
+                    player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
+                            relSettings.coolDown.timeLeftWords(player.getName())));
+                    scheduleCooldownEndNotice(player, relSettings);
+                }
             }
         } catch (final JrtpBaseException.NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
@@ -74,6 +93,43 @@ public class CmdRtp implements TabExecutor {
             e.printStackTrace();
         }
         return true;
+    }
+
+    private void scheduleCooldownEndNotice(final Player player, final RtpProfile profile) {
+        final long msLeft = profile.coolDown.timeLeft(player.getName());
+        if (msLeft <= 0) return;
+        final int ticks = Math.max(1, millisToTicksCeil(msLeft)); // ceil to ticks
+        final UUID uuid = player.getUniqueId();
+        final BukkitScheduler scheduler = player.getServer().getScheduler();
+
+        // Ensure record exists
+        final CooldownNotifyRecord record = cooldownNotifies.computeIfAbsent(
+                uuid, u -> new CooldownNotifyRecord(new ConcurrentHashMap<>())
+        );
+        final Map<String, Integer> perProfile = record.perProfileTaskIds();
+        final String profileKey = profile.name.toLowerCase();
+        // Cancel prior task for this profile if any
+        final Integer prev = perProfile.remove(profileKey);
+        if (prev != null) scheduler.cancelTask(prev);
+
+        final int taskId = scheduler.scheduleSyncDelayedTask(plugin, () -> {
+            try {
+                final Player p = plugin.getServer().getPlayer(uuid);
+                if (p == null || !p.isOnline()) return;
+                // Only notify if cooldown actually ended
+                if (profile.coolDown.timeLeft(p.getName()) <= 0) {
+                    p.sendMessage(Messages.COOLDOWN_OVER.format(profile.name));
+                }
+            } finally {
+                final CooldownNotifyRecord rec = cooldownNotifies.get(uuid);
+                if (rec != null) {
+                    final Map<String, Integer> m = rec.perProfileTaskIds();
+                    m.remove(profileKey);
+                    if (m.isEmpty()) cooldownNotifies.remove(uuid);
+                }
+            }
+        }, ticks);
+        if (taskId != -1) perProfile.put(profileKey, taskId);
     }
 
     private Runnable makeRunnable(final Player player, final RtpProfile rtpProfile, final boolean calculatedWarmup) {
@@ -171,14 +227,14 @@ public class CmdRtp implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        final ArrayList<String> validSearches = new ArrayList<>();
-        if (args.length == 0 ||
-                !(sender instanceof Player) ||
-                !sender.hasPermission("jakesrtp.usebyname")
-        ) return validSearches;
+        // When sender can't use by name or isn't a player, no suggestions.
+        if (!(sender instanceof Player) || !sender.hasPermission("jakesrtp.usebyname")) return List.of();
+
+        // Provide suggestions even when args.length == 0 (alias like /wild often sends empty args during completion)
+        final String prefix = args.length == 0 ? "" : args[0];
+        final ArrayList<String> out = new ArrayList<>();
         for (final String name : randomTeleporter.getRtpSettingsNamesForPlayer((Player) sender))
-            if (name.contains(args[0]))
-                validSearches.add(name);
-        return validSearches;
+            if (name.toLowerCase().startsWith(prefix.toLowerCase())) out.add(name);
+        return out;
     }
 }

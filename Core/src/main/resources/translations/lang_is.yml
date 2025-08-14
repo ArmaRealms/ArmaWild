@@ -33,6 +33,7 @@ player-not-found: 'Gat ekki fundið spilara {0}'
 # For when a world name is expected but not received.
 #   {0} - The given name that matched no world names.
 world-not-found: 'Gat ekki fundið heim {0}'
+cooldown-over: 'Your RTP cooldown for "{0}" is over.'
 # For when a given rtpSettings is expected to contain the given world, but does not.
 #   {0} - The rtpSetting's name
 #   {1} - The world's name
