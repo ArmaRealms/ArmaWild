@@ -171,14 +171,14 @@ public class CmdRtp implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        final ArrayList<String> validSearches = new ArrayList<>();
-        if (args.length == 0 ||
-                !(sender instanceof Player) ||
-                !sender.hasPermission("jakesrtp.usebyname")
-        ) return validSearches;
+        // When sender can't use by name or isn't a player, no suggestions.
+        if (!(sender instanceof Player) || !sender.hasPermission("jakesrtp.usebyname")) return List.of();
+
+        // Provide suggestions even when args.length == 0 (alias like /wild often sends empty args during completion)
+        final String prefix = args.length == 0 ? "" : args[0];
+        final ArrayList<String> out = new ArrayList<>();
         for (final String name : randomTeleporter.getRtpSettingsNamesForPlayer((Player) sender))
-            if (name.contains(args[0]))
-                validSearches.add(name);
-        return validSearches;
+            if (name.toLowerCase().startsWith(prefix.toLowerCase())) out.add(name);
+        return out;
     }
 }
