@@ -3,7 +3,7 @@ author: JakeTS
 main: biz.donvi.jakesRTP.JakesRtpPlugin
 prefix: 'J-RTP'
 version: '${version}'
-api-version: '1.13'
+api-version: '1.20'
 
 softdepend:
   # Needed for multi-world support
