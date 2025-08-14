@@ -25,19 +25,36 @@ public class CmdRtpAdmin implements TabExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        final List<String> argsList = new ArrayList<>(Arrays.asList(args));
-        if (argsList.contains("reload"))
-            subReload(sender);
-        else if (argsList.contains("status"))
-            subStatus(sender, args);
-        else if (argsList.contains("reload-messages"))
-            subReloadMessages(sender);
-        else return false;
-        return true;
+        if (args.length == 0) return false;
+        final String sub = args[0].toLowerCase();
+        switch (sub) {
+            case "reload":
+                subReload(sender);
+                return true;
+            case "status":
+                subStatus(sender, Arrays.copyOfRange(args, 1, args.length));
+                return true;
+            case "reload-messages":
+                subReloadMessages(sender);
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
+        // Only ops/admins should see suggestions
+        if (!sender.hasPermission("jakesrtp.admin")) return List.of();
+        if (args.length <= 1) {
+            final String prefix = args.length == 0 ? "" : args[0];
+            return filterPrefix(List.of("reload", "status", "reload-messages"), prefix);
+        } else if (args.length == 2 && "status".equalsIgnoreCase(args[0])) {
+            // Suggest config names and special token
+            final ArrayList<String> items = new ArrayList<>(getConfigNames());
+            items.add("#static");
+            return filterPrefix(items, args[1]);
+        }
         return List.of();
     }
 
@@ -78,7 +95,7 @@ public class CmdRtpAdmin implements TabExecutor {
             for (final String line : theRandomTeleporter.infoStringAll(true))
                 msg.append(line).append('\n');
             sender.sendMessage(msg.toString());
-        } else try {
+        } else if (args.length >= 1) try {
             final RtpProfile settings = theRandomTeleporter.getRtpSettingsByName(args[0]);
             for (final String message : settings.infoStringAll(true, true))
                 sender.sendMessage(message);
@@ -91,4 +108,11 @@ public class CmdRtpAdmin implements TabExecutor {
 
     }
 
+    private static List<String> filterPrefix(final List<String> items, final String prefix) {
+        final String p = prefix == null ? "" : prefix.toLowerCase();
+        final ArrayList<String> out = new ArrayList<>();
+        for (final String s : items)
+            if (s.toLowerCase().startsWith(p)) out.add(s);
+        return out;
+    }
 }
