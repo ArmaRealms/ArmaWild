@@ -49,43 +49,61 @@ public class CmdRtp implements TabExecutor {
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         try {
-            if ((args.length == 0 || args.length == 1) && sender instanceof Player) {
-                final Player player = (Player) sender;
-                if (args.length == 1 && !sender.hasPermission("jakesrtp.usebyname"))
-                    return false;
-                final RtpProfile relSettings = args.length == 0
-                        ? randomTeleporter.getRtpSettingsByWorldForPlayer(player)
-                        : randomTeleporter.getRtpSettingsByNameForPlayer(player, args[0]);
-                if (player.hasPermission("jakesrtp.nocooldown") // If the player has permission to skip cooldown
-                        || player.hasPermission("jakesrtp.nocooldown." + relSettings.name.toLowerCase())
-                        || relSettings.coolDown.check(player.getName())) { // Or they are not on cooldown
-                    if (!randomTeleporter.playersInWarmup.containsKey(player.getUniqueId())) {
-                        final boolean warmup =
-                                relSettings.warmupEnabled && // Obvious...
-                                        !player.hasPermission("jakesrtp.nowarmup") && // Or if they have the perm to avoid it
-                                        !player.hasPermission("jakesrtp.nowarmup." + relSettings.name.toLowerCase());
-                        if (!plugin.canUseEconomy() || relSettings.cost <= 0 ||
-                                plugin.getEconomy().getBalance(player) >= relSettings.cost) {
-                            // ==== By this point, all checks are done and the player WILL be teleported. ====
-                            final Runnable execRtp = makeRunnable(player, relSettings, warmup);
-                            if (warmup) { // If there is a warmup, schedule the runnable
-                                final int taskID = sender
-                                        .getServer().getScheduler() // Get the task ID so that we can cancel it later.
-                                        .scheduleSyncRepeatingTask(plugin, execRtp, 2, 20);
-                                if (taskID == -1) // This should only really happen during shutdown.
-                                    throw new JrtpBaseException("Could not schedule rtp-after-warmup.");
-                                randomTeleporter.playersInWarmup.put(player.getUniqueId(),
-                                        taskID); // Needed for canceling.
-                            } else execRtp.run(); // No warmup, just run the teleport.
-                        } else player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
-                                relSettings.cost, plugin.getEconomy().getBalance(player)));
-                    } else player.sendMessage(Messages.WARMUP_RTP_ALREADY_CALLED.format());
-                } else {
-                    player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
-                            relSettings.coolDown.timeLeftWords(player.getName())));
-                    scheduleCooldownEndNotice(player, relSettings);
-                }
-            }
+        // Only handle when sender is a player and argument count is valid (0 or 1)
+        if (!(sender instanceof Player)) return true;
+        if (args.length > 1) return true;
+
+        final Player player = (Player) sender;
+
+        // If using by name (1 arg), require permission
+        if (args.length == 1 && !sender.hasPermission("jakesrtp.usebyname")) return false;
+
+        // Resolve profile (by world or by provided name)
+        final RtpProfile relSettings = (args.length == 0)
+            ? randomTeleporter.getRtpSettingsByWorldForPlayer(player)
+            : randomTeleporter.getRtpSettingsByNameForPlayer(player, args[0]);
+
+        // Cooldown check with bypass permission
+        final boolean bypassCooldown = player.hasPermission("jakesrtp.nocooldown")
+            || player.hasPermission("jakesrtp.nocooldown." + relSettings.name.toLowerCase());
+        final boolean cooldownOk = relSettings.coolDown.check(player.getName());
+        if (!(bypassCooldown || cooldownOk)) {
+        player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
+            relSettings.coolDown.timeLeftWords(player.getName())));
+        scheduleCooldownEndNotice(player, relSettings);
+        return true;
+        }
+
+        // Already in warmup
+        if (randomTeleporter.playersInWarmup.containsKey(player.getUniqueId())) {
+        player.sendMessage(Messages.WARMUP_RTP_ALREADY_CALLED.format());
+        return true;
+        }
+
+        // Determine warmup necessity
+        final boolean warmup = relSettings.warmupEnabled
+            && !player.hasPermission("jakesrtp.nowarmup")
+            && !player.hasPermission("jakesrtp.nowarmup." + relSettings.name.toLowerCase());
+
+        // Economy check: require funds if economy enabled and cost > 0
+        final boolean needsPayment = plugin.canUseEconomy() && relSettings.cost > 0;
+        if (needsPayment && plugin.getEconomy().getBalance(player) < relSettings.cost) {
+        player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
+            plugin.getEconomy().format(relSettings.cost),
+            plugin.getEconomy().format(plugin.getEconomy().getBalance(player))));
+        return true;
+        }
+
+        // All checks passed: execute teleport (immediately or schedule warmup)
+        final Runnable execRtp = makeRunnable(player, relSettings, warmup);
+        if (warmup) {
+        final int taskID = sender.getServer().getScheduler()
+            .scheduleSyncRepeatingTask(plugin, execRtp, 2, 20);
+        if (taskID == -1) throw new JrtpBaseException("Could not schedule rtp-after-warmup.");
+        randomTeleporter.playersInWarmup.put(player.getUniqueId(), taskID);
+        } else {
+        execRtp.run();
+        }
         } catch (final JrtpBaseException.NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
         } catch (final JrtpBaseException e) {
