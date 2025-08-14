@@ -13,6 +13,10 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +25,8 @@ import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
 public class CmdRtp implements TabExecutor {
 
     private final RandomTeleporter randomTeleporter;
+    // Track scheduled cooldown notifications per player+profile to avoid duplicates
+    private final Map<String, Integer> cooldownNotifyTasks = new ConcurrentHashMap<>();
 
     public CmdRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
@@ -64,8 +70,11 @@ public class CmdRtp implements TabExecutor {
                         } else player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
                                 relSettings.cost, plugin.getEconomy().getBalance(player)));
                     } else player.sendMessage(Messages.WARMUP_RTP_ALREADY_CALLED.format());
-                } else player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
-                        relSettings.coolDown.timeLeftWords(player.getName())));
+                } else {
+                    player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
+                            relSettings.coolDown.timeLeftWords(player.getName())));
+                    scheduleCooldownEndNotice(player, relSettings);
+                }
             }
         } catch (final JrtpBaseException.NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
@@ -74,6 +83,33 @@ public class CmdRtp implements TabExecutor {
             e.printStackTrace();
         }
         return true;
+    }
+
+    private void scheduleCooldownEndNotice(final Player player, final RtpProfile profile) {
+        final long msLeft = profile.coolDown.timeLeft(player.getName());
+        if (msLeft <= 0) return;
+        final int ticks = (int) Math.max(1, (msLeft + 49) / 50); // ceil to ticks
+        final UUID uuid = player.getUniqueId();
+        final String key = uuid + ":" + profile.name.toLowerCase();
+        final BukkitScheduler scheduler = player.getServer().getScheduler();
+
+        // Cancel prior task if any
+        final Integer prev = cooldownNotifyTasks.remove(key);
+        if (prev != null) scheduler.cancelTask(prev);
+
+        final int taskId = scheduler.scheduleSyncDelayedTask(plugin, () -> {
+            try {
+                final Player p = plugin.getServer().getPlayer(uuid);
+                if (p == null || !p.isOnline()) return;
+                // Only notify if cooldown actually ended
+                if (profile.coolDown.timeLeft(p.getName()) <= 0) {
+                    p.sendMessage(Messages.COOLDOWN_OVER.format());
+                }
+            } finally {
+                cooldownNotifyTasks.remove(key);
+            }
+        }, ticks);
+        if (taskId != -1) cooldownNotifyTasks.put(key, taskId);
     }
 
     private Runnable makeRunnable(final Player player, final RtpProfile rtpProfile, final boolean calculatedWarmup) {

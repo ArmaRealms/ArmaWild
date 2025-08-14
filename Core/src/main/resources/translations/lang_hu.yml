@@ -33,6 +33,8 @@ player-not-found: 'Játékos {0} nem található.'
 # For when a world name is expected but not received.
 #   {0} - The given name that matched no world names.
 world-not-found: 'Nincs {0} néven világ generálva.'
+# When RTP cooldown ends
+cooldown-over: 'Your RTP cooldown is over.'
 # For when a given rtpSettings is expected to contain the given world, but does not.
 #   {0} - The rtpSetting's name
 #   {1} - The world's name
