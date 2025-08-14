@@ -1,20 +1,19 @@
-package biz.donvi.jakesRTP;
+package biz.donvi.jakesRTP.commands;
 
-import biz.donvi.argsChecker.ArgsChecker;
-import biz.donvi.argsChecker.ArgsTester;
-import biz.donvi.argsChecker.DynamicArgsMap;
+import biz.donvi.jakesRTP.GeneralUtil;
 import biz.donvi.jakesRTP.GeneralUtil.Pair;
+import biz.donvi.jakesRTP.JakesRtpPlugin;
+import biz.donvi.jakesRTP.RandomTeleporter;
+import biz.donvi.jakesRTP.RtpProfile;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
+public class CmdRtpAdmin implements TabExecutor {
 
-    Map<String, Object> cmdMap;
     /**
      * The result of {@code getConfigNames()}, stored with an expiration time. If the data has not expired, the method
      * should return the value of {@code getConfigNamesResults}. If it has expired, it should compute the new value,
@@ -22,10 +21,6 @@ public class CmdRtpAdmin extends DynamicArgsMap implements TabExecutor {
      * it here, then return it.
      */
     private Pair<Long, List<String>> getConfigNamesResults;
-
-    public CmdRtpAdmin(final Map<String, Object> commandMap) {
-        cmdMap = commandMap;
-    }
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {

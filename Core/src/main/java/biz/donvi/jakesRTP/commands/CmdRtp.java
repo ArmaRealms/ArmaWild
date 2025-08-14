@@ -1,5 +1,10 @@
-package biz.donvi.jakesRTP;
+package biz.donvi.jakesRTP.commands;
 
+import biz.donvi.jakesRTP.JrtpBaseException;
+import biz.donvi.jakesRTP.Messages;
+import biz.donvi.jakesRTP.RandomTeleportAction;
+import biz.donvi.jakesRTP.RandomTeleporter;
+import biz.donvi.jakesRTP.RtpProfile;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Location;
 import org.bukkit.command.Command;

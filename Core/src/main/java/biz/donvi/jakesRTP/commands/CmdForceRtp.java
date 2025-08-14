@@ -1,8 +1,11 @@
-package biz.donvi.jakesRTP;
+package biz.donvi.jakesRTP.commands;
 
-import biz.donvi.argsChecker.ArgsChecker;
-import biz.donvi.argsChecker.ArgsTester;
-import biz.donvi.argsChecker.DynamicArgsMap;
+import biz.donvi.jakesRTP.GeneralUtil;
+import biz.donvi.jakesRTP.JrtpBaseException;
+import biz.donvi.jakesRTP.Messages;
+import biz.donvi.jakesRTP.RandomTeleportAction;
+import biz.donvi.jakesRTP.RandomTeleporter;
+import biz.donvi.jakesRTP.RtpProfile;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -10,12 +13,13 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static org.bukkit.Bukkit.getServer;
 
-public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
+public class CmdForceRtp implements TabExecutor {
 
     private final RandomTeleporter randomTeleporter;
     Map<String, Object> cmdMap;
@@ -27,13 +31,12 @@ public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        final ArgsChecker argsChecker = new ArgsChecker(args);
-
+        final List<String> argsList = new ArrayList<>(Arrays.asList(args));
         try {
-            if (argsChecker.matches(true, null, "-c", null))
-                subForceRtpWithConfig(sender, argsChecker.getRemainingArgs());
-            else if (argsChecker.matches(true, null, "-w", null))
-                subForceRtpWithWorld(sender, argsChecker.getRemainingArgs());
+            if (argsList.contains("-c"))
+                subForceRtpWithConfig(sender, args);
+            else if (argsList.contains("-w"))
+                subForceRtpWithWorld(sender, args);
             else return false;
         } catch (final JrtpBaseException.NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
@@ -90,34 +93,23 @@ public class CmdForceRtp extends DynamicArgsMap implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        return ArgsTester.nextCompleteInTree(args, cmdMap, this);
-    }
-
-    @Override
-    public void getPotential(final String[] path) throws ResultAlreadySetException {
-        if (path.length == 0) {
+        if (args.length == 0) {
             final List<String> players = new ArrayList<>();
             for (final Player player : getServer().getOnlinePlayers())
                 players.add(player.getName());
-            setResult(players);
-        } else if (path.length == 2) {
-            switch (path[1]) {
+            return players;
+        } else if (args.length == 2) {
+            switch (args[1]) {
                 case "-c":
-                    setResult(randomTeleporter.getRtpSettingsNames());
-                    break;
+                    return randomTeleporter.getRtpSettingsNames();
                 case "-w":
                     final List<String> worldNames = new ArrayList<>();
                     for (final World world : getServer().getWorlds())
                         worldNames.add(world.getName());
-                    setResult(worldNames);
-                    break;
+                    return worldNames;
             }
         }
+        return List.of();
     }
-
-    @Override
-    public void getPotential(final String path) throws ResultAlreadySetException {
-    }
-
 
 }
