@@ -1,12 +1,12 @@
 pluginManagement {
-	repositories {
-		gradlePluginPortal()
-		mavenCentral()
-	}
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
 }
 
 dependencyResolutionManagement {
-	repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
 }
 
 rootProject.name = "JakesRTP"

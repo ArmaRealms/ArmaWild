@@ -74,6 +74,14 @@ public final class JakesRtpPlugin extends JavaPlugin {
         log(Level.INFO, msg);
     }
 
+    private static String getLanguageOrDefault(final Map<String, String> overrides, final String defaultLang) {
+        if (overrides == null) return defaultLang;
+        final String value = overrides.get("language");
+        if (value == null) return defaultLang;
+        final String trimmed = value.trim();
+        return trimmed.isEmpty() ? defaultLang : trimmed;
+    }
+
     @Override
     public void onLoad() {
         if (getServer().getPluginManager().getPlugin("WorldGuard") != null)
@@ -93,7 +101,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
         hasEconomy = setupEconomy();
         loadConfigs(); // Loads the default configs if no configs are there
-    registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
+        registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
         loadMessageMap(); // Loads all the messages that get sent by the plugin
         loadRandomTeleporter(); // Loads the random teleporter
         loadLocationCacheFiller(); // Loads the location cache filler
@@ -110,7 +118,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
         locCache = false;
         HandlerList.unregisterAll(this);
         theRandomTeleporter = null;
-    if (locFinderRunnable != null) locFinderRunnable.markAsOver();
+        if (locFinderRunnable != null) locFinderRunnable.markAsOver();
         Bukkit.getScheduler().cancelTasks(this);
     }
 
@@ -120,7 +128,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
     public void reloadCommands() {
         HandlerList.unregisterAll(this);
-    registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
+        registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
     }
 
     //<editor-fold desc="Loading Methods">
@@ -156,6 +164,11 @@ public final class JakesRtpPlugin extends JavaPlugin {
         }
 
     }
+    //</editor-fold>
+
+    /* ================================================== *\
+                   Getters
+    \* ================================================== */
 
     private boolean setupEconomy() {
         economy = null;
@@ -167,11 +180,6 @@ public final class JakesRtpPlugin extends JavaPlugin {
         economy = rsp.getProvider();
         return true;
     }
-    //</editor-fold>
-
-    /* ================================================== *\
-                   Getters
-    \* ================================================== */
 
     @SuppressWarnings("ConstantConditions")
     public void loadRandomTeleporter() {
@@ -262,8 +270,8 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
 
         // Read message overrides (this also tells us which language to use!)
-    Map<String, String> languageOverrides = null;
-    Map<String, String> messageOverrides = null;
+        Map<String, String> languageOverrides = null;
+        Map<String, String> messageOverrides = null;
         try {
             messageOverrides = new Yaml().load(new FileInputStream(new File(getDataFolder(), LANG_SETTINGS_FILE_NAME)));
         } catch (final FileNotFoundException e) {
@@ -288,16 +296,16 @@ public final class JakesRtpPlugin extends JavaPlugin {
             customMessageCount = Messages.addMap(messageOverrides);
         }
     }
-
-    //<editor-fold desc="Getters">
-    public Economy getEconomy() {
-        return economy;
-    }
     //</editor-fold>
 
     /* ================================================== *\
                     Logging Related
     \* ================================================== */
+
+    //<editor-fold desc="Getters">
+    public Economy getEconomy() {
+        return economy;
+    }
 
     public boolean canUseEconomy() {
         return hasEconomy;
@@ -309,18 +317,6 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
     public RandomTeleporter getRandomTeleporter() {
         return theRandomTeleporter;
-    }
-
-    private static final class LogMsg {
-        @SuppressWarnings("unused")
-        final Level left;
-        @SuppressWarnings("unused")
-        final String right;
-
-        LogMsg(final Level level, final String msg) {
-            left = level;
-            right = msg;
-        }
     }
 
     // ===== Helper methods =====
@@ -342,11 +338,15 @@ public final class JakesRtpPlugin extends JavaPlugin {
         }
     }
 
-    private static String getLanguageOrDefault(final Map<String, String> overrides, final String defaultLang) {
-        if (overrides == null) return defaultLang;
-        final String value = overrides.get("language");
-        if (value == null) return defaultLang;
-        final String trimmed = value.trim();
-        return trimmed.isEmpty() ? defaultLang : trimmed;
+    private static final class LogMsg {
+        @SuppressWarnings("unused")
+        final Level left;
+        @SuppressWarnings("unused")
+        final String right;
+
+        LogMsg(final Level level, final String msg) {
+            left = level;
+            right = msg;
+        }
     }
 }

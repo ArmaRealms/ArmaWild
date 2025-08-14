@@ -15,10 +15,10 @@ class MessageStyles {
     @SuppressWarnings("SpellCheckingInspection")
     static final String[] COLOR_S = {"#157BEF", "#0CB863", "#0DDDC9"};
     static final ChatColor[] COLOR_IL = {
-        ChatColor.of(COLOR_S[0]),
-        ChatColor.of(COLOR_S[1]),
-        ChatColor.of(COLOR_S[2]),
-        ChatColor.GRAY
+            ChatColor.of(COLOR_S[0]),
+            ChatColor.of(COLOR_S[1]),
+            ChatColor.of(COLOR_S[2]),
+            ChatColor.GRAY
     };
 
     static String enabledOrDisabled(final boolean b) {
@@ -54,6 +54,7 @@ class MessageStyles {
                     ? MessageFormat.format(mcText, args)
                     : MessageFormat.format(consoleText, args);
         }
+
         private enum McVersion {
             HEADER_TOP(String.format("%s┏§l§m╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍§r", COLOR_IL[0])),
             HEADER_MID(String.format("%s┃ [J-RTP] %s{0}", COLOR_IL[0], COLOR_IL[1])),

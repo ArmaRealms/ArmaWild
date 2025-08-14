@@ -25,6 +25,14 @@ public class CmdForceRtp implements TabExecutor {
         this.randomTeleporter = randomTeleporter;
     }
 
+    private static List<String> filterPrefix(final List<String> items, final String prefix) {
+        final String p = prefix == null ? "" : prefix.toLowerCase();
+        final ArrayList<String> out = new ArrayList<>();
+        for (final String s : items)
+            if (s.toLowerCase().startsWith(p)) out.add(s);
+        return out;
+    }
+
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         try {
@@ -120,14 +128,6 @@ public class CmdForceRtp implements TabExecutor {
             }
         }
         return List.of();
-    }
-
-    private static List<String> filterPrefix(final List<String> items, final String prefix) {
-        final String p = prefix == null ? "" : prefix.toLowerCase();
-        final ArrayList<String> out = new ArrayList<>();
-        for (final String s : items)
-            if (s.toLowerCase().startsWith(p)) out.add(s);
-        return out;
     }
 
 }

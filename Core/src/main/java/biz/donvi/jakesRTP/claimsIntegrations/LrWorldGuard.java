@@ -31,6 +31,7 @@ public class LrWorldGuard implements LocationRestrictor {
     private WeakReference<RegionContainer> regionContainer = null;
     private WeakReference<World> regionManagerIsForWorld = null;
     private WeakReference<RegionManager> regionManagerWR = null;
+
     public LrWorldGuard(final WorldGuardPlugin worldGuardPlugin) {
         if (worldGuardPlugin == null) throw new NullPointerException("worldGuardPlugin must NOT be null!");
         plugin = worldGuardPlugin;

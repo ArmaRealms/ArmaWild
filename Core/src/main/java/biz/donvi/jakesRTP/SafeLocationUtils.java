@@ -1,4 +1,3 @@
-
 package biz.donvi.jakesRTP;
 
 import org.bukkit.Bukkit;
