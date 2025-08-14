@@ -1,6 +1,5 @@
 package biz.donvi.jakesRTP;
 
-// import io.papermc.lib.PaperLib; // Removed
 import net.md_5.bungee.api.ChatColor;
 
 import java.text.MessageFormat;

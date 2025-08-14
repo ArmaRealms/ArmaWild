@@ -1,6 +1,6 @@
 package biz.donvi.jakesRTP;
 
-// import io.papermc.lib.PaperLib; // Removed
+import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
@@ -100,7 +100,7 @@ public class SafeLocationFinderOtherThread extends SafeLocationFinder {
         final Future<CompletableFuture<ChunkSnapshot>> callSyncFuture =
             Bukkit.getScheduler().callSyncMethod(
                 JakesRtpPlugin.plugin,
-                () -> chunkAt.getChunk().getChunkSnapshot()
+                () -> PaperLib.getChunkAtAsync(chunkAt).thenApply(Chunk::getChunkSnapshot)
             );
             // Looks to get the result of `callSyncFuture` which will be the value of `getChunkSnapshotFuture`
             while (System.currentTimeMillis() < maxTime && plugin.locCache())
