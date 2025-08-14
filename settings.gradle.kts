@@ -10,4 +10,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "JakesRTP"
-include("API", "Core")
+include("api", "core")
