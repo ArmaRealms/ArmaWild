@@ -30,6 +30,14 @@ public class CmdRtp implements TabExecutor {
 
     private static record CooldownNotifyRecord(Map<String, Integer> perProfileTaskIds) {}
 
+    // Minecraft runs at 20 TPS -> 1 tick = 50 milliseconds
+    private static final int MS_PER_TICK = 50;
+
+    // Convert milliseconds to ticks using ceiling division (avoid magic number 49)
+    private static int millisToTicksCeil(final long ms) {
+        return (int) ((ms + MS_PER_TICK - 1) / MS_PER_TICK);
+    }
+
     public CmdRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
     }
@@ -90,7 +98,7 @@ public class CmdRtp implements TabExecutor {
     private void scheduleCooldownEndNotice(final Player player, final RtpProfile profile) {
         final long msLeft = profile.coolDown.timeLeft(player.getName());
         if (msLeft <= 0) return;
-        final int ticks = (int) Math.max(1, (msLeft + 49) / 50); // ceil to ticks
+        final int ticks = Math.max(1, millisToTicksCeil(msLeft)); // ceil to ticks
         final UUID uuid = player.getUniqueId();
         final BukkitScheduler scheduler = player.getServer().getScheduler();
 
