@@ -12,5 +12,5 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:${libs.versions.paper}")
+    add("compileOnly", libs.paper)
 }

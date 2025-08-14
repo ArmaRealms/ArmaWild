@@ -6,10 +6,10 @@ subprojects {
     group = "biz.donvi"
     version = "0.14.9"
 
-    // Configure Java toolchain for all subprojects using the version catalog
+    // Configure Java toolchain for all subprojects (avoid using version catalog here)
     extensions.configure<JavaPluginExtension> {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get().toInt()))
+            languageVersion.set(JavaLanguageVersion.of(21))
         }
     }
 
@@ -28,19 +28,7 @@ subprojects {
         maven("https://repo.mikeprimm.com/")
     }
 
-    dependencies {
-        compileOnly(libs.paper)
-        compileOnly(libs.dynmap)
-        compileOnly(libs.chunkyCommon)
-        compileOnly(libs.chunkyBorderCommon)
-        compileOnly(libs.chunkyBorderBukkit)
-        compileOnly(libs.worldBorder)
-        compileOnly(libs.vaultAPI)
-        compileOnly(libs.griefPrevention)
-        compileOnly(libs.worldguard)
-        compileOnly(libs.huskTowns)
-        compileOnly(libs.landsAPI)
-    }
+    // Per-module dependencies are declared in each module's build.gradle.kts
 
     tasks.withType<Copy> {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
