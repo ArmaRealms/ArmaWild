@@ -7,11 +7,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 
-import com.destroystokyo.paper.MaterialTags;
-
 public class SafeLocationUtils {
 
-    public static final SafeLocationUtils util = new SafeLocationUtils()
+    public static final SafeLocationUtils util = new SafeLocationUtils();
 
     private SafeLocationUtils() {
     }
