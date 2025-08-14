@@ -9,16 +9,12 @@ repositories {
     maven { url 'https://repo.codemc.io/repository/maven-public/' }
     maven { url 'https://jitpack.io' }
     maven { url 'https://maven.enginehub.org/repo/' }
-    maven { url 'https://repo.mikeprimm.com/'}
+    maven { url 'https://repo.mikeprimm.com/' }
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
     implementation 'io.papermc:paperlib:1.0.6'
-    implementation 'biz.donvi:ArgsChecker:1.0'
-    implementation 'biz.donvi:EvenDistribution:1.1.1'
-    implementation 'biz.donvi:GnuPlotter:1.2'
-//    implementation project(":patch-1-12-2")
     compileOnly 'us.dynmap:dynmap-api:3.1'
     compileOnly 'org.popcraft:chunky-common:1.2.86'
     compileOnly 'org.popcraft:chunkyborder-common:1.0.59'
@@ -40,8 +36,6 @@ processResources {
 
 shadowJar {
     relocate 'io.papermc', 'biz.donvi.jakesRTP.libs.io.papermc'
-    relocate 'biz.donvi.argsChecker', 'biz.donvi.jakesRTP.libs.biz.donvi.argsChecker'
-    relocate 'biz.donvi.evenDistribution', 'biz.donvi.jakesRTP.libs.biz.donvi.evenDistribution'
 }
 
 artifacts {
@@ -50,7 +44,6 @@ artifacts {
 
 task copyToMainOut(type: Copy) {
     dependsOn(tasks.build)
-    delete file("../build-output-final/").listFiles()
     from file("build/libs/Core-${project.version}-all.jar")
     into file("../build-output-final")
     rename 'Core-', 'JakesRTP-v'
