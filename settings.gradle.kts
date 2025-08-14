@@ -1,0 +1,2 @@
+rootProject.name = "JakesRTP"
+include("API", "Core")

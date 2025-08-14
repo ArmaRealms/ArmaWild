@@ -1,0 +1,31 @@
+[versions]
+jvm = "21"
+paper = "1.20.4-R0.1-SNAPSHOT"
+dynmap = "3.1"
+chunkyCommon = "1.2.86"
+chunkyBorderCommon = "1.0.59"
+chunkyBorderBukkit = "1.0.59"
+worldBorder = "c0d1772418"
+vaultAPI = "1.7"
+griefPrevention = "17.0.0"
+worldguard = "7.0.5"
+huskTowns = "1.5.3"
+landsAPI = "7.15.20"
+shadow = "8.1.1"
+
+
+[libraries]
+paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+dynmap = { module = "us.dynmap:dynmap-api", version.ref = "dynmap" }
+chunkyCommon = { module = "org.popcraft:chunky-common", version.ref = "chunkyCommon" }
+chunkyBorderCommon = { module = "org.popcraft:chunkyborder-common", version.ref = "chunkyBorderCommon" }
+chunkyBorderBukkit = { module = "org.popcraft:chunkyborder-bukkit", version.ref = "chunkyBorderBukkit" }
+worldBorder = { module = "com.github.Brettflan:WorldBorder", version.ref = "worldBorder" }
+vaultAPI = { module = "com.github.MilkBowl:VaultAPI", version.ref = "vaultAPI" }
+griefPrevention = { module = "com.github.TechFortress:GriefPrevention", version.ref = "griefPrevention" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
+huskTowns = { module = "com.github.WiIIiam278:HuskTowns", version.ref = "huskTowns" }
+landsAPI = { module = "com.github.angeschossen:LandsAPI", version.ref = "landsAPI" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version = "9.0.1" }
