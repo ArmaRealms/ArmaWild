@@ -14,3 +14,10 @@ repositories {
 dependencies {
     add("compileOnly", libs.paper)
 }
+
+tasks.named<Jar>("jar") {
+    archiveBaseName.set("JakesRTP-API")
+    archiveClassifier.set("")
+    archiveVersion.set(project.version.toString())
+    destinationDirectory.set(rootProject.layout.projectDirectory.dir("out"))
+}

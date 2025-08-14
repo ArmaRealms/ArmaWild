@@ -44,7 +44,12 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveBaseName.set("JakesRTP")
     archiveClassifier.set("")
     archiveVersion.set(project.version.toString())
+    destinationDirectory.set(rootProject.layout.projectDirectory.dir("out"))
     relocate("io.papermc", "biz.donvi.jakesRTP.libs.io.papermc")
+}
+
+tasks.named("build") {
+    dependsOn(tasks.named("shadowJar"))
 }
 
 // Shadow plugin already adds the shadowJar artifact by default
