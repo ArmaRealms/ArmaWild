@@ -1,6 +1,6 @@
 package biz.donvi.jakesRTP;
 
-import io.papermc.lib.PaperLib;
+// import io.papermc.lib.PaperLib; // Removed
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -122,7 +122,7 @@ public class RandomTeleportAction {
      */
     public RandomTeleportAction teleportAsync(final Player player) throws JrtpBaseException {
         preTeleport(player);
-        PaperLib.teleportAsync(player, landingLoc).thenAccept(this::postTeleport);
+        player.teleportAsync(landingLoc).thenAccept(success -> postTeleport(success));
         return this;
     }
 

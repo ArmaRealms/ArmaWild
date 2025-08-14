@@ -1,6 +1,6 @@
+
 package biz.donvi.jakesRTP;
 
-import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
@@ -16,16 +16,6 @@ public class SafeLocationUtils {
         util = new SafeLocationUtils();
         Class<SafeLocationUtils_Patch> patchClass = null;
         SafeLocationUtils_Patch patchInstance = null;
-        try {
-            if (PaperLib.getMinecraftVersion() <= 12) {
-                //noinspection unchecked
-                patchClass = (Class<SafeLocationUtils_Patch>) Class
-                        .forName("biz.donvi.jakesRTP.SafeLocationUtils_12")
-                        .asSubclass(SafeLocationUtils_Patch.class);
-            }
-        } catch (final ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         if (patchClass != null)
             try {
                 patchInstance = patchClass.newInstance();
