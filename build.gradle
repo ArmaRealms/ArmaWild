@@ -6,8 +6,8 @@ subprojects {
     group = 'biz.donvi'
     project.version = '0.14.9'
 
-    sourceCompatibility = 16
-    targetCompatibility = 16
+    sourceCompatibility = 17
+    targetCompatibility = 17
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
