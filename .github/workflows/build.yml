@@ -35,11 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: JakesRTP-artifacts
-          path: |
-            Core/build/libs/*.jar
-            API/build/libs/*.jar
-        - name: Upload Plugin
-          uses: actions/upload-artifact@v4
-          with:
-            name: JakesRTP-artifacts
-            path: out/*.jar
+          path: out/*.jar
