@@ -11,8 +11,6 @@ import org.bukkit.plugin.RegisteredListener;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 
-import static biz.donvi.jakesRTP.GeneralUtil.isAnchorSpawn;
-
 public class RtpOnEvent implements Listener {
 
     private final RandomTeleporter randomTeleporter;
@@ -105,7 +103,7 @@ public class RtpOnEvent implements Listener {
         if (randomTeleporter.onDeathRtp &&
                 (!randomTeleporter.onDeathRequirePermission || event.getPlayer().hasPermission("jakesrtp.rtpondeath")) &&
                 (!randomTeleporter.onDeathRespectBeds || !event.isBedSpawn()) &&
-                (!randomTeleporter.onDeathRespectAnchors || !isAnchorSpawn(event))
+                (!randomTeleporter.onDeathRespectAnchors || !event.isAnchorSpawn())
         ) try {
             final Location landingLoc = new RandomTeleportAction(
                     randomTeleporter,

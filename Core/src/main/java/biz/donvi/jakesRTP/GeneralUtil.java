@@ -1,13 +1,11 @@
 package biz.donvi.jakesRTP;
 
-import io.papermc.lib.PaperLib;
 import org.apache.commons.lang.text.StrBuilder;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +28,6 @@ public final class GeneralUtil {
     public static final Pattern LEGACY_COLOR_REGEX_DOUBLE = Pattern.compile("&&([0-9a-fk-orx])");
     public static final Pattern HEX_COLOR_REGEX = Pattern.compile(
             "\\{#([\\da-fA-F])([\\da-fA-F])([\\da-fA-F])([\\da-fA-F])([\\da-fA-F])([\\da-fA-F])}");
-    private static final boolean anchorSupport = PaperLib.getMinecraftVersion() >= 16;
     public static long uselessLong = 0; // Quite literally useless. Never used anywhere.
 
     /**
@@ -162,17 +159,6 @@ public final class GeneralUtil {
     }
 
     /**
-     * If the current minecraft version has respawn anchors, this tells us if the event is an anchor spawn.
-     * If the current version does NOT have anchors, this returns false.
-     *
-     * @param event PlayerRespawnEvent event to check.
-     * @return Was this a 1.16+ respawn anchor spawn?
-     */
-    public static boolean isAnchorSpawn(final PlayerRespawnEvent event) {
-        return anchorSupport && event.isAnchorSpawn();
-    }
-
-    /**
      * Just lists out the items in a list. Doesn't say "and" or "or" at the end, its just a simple
      * comma separated list. Kinda like this: A, B, C, D
      *
@@ -180,9 +166,9 @@ public final class GeneralUtil {
      * @return The items as comma separated list.
      */
     public static String listText(final List<String> items) {
-        if (items == null || items.size() == 0) return null;
-        if (items.size() == 1) return items.get(0);
-        final StringBuilder s = new StringBuilder(items.get(0));
+        if (items == null || items.isEmpty()) return null;
+        if (items.size() == 1) return items.getFirst();
+        final StringBuilder s = new StringBuilder(items.getFirst());
         for (int i = 1; i < items.size(); i++)
             s.append(", ").append(items.get(i));
         return s.toString();

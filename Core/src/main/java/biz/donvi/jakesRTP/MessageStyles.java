@@ -1,6 +1,5 @@
 package biz.donvi.jakesRTP;
 
-import io.papermc.lib.PaperLib;
 import net.md_5.bungee.api.ChatColor;
 
 import java.text.MessageFormat;
@@ -15,15 +14,12 @@ class MessageStyles {
 
     @SuppressWarnings("SpellCheckingInspection")
     static final String[] COLOR_S = {"#157BEF", "#0CB863", "#0DDDC9"};
-    static final ChatColor[] COLOR_IL = PaperLib.getMinecraftVersion() >= 16 ?
-            new ChatColor[]{
-                    ChatColor.of(COLOR_S[0]),
-                    ChatColor.of(COLOR_S[1]),
-                    ChatColor.of(COLOR_S[2])} :
-            new ChatColor[]{
-                    ChatColor.BLUE,
-                    ChatColor.GREEN,
-                    ChatColor.GRAY};
+    static final ChatColor[] COLOR_IL = {
+        ChatColor.of(COLOR_S[0]),
+        ChatColor.of(COLOR_S[1]),
+        ChatColor.of(COLOR_S[2]),
+        ChatColor.GRAY
+    };
 
     static String enabledOrDisabled(final boolean b) {
         return b ? "Enabled" : "Disabled";

@@ -96,12 +96,12 @@ public class SafeLocationFinderOtherThread extends SafeLocationFinder {
             // the timeout to be reached, or let the server forcefully kill it (and send us an annoying message in
             // console). To get around this, we break up the two gets into their own sections, and check every few
             // milliseconds if we can retrieve it, or if we should give up.
-            CompletableFuture<ChunkSnapshot> getChunkSnapshotFuture = null;
-            final Future<CompletableFuture<ChunkSnapshot>> callSyncFuture =
-                    Bukkit.getScheduler().callSyncMethod(
-                            JakesRtpPlugin.plugin,
-                            () -> PaperLib.getChunkAtAsync(chunkAt).thenApply(Chunk::getChunkSnapshot)
-                    );
+        CompletableFuture<ChunkSnapshot> getChunkSnapshotFuture = null;
+        final Future<CompletableFuture<ChunkSnapshot>> callSyncFuture =
+            Bukkit.getScheduler().callSyncMethod(
+                JakesRtpPlugin.plugin,
+                () -> PaperLib.getChunkAtAsync(chunkAt).thenApply(Chunk::getChunkSnapshot)
+            );
             // Looks to get the result of `callSyncFuture` which will be the value of `getChunkSnapshotFuture`
             while (System.currentTimeMillis() < maxTime && plugin.locCache())
                 if (callSyncFuture.isDone()) {
