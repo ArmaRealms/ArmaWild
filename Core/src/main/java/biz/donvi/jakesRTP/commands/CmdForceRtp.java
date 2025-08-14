@@ -14,18 +14,15 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.bukkit.Bukkit.getServer;
 
 public class CmdForceRtp implements TabExecutor {
 
     private final RandomTeleporter randomTeleporter;
-    Map<String, Object> cmdMap;
 
-    public CmdForceRtp(final RandomTeleporter randomTeleporter, final Map<String, Object> commandMap) {
+    public CmdForceRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
-        this.cmdMap = commandMap;
     }
 
     @Override

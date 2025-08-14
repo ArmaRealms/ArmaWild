@@ -6,6 +6,8 @@ import biz.donvi.jakesRTP.commands.CmdRtp;
 import biz.donvi.jakesRTP.commands.CmdRtpAdmin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,7 +45,6 @@ public final class JakesRtpPlugin extends JavaPlugin {
     private static final Queue<LogMsg> msgLog = new ArrayDeque<>();
     //<editor-fold desc="======== Static Fields ========">
     public static JakesRtpPlugin plugin;
-    static Map<String, Object> cmdMap;
     static LocationCacheFiller locFinderRunnable;
     static WorldBorderPluginHook worldBorderPluginHook;
     static ClaimsManager claimsManager = null;
@@ -87,12 +88,12 @@ public final class JakesRtpPlugin extends JavaPlugin {
         //Set up the reference for some objects
         plugin = this;
         logger = plugin.getLogger();
-        cmdMap = new Yaml().load(this.getClassLoader().getResourceAsStream("commandTree.yml"));
+
         worldBorderPluginHook = new WorldBorderPluginHook(getServer());
 
         hasEconomy = setupEconomy();
         loadConfigs(); // Loads the default configs if no configs are there
-        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin());
+    registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
         loadMessageMap(); // Loads all the messages that get sent by the plugin
         loadRandomTeleporter(); // Loads the random teleporter
         loadLocationCacheFiller(); // Loads the location cache filler
@@ -109,7 +110,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
         locCache = false;
         HandlerList.unregisterAll(this);
         theRandomTeleporter = null;
-        locFinderRunnable.markAsOver();
+    if (locFinderRunnable != null) locFinderRunnable.markAsOver();
         Bukkit.getScheduler().cancelTasks(this);
     }
 
@@ -119,7 +120,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
     public void reloadCommands() {
         HandlerList.unregisterAll(this);
-        getCommand("rtp-admin").setExecutor(new CmdRtpAdmin());
+    registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
     }
 
     //<editor-fold desc="Loading Methods">
@@ -181,10 +182,8 @@ public final class JakesRtpPlugin extends JavaPlugin {
                             this.getConfig(),
                             GeneralUtil.getFileConfigFromFile(toRtpSettings.toFile().listFiles()),
                             GeneralUtil.getFileConfigFromFile(toDistSettings.toFile().listFiles()));
-            getCommand("rtp").setExecutor(
-                    new CmdRtp(theRandomTeleporter));
-            getCommand("forcertp").setExecutor(
-                    new CmdForceRtp(theRandomTeleporter, cmdMap));
+            registerCommandExecutor("rtp", new CmdRtp(theRandomTeleporter));
+            registerCommandExecutor("forcertp", new CmdForceRtp(theRandomTeleporter));
             getServer().getPluginManager().registerEvents(
                     new RtpOnEvent(theRandomTeleporter), this);
         } catch (final Exception e) {
@@ -263,8 +262,8 @@ public final class JakesRtpPlugin extends JavaPlugin {
 
 
         // Read message overrides (this also tells us which language to use!)
-        Map<String, String> languageOverrides = null;
-        Map<String, String> messageOverrides = null;
+    Map<String, String> languageOverrides = null;
+    Map<String, String> messageOverrides = null;
         try {
             messageOverrides = new Yaml().load(new FileInputStream(new File(getDataFolder(), LANG_SETTINGS_FILE_NAME)));
         } catch (final FileNotFoundException e) {
@@ -275,7 +274,9 @@ public final class JakesRtpPlugin extends JavaPlugin {
         Messages.setMap(new Yaml().load(this.getClassLoader().getResourceAsStream(
                 String.format(BLANK_LANG_FILE_NAME, "en"))));
         // Load & add all the messages from the language file
-        lang = messageOverrides.get("language");
+    lang = (messageOverrides != null && messageOverrides.get("language") != null)
+        ? messageOverrides.get("language")
+        : "en";
         if (!lang.equalsIgnoreCase("en")) {
             languageOverrides = new Yaml().load(this.getClassLoader().getResourceAsStream(
                     String.format(BLANK_LANG_FILE_NAME, lang)));
@@ -283,9 +284,11 @@ public final class JakesRtpPlugin extends JavaPlugin {
             Messages.addMap(languageOverrides);
         }
         // Load message overrides.
-        messageOverrides.remove("language");
-        infoLog("Overwriting messages with custom messages.");
-        customMessageCount = Messages.addMap(messageOverrides);
+        if (messageOverrides != null) {
+            messageOverrides.remove("language");
+            infoLog("Overwriting messages with custom messages.");
+            customMessageCount = Messages.addMap(messageOverrides);
+        }
     }
 
     //<editor-fold desc="Getters">
@@ -311,12 +314,33 @@ public final class JakesRtpPlugin extends JavaPlugin {
     }
 
     private static final class LogMsg {
+        @SuppressWarnings("unused")
         final Level left;
+        @SuppressWarnings("unused")
         final String right;
 
         LogMsg(final Level level, final String msg) {
             left = level;
             right = msg;
+        }
+    }
+
+    // ===== Helper methods =====
+    private void registerCommandExecutor(final String name, final TabExecutor executor) {
+        final PluginCommand cmd = getCommand(name);
+        if (cmd == null) {
+            getLogger().warning("Command '" + name + "' is not defined in plugin.yml; skipping registration.");
+            return;
+        }
+        if (executor == null) {
+            getLogger().warning("Attempted to register null executor for command '" + name + "'.");
+            return;
+        }
+        try {
+            cmd.setExecutor(executor);
+            cmd.setTabCompleter(executor);
+        } catch (final Exception ex) {
+            getLogger().log(Level.WARNING, "Failed to register executor for command '" + name + "'", ex);
         }
     }
 }
