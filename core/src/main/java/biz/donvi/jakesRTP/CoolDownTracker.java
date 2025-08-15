@@ -4,8 +4,9 @@ import java.util.HashMap;
 
 public class CoolDownTracker {
 
-    final long coolDownTime;
+    private static final long MS_TO_TICKS = 50L;
     private final HashMap<String, Long> tracker = new HashMap<>();
+    private final long coolDownTime;
 
     /**
      * Creates a CoolDownTracker object, and sets the coolDownTime.
@@ -23,6 +24,16 @@ public class CoolDownTracker {
      */
     public long getCoolDownTime() {
         return coolDownTime;
+    }
+
+    /**
+     * Returns the cooldown time in ticks.
+     * This is used for Bukkit/Spigot/Paper plugins, where 1 tick is 50 milliseconds.
+     *
+     * @return The cooldown time in ticks.
+     */
+    public long getCoolDownTimeInTicks() {
+        return coolDownTime / MS_TO_TICKS;
     }
 
     /**
@@ -60,7 +71,7 @@ public class CoolDownTracker {
      *
      * @param playerName Player to log time for.
      */
-    void log(final String playerName) {
+    public void log(final String playerName) {
         log(playerName, System.currentTimeMillis());
     }
 
@@ -108,19 +119,19 @@ public class CoolDownTracker {
     }
 
     /**
-     * Returns the amount of time left to wait before calling rtp again, formatted in a reasonable manor.
+     * Returns the amount of time left to wait before calling rtp again, formatted in a reasonable manner.
      *
      * @param playerName The player to check.
-     * @return A string describing the time left until the cooldown is over. Human readable.
+     * @return A string describing the time left until the cooldown is over. Human-readable.
      */
     public String timeLeftWords(final String playerName) {
         return GeneralUtil.readableTime(timeLeft(playerName));
     }
 
     /**
-     * Returns the amount of time that a player must wait between rtp calls, formatted in a reasonable manor.
+     * Returns the amount of time that a player must wait between rtp calls, formatted in a reasonable manner.
      *
-     * @return A human readable string of the cooldown time.
+     * @return A human-readable string of the cooldown time.
      */
     String coolDownTime() {
         return coolDownTime == 0 ? "None." : GeneralUtil.readableTime(coolDownTime);

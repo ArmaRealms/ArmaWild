@@ -107,7 +107,7 @@ public class CmdRtp implements TabExecutor {
                 player.sendMessage(Messages.COOLDOWN_OVER.format(profile.name));
                 player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
             }
-        }, profile.coolDown.getCoolDownTime() / 50L); // Convert ms to ticks (20 ticks = 1 second)
+        }, profile.coolDown.getCoolDownTimeInTicks());
     }
 
     @Contract(value = "_, _, _ -> new", pure = true)
@@ -166,7 +166,7 @@ public class CmdRtp implements TabExecutor {
                         rtpAction.teleportSync(player);
                     else rtpAction.teleportAsync(player);
                     // Log in the cooldown list
-                    rtpProfile.coolDown.log(player.getName(), System.currentTimeMillis());
+                    rtpProfile.coolDown.log(player.getName());
                     scheduleCooldownEndNotice(player, rtpProfile);
                     // Charge the player
                     if (rtpProfile.cost > 0) {

@@ -36,7 +36,7 @@ class MetricsCustomizer {
                 settings -> settings.distribution.shape.shape()); // TODO MAKE SURE WORKS ON bSTATS
 
         addAdvancedPie("rtp-cooldown", r::getRtpSettings,
-                settings -> readableTime(settings.coolDown.coolDownTime)); // TODO ADD TO bSTATS
+                settings -> readableTime(settings.coolDown.getCoolDownTime())); // TODO ADD TO bSTATS
         addAdvancedPie("rtp-warmup", r::getRtpSettings,
                 settings -> readableTime(settings.warmup * 1000L)); // TODO ADD TO bSTATS
         addAdvancedPie("rtp-cost", r::getRtpSettings,
