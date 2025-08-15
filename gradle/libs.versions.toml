@@ -11,9 +11,9 @@ griefPrevention = "17.0.0"
 worldguard = "7.0.5"
 huskTowns = "1.5.3"
 landsAPI = "7.15.20"
-shadow = "8.1.1"
 paperlib = "1.0.8"
-
+shadow = "9.0.1"
+runpaper = "2.3.1"
 
 [libraries]
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
@@ -30,4 +30,5 @@ landsAPI = { module = "com.github.angeschossen:LandsAPI", version.ref = "landsAP
 paperlib = { module = "io.papermc:paperlib", version.ref = "paperlib" }
 
 [plugins]
-shadow = { id = "com.gradleup.shadow", version = "9.0.1" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+runpaper = { id = "xyz.jpenilla.run-paper", version.ref = "runpaper" }

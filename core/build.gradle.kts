@@ -1,8 +1,10 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import xyz.jpenilla.runpaper.task.RunServer
 
 plugins {
     java
     alias(libs.plugins.shadow)
+    alias(libs.plugins.runpaper)
 }
 
 java {
@@ -52,7 +54,14 @@ tasks.named("build") {
     dependsOn(tasks.named("shadowJar"))
 }
 
-// Shadow plugin already adds the shadowJar artifact by default
+tasks.named<RunServer>("runServer") {
+        minecraftVersion("1.20.4")
+        jvmArguments.add("-Dcom.mojang.eula.agree=true")
+        jvmArguments.add("-Dnet.kyori.ansi.colorLevel=truecolor")
+        jvmArguments.add("-Dfile.encoding=UTF8")
+        systemProperty("terminal.jline", false)
+        systemProperty("terminal.ansi", true)
+}
 
 
 

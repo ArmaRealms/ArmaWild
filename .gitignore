@@ -150,5 +150,6 @@ build
 /build-output-final/
 /cache/
 /API/build/
-/Core/build/
+/core/build/
 /patch-1-12-2/build/
+/core/run/
