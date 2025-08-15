@@ -18,6 +18,7 @@ public enum Messages {
     NP_R_NO_RTPSETTINGS_NAME("no-settings-found-with-name"),
     NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER("no-settings-found-with-name-for-player"),
     NP_R_TOO_MANY_FAILED_ATTEMPTS("too-many-failed-attempts"),
+    NP_NO_PERMISSION("no-permission"),
     PLAYER_NOT_FOUND("player-not-found"),
     WORLD_NOT_FOUND("world-not-found"),
     RTPSETTINGS_NO_CONTAIN_WORLD("rtp-settings-no-contain-world"),

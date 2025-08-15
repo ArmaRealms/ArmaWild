@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,14 +44,18 @@ public class CmdRtp implements TabExecutor {
      * Anything (except errors) that directly deals with the player is done here.
      */
     @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command,
+                             final @NotNull String label, final String[] args) {
         try {
             // Only handle when sender is a player and argument count is valid (0 or 1)
             if (!(sender instanceof final Player player)) return true;
             if (args.length > 1) return true;
 
             // If using by name (1 arg), require permission
-            if (args.length == 1 && !sender.hasPermission("jakesrtp.usebyname")) return false;
+            if (args.length == 1 && !sender.hasPermission("jakesrtp.usebyname")) {
+                player.sendMessage(Messages.NP_NO_PERMISSION.format("jakesrtp.usebyname"));
+                return true;
+            }
 
             // Resolve profile (by world or by provided name)
             final RtpProfile relSettings = (args.length == 0)
