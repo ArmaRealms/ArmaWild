@@ -54,7 +54,6 @@ public class RtpProfile {
      */
     public final ConcurrentLinkedQueue<Location> locationQueue = new ConcurrentLinkedQueue<>();
 
-    //<editor-fold desc="Config Values">
     /* All settings below are read directly from the config */
     public final String name;
     public final boolean commandEnabled;
@@ -80,7 +79,6 @@ public class RtpProfile {
     public final boolean warmupEnabled; // Just for convenience (it is mostly redundant)
     public final boolean canUseLocQueue;
     public final CoolDownTracker coolDown;
-    //</editor-fold>
 
     /**
      * Creates an RtpSettings object. This primarily deals with reading in data from a YAML config,
@@ -307,11 +305,6 @@ public class RtpProfile {
         return landingWorld.getName() + " [" + locationQueue.size() + "] ";
     }
 
-    /* ================================================== *\
-                    Info Strings...
-    \* ================================================== */
-
-    //<editor-fold desc="Info Strings...">
     public String infoStringCommandEnabled(final boolean mcFormat) {
         return LVL_01_SET.format(mcFormat, "Command", enabledOrDisabled(commandEnabled));
     }
@@ -391,5 +384,4 @@ public class RtpProfile {
                 ? DOU_01_SET.format(mcFormat, "Location caching", "Enabled", "Num", locationQueue.size() + "/" + cacheLocationCount)
                 : LVL_01_SET.format(mcFormat, "Location caching", "Disabled");
     }
-    //</editor-fold>
 }

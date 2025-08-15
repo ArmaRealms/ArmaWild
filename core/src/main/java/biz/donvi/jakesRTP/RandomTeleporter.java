@@ -33,12 +33,11 @@ public class RandomTeleporter {
     final static String EXPLICIT_PERM_PREFIX = "jakesrtp.use.";
     // Dynamic settings
     public final Map<String, DistributionSettings> distributionSettings;
-    //<editor-fold desc="'Static' Settings (final fields)">
     // First join settings
-    public final boolean firstJoinRtp;
+    public final boolean firstJoinRtp = false;
     public final RtpProfile firstJoinSettings;
     // On death settings
-    public final boolean onDeathRtp;
+    public final boolean onDeathRtp = false;
     public final boolean onDeathRespectBeds;
     public final boolean onDeathRespectAnchors;
     public final boolean onDeathRequirePermission;
@@ -58,7 +57,6 @@ public class RandomTeleporter {
     // The int stored is the id of the task to cancel it.
     public final Map<UUID, Integer> playersInWarmup = new HashMap<>();
     private final ArrayList<RtpProfile> rtpSettings;
-    //</editor-fold>
 
     /**
      * Creating an instance of the RandomTeleporter object is required to be able to use the command.
@@ -81,9 +79,7 @@ public class RandomTeleporter {
                 log(Level.WARNING, "Could not load distribution settings " + item.key);
                 e.printStackTrace();
             }
-        for (final Map.Entry<String, DistributionSettings> en : worldBorderPluginHook.generateDistributions().entrySet()) {
-            distributionSettings.put(en.getKey(), en.getValue());
-        }
+        distributionSettings.putAll(worldBorderPluginHook.generateDistributions());
         // Modular settings:
         this.rtpSettings = new ArrayList<>();
         final boolean[] loaded = new boolean[rtpSections.size()];
@@ -139,12 +135,12 @@ public class RandomTeleporter {
                         "and that all files that do have the 'load-from' have valid settings names as their value." +
                         " ");
         // Static settings:
-        if (firstJoinRtp = globalConfig.getBoolean("rtp-on-first-join.enabled", false)) {
+        if (firstJoinRtp == globalConfig.getBoolean("rtp-on-first-join.enabled", false)) {
             firstJoinSettings = getRtpSettingsByName(globalConfig.getString("rtp-on-first-join.settings"));
         } else {
             firstJoinSettings = null;
         }
-        if (onDeathRtp = globalConfig.getBoolean("rtp-on-death.enabled", false)) {
+        if (onDeathRtp == globalConfig.getBoolean("rtp-on-death.enabled", false)) {
             onDeathRespectBeds = globalConfig.getBoolean("rtp-on-death.respect-beds", true);
             onDeathRespectAnchors = globalConfig.getBoolean("rtp-on-death.respect-anchors", true);
             onDeathSettings = getRtpSettingsByName(globalConfig.getString("rtp-on-death.settings"));
@@ -169,12 +165,6 @@ public class RandomTeleporter {
 
         for (final String line : infoStringAll(false)) infoLog("[#Static] " + line);
     }
-
-    /* ================================================== *\
-                    RtpSettings ← Getters
-    \* ================================================== */
-
-    //<editor-fold desc="RtpSettings ← Getters">
 
     /**
      * Getter for the ArrayList of RtpSettings. This contains all settings that are done per config sections.
@@ -219,7 +209,7 @@ public class RandomTeleporter {
      *
      * @param world World to get RTP settings for
      * @return The RtpSettings of that world
-     * @throws JrtpBaseException.NotPermittedException If the world does not exist.
+     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException If the world does not exist.
      */
     public RtpProfile getRtpSettingsByWorld(final World world) throws JrtpBaseException.NotPermittedException {
         RtpProfile finSettings = null;
@@ -255,7 +245,7 @@ public class RandomTeleporter {
      *
      * @param player The player whose information will be used to determine the relevant rtp settings
      * @return The RtpSettings for the player to use, normally for when they run the {@code /rtp} command.
-     * @throws JrtpBaseException.NotPermittedException If no settings can be used.
+     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException If no settings can be used.
      */
     public RtpProfile getRtpSettingsByWorldForPlayer(final Player player) throws JrtpBaseException.NotPermittedException {
         RtpProfile finSettings = null;
@@ -287,7 +277,7 @@ public class RandomTeleporter {
      * @param name   The name of the settings to find.
      * @return The {@code rtpSettings} object with the matching name. If no valid {@code rtpSettings} is found, an
      * an exception will be thrown.
-     * @throws JrtpBaseException.NotPermittedException if no valid {@code rtpSettings} object is found.
+     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException if no valid {@code rtpSettings} object is found.
      */
     public RtpProfile getRtpSettingsByNameForPlayer(final Player player, final String name)
             throws JrtpBaseException.NotPermittedException {
@@ -302,13 +292,6 @@ public class RandomTeleporter {
                 return settings;
         throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER.format(name));
     }
-    //</editor-fold>
-
-    /* ================================================== *\
-                    Rtp Locations ← Getters
-    \* ================================================== */
-
-    //<editor-fold desc="Rtp Locations ← Getters">
 
     /**
      * Creates the potential RTP location. If this location happens to be safe, is will be the exact location that
@@ -362,12 +345,12 @@ public class RandomTeleporter {
      *                      <p> - Set to {@code false} if you are filling the queue, or it is known that the queue is
      *                      empty.
      * @return A random location that can be safely teleported to by a player.
-     * @throws Exception Only two points of this code are expected to be able to throw an exception:
+     * @throws JrtpBaseException Only two points of this code are expected to be able to throw an exception:
      *                   getWorldRtpSettings() will throw an exception if the world is not RTP enabled.
      *                   getRtpXZ() will throw an exception if the rtp shape is not defined.
      */
     public Location getRtpLocation(final RtpProfile rtpProfile, final Location callFromLoc, final boolean takeFromQueue)
-            throws JrtpBaseException, JrtpBaseException.PluginDisabledException {
+            throws JrtpBaseException {
         // Part 1: Force destination world if not current world
         if (callFromLoc.getWorld() != rtpProfile.landingWorld)
             callFromLoc.setWorld(rtpProfile.landingWorld);
@@ -397,7 +380,7 @@ public class RandomTeleporter {
                                 "FailedToWorldBorder: " + failedToWorldBorder + ", " +
                                 "FailedToClaims: " + failedToClaimedLand + ", " +
                                 "FailedToSafety: " + failedToSafetyCheck + "]");
-            //<editor-fold desc="Super verbose checking (and running `tryAndMakeSafe() method)">
+
             // Currently, I ASSUME that the `tryAndMakeSafe()` is by far the most expensive method, so I do the easy
             //   checks before (so we can avoid trying to make it safe) but then we also have to check them again at
             //   the end since `tryAndMakeSafe()` may move the location.
@@ -450,18 +433,11 @@ public class RandomTeleporter {
                 locationBad = temp;
                 failedToClaimedLand++;
             }
-            //</editor-fold>
         } while (locationBad);
         return potentialRtpLocation;
 
     }
-    //</editor-fold>
 
-    /* ================================================== *\
-                    Misc ← Workers
-    \* ================================================== */
-
-    //<editor-fold desc="Misc ← Workers">
     private boolean isOutsideWorldBorder(final Location loc) {
         return !worldBorderPluginHook.isInside(loc);
     }
@@ -477,16 +453,16 @@ public class RandomTeleporter {
      *
      * @param settings The rtpSettings to use for the world
      * @return The number of locations added to the queue. (The result can be ignored if deemed unnecessary)
-     * @throws JrtpBaseException.NotPermittedException Should not realistically get thrown, but may occur if the
+     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException Should not realistically get thrown, but may occur if the
      *                                                 world is not
      *                                                 enabled in the settings.
      */
     public int fillQueue(final RtpProfile settings)
-            throws JrtpBaseException, JrtpBaseException.PluginDisabledException {
+            throws JrtpBaseException {
         try {
             int changesMade = 0;
             while (settings.locationQueue.size() < settings.cacheLocationCount) {
-                JakesRtpPlugin.locFinderRunnable.waitIfNonMainThread();
+                locFinderRunnable.waitIfNonMainThread();
 
                 final long startTime = System.currentTimeMillis();
 
@@ -510,13 +486,7 @@ public class RandomTeleporter {
             return 0;
         }
     }
-    //</editor-fold>
 
-    /* ================================================== *\
-                Info-Strings for Static Settings
-    \* ================================================== */
-
-    //<editor-fold desc="Info-Strings">
     public List<String> infoStringAll(final boolean mcFormat) {
         final ArrayList<String> lines = new ArrayList<>();
         if (mcFormat) {
@@ -571,5 +541,4 @@ public class RandomTeleporter {
         lines.add(LVL_02_SET.format(mcFormat, "RTP for queue", enabledOrDisabled(logRtpForQueue)));
         return lines;
     }
-    //</editor-fold>
 }

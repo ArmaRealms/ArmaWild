@@ -148,24 +148,6 @@ public class SimpleLagTimer {
         return running;
     }
 
-    //<editor-fold desc="GNU PLOT HOOKS">
-//    private final ArrayList<double[]> gnuPlotData = new ArrayList<>();
-//
-//    private void gnuPlotHook(TickInfo tick) {
-//        gnuPlotData.add(new double[]{
-//                tick.timeOf - startTime,
-//                tick.number,
-//                tick.timeDif,
-//                (double) tickQueueTimeSum / (double) tickInfoQueue.size()
-//        });
-//    }
-//
-//    private void gnuPlotEnd() {
-//        new Plotter("C:/Program Files/gnuplot/bin/wgnuplot.exe", 10, 10)
-//                .writeData(gnuPlotData.toArray(new double[0][])).plot(false);
-//    }
-    //</editor-fold>
-
     /**
      * Stops the tick timer and removes the task from the bukkit scheduler. Make sure to run this method before
      * discarding the {@code SimpleTickTimer} object.

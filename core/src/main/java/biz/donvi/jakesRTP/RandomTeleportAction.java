@@ -143,7 +143,6 @@ public class RandomTeleportAction {
         return landingLoc;
     }
 
-    //<editor-fold desc="======== Getters ========">
     public boolean isUsed() {
         return used;
     }
@@ -151,7 +150,6 @@ public class RandomTeleportAction {
     public boolean isCompleted() {
         return completed;
     }
-    //</editor-fold>
 
     public long getTimeStarted() {
         if (!used) throw new RandomTeleportActionNotYetUsedException();
@@ -189,7 +187,7 @@ public class RandomTeleportAction {
                 callFromLoc,
                 takeFromQueue);
         this.player = player;
-        //<editor-fold desc="setPlaceholders();">
+
         if (rtpProfile.commandsToRun.length != 0) {
             placeholders.put("location", locationAsString(landingLoc, 1, false));
             placeholders.put("world", Objects.requireNonNull(landingLoc.getWorld()).getName());
@@ -206,7 +204,6 @@ public class RandomTeleportAction {
             placeholders.put("y_old", String.valueOf(playerLoc.getBlockY()));
             placeholders.put("z_old", String.valueOf(playerLoc.getBlockZ()));
         }
-        //</editor-fold>
     }
 
     /**
