@@ -17,6 +17,15 @@ public class CoolDownTracker {
     }
 
     /**
+     * Returns the cooldown time in milliseconds.
+     *
+     * @return The cooldown time in milliseconds.
+     */
+    public long getCoolDownTime() {
+        return coolDownTime;
+    }
+
+    /**
      * Checks if between now and the last logged time is greater or less than the last logged time.
      * No changes will be made to the data regardless of the result.
      *
