@@ -46,10 +46,8 @@ public class CmdRtp implements TabExecutor {
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         try {
             // Only handle when sender is a player and argument count is valid (0 or 1)
-            if (!(sender instanceof Player)) return true;
+            if (!(sender instanceof final Player player)) return true;
             if (args.length > 1) return true;
-
-            final Player player = (Player) sender;
 
             // If using by name (1 arg), require permission
             if (args.length == 1 && !sender.hasPermission("jakesrtp.usebyname")) return false;
@@ -252,6 +250,6 @@ public class CmdRtp implements TabExecutor {
         return out;
     }
 
-    private static record CooldownNotifyRecord(Map<String, Integer> perProfileTaskIds) {
+    private record CooldownNotifyRecord(Map<String, Integer> perProfileTaskIds) {
     }
 }
