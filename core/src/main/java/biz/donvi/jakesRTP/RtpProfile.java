@@ -150,7 +150,7 @@ public class RtpProfile {
         infoLog(nameInLog + infoStringRegionCenter(false)); // double log!
 
         // Cool-Down
-        coolDown = new CoolDownTracker(config.getInt("cooldown", (int) (defaults.coolDown.coolDownTime / 1000)));
+        coolDown = new CoolDownTracker(config.getInt("cooldown", (int) (defaults.coolDown.getCoolDownTime() / 1000)));
         infoLog(nameInLog + infoStringCooldown(false));
 
         // Warm-Up
@@ -336,9 +336,9 @@ public class RtpProfile {
     }
 
     public String infoStringCooldown(final boolean mcFormat) {
-        return coolDown.coolDownTime == 0
+        return coolDown.getCoolDownTime() == 0
                 ? LVL_01_SET.format(mcFormat, "Cooldown", "Disabled")
-                : LVL_01_SET.format(mcFormat, "Cooldown time", coolDown.coolDownTime / 1000 + " seconds.");
+                : LVL_01_SET.format(mcFormat, "Cooldown time", coolDown.getCoolDownTime() / 1000 + " seconds.");
     }
 
     public List<String> infoStringsWarmup(final boolean mcFormat) {

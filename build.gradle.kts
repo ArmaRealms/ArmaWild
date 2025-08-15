@@ -5,7 +5,6 @@ subprojects {
 
     group = "biz.donvi"
     version = "0.14.9"
-
     // Configure Java toolchain for all subprojects (avoid using version catalog here)
     extensions.configure<JavaPluginExtension> {
         toolchain {

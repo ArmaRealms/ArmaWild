@@ -21,6 +21,9 @@ not-enabled-in-this-world: 'RTP is niet ingeschakeld in deze wereld. {0}'
 # For no rtpSettings are found with a given name
 #   {0} - The given name
 no-settings-found-with-name: 'Geen RTP instellingen gevonden met naam {0}'
+# For when a player does not have permission to use the rtpSettings with the given name
+# {0} - The permission node that was required to use the rtpSettings
+no-permission: "You do not have permission {0} to use RTP settings"
 # For no rtpSettings are found with a given name WHEN SEARCHED BY A SPECIFIC PLAYER
 # This will both be displayed when the rtpSettings with the given name do not exist, or the player who ran
 #   the `/rtp <settingsName>` command did not have permission to use the settings found.

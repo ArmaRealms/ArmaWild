@@ -20,6 +20,9 @@ not-enabled-in-this-world: 'RTP в этом мире отключено. {0}'
 # Выводится если не были заданы настройки rtpSettings с указанным названием.
 #   {0} - указанное имя. ('/rtp <settingsName>'. Путь: JakesRTP/rtpSettings)
 no-settings-found-with-name: 'Настройки RTP с именем {0} не найдены.'
+# For when a player does not have permission to use the rtpSettings with the given name
+# {0} - The permission node that was required to use the rtpSettings
+no-permission: "You do not have permission {0} to use RTP settings"
 # Настройки rtpSettings не были найдены ПРИ ПОИСКЕ САМИМ ИГРОКОМ.
 # Это сообщение выводится в том случае, когда rtpSettings с указанным именем не существует, или
 #   команда `/rtp <settingsName>` команда не имеет разрешения на выполнение указанных настроек.
