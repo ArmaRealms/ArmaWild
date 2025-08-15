@@ -1,5 +1,7 @@
 package biz.donvi.jakesRTP;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Map;
@@ -35,10 +37,6 @@ public enum Messages {
     READABLE_TIME_WORD_MINUTES("readable-time-word-minutes"),
     READABLE_TIME_WORD_SECONDS("readable-time-word-seconds");
 
-    /* ================================================== *\
-                            Static
-    \* ================================================== */
-
     private static final String[] mappedValues = new String[Messages.values().length];
     final String key;
 
@@ -52,19 +50,15 @@ public enum Messages {
             mappedValues[m.ordinal()] = reformat(newMap.remove(m.key));
             if (mappedValues[m.ordinal()] == null) emptyValues.add(m.name() + " ~ " + m.key);
         }
-        if (newMap.size() > 0) {
+        if (!newMap.isEmpty()) {
             JakesRtpPlugin.log(WARNING, "More mappings were given than expected. Extra keys:");
             for (final String extraValue : newMap.keySet()) JakesRtpPlugin.log(WARNING, extraValue);
         }
-        if (emptyValues.size() > 0) {
+        if (!emptyValues.isEmpty()) {
             JakesRtpPlugin.log(WARNING, "Some messages could not be assigned values. Missing keys:");
             for (final String missingValue : emptyValues) JakesRtpPlugin.log(WARNING, missingValue);
         }
     }
-
-    /* ================================================== *\
-                          Instance
-    \* ================================================== */
 
     static int addMap(final Map<String, String> newMap) {
         int numValuesAdded = 0;
@@ -75,7 +69,7 @@ public enum Messages {
                 numValuesAdded++;
             }
         }
-        if (newMap.size() > 0) {
+        if (!newMap.isEmpty()) {
             JakesRtpPlugin.log(WARNING, "Some extra keys were found:");
             for (final String extraValue : newMap.keySet()) JakesRtpPlugin.log(WARNING, extraValue);
         }
@@ -86,15 +80,11 @@ public enum Messages {
         return s == null ? null : replaceNewColors(replaceLegacyColors(replaceWrittenLineBreaks(s)));
     }
 
-    String getKey() {
-        return key;
-    }
-
     String raw() {
         return mappedValues[this.ordinal()];
     }
 
-    public String format(final Object... args) {
+    public @NotNull String format(final Object... args) {
         return MessageFormat.format(raw(), args);
     }
 }

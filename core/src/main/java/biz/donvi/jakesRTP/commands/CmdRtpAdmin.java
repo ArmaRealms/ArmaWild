@@ -23,6 +23,14 @@ public class CmdRtpAdmin implements TabExecutor {
      */
     private Pair<Long, List<String>> getConfigNamesResults;
 
+    private static List<String> filterPrefix(final List<String> items, final String prefix) {
+        final String p = prefix == null ? "" : prefix.toLowerCase();
+        final ArrayList<String> out = new ArrayList<>();
+        for (final String s : items)
+            if (s.toLowerCase().startsWith(p)) out.add(s);
+        return out;
+    }
+
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (args.length == 0) return false;
@@ -87,7 +95,6 @@ public class CmdRtpAdmin implements TabExecutor {
         return getConfigNamesResults.value;
     }
 
-
     private void subStatus(final CommandSender sender, final String[] args) {
         final RandomTeleporter theRandomTeleporter = JakesRtpPlugin.plugin.getRandomTeleporter();
         if (args.length == 1 && args[0].equalsIgnoreCase("#static")) {
@@ -105,14 +112,5 @@ public class CmdRtpAdmin implements TabExecutor {
                             GeneralUtil.listText(theRandomTeleporter.getRtpSettingsNames())
             );
         }
-
-    }
-
-    private static List<String> filterPrefix(final List<String> items, final String prefix) {
-        final String p = prefix == null ? "" : prefix.toLowerCase();
-        final ArrayList<String> out = new ArrayList<>();
-        for (final String s : items)
-            if (s.toLowerCase().startsWith(p)) out.add(s);
-        return out;
     }
 }

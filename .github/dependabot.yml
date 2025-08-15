@@ -10,9 +10,9 @@ updates:
       - "gradle"
     ignore:
       - dependency-name: "io.papermc.paper:paper-api"
-        update-types: ["version-update:semver-major"]
+        update-types: [ "version-update:semver-major" ]
       - dependency-name: "com.gradleup.shadow"
-        update-types: ["version-update:semver-major"]
+        update-types: [ "version-update:semver-major" ]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

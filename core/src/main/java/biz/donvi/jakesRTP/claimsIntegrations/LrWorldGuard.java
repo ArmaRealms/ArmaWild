@@ -23,7 +23,6 @@ public class LrWorldGuard implements LocationRestrictor {
 
     private static StateFlag customJrtpFlag = null;
     protected WorldGuardPlugin plugin;
-    //<editor-fold desc="All this caching stuff I probably didn't actually need to write.">
     // Just some caching of values so quick usage doesn't need to keep finding them.
     // This is all probably unnecessary, I'm just afraid of persisting something from WorldGuard at the wrong time.
     private long maxAgeBeforeCacheClear = 60 * 1000; // 60 seconds before we clear the cache
@@ -31,6 +30,7 @@ public class LrWorldGuard implements LocationRestrictor {
     private WeakReference<RegionContainer> regionContainer = null;
     private WeakReference<World> regionManagerIsForWorld = null;
     private WeakReference<RegionManager> regionManagerWR = null;
+
     public LrWorldGuard(final WorldGuardPlugin worldGuardPlugin) {
         if (worldGuardPlugin == null) throw new NullPointerException("worldGuardPlugin must NOT be null!");
         plugin = worldGuardPlugin;
@@ -76,7 +76,6 @@ public class LrWorldGuard implements LocationRestrictor {
         }
         lastTimeAccessed = System.currentTimeMillis();
     }
-    //</editor-fold>
 
     /**
      * Gets a potentially cached regionContainer for the server

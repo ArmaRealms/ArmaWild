@@ -25,10 +25,6 @@ abstract class DistributionShape {
 
     public abstract List<String> infoStrings(boolean mcFormat);
 
-    /* ================================================== *\
-                    All the simple subclasses
-    \* ================================================== */
-
     public static abstract class Symmetric extends DistributionShape {
         final int radiusMax;
         final int radiusMin;

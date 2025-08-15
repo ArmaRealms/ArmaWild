@@ -42,6 +42,7 @@ or for statistics about the plugin, go to [the bStats page](https://bstats.org/p
 * Some stuff about how many spots to check for safety, though these shouldn't need to be modified for a normal world.
 
 ###### _* <sub>Denotes static settings. (Settings that are not per config and generally are only applicable to one
+
 config at a time)</sub>_
 
 ###### _All of this is per individual config. Multiple configs can exist at the same time_

@@ -62,10 +62,6 @@ public class WorldBorderPluginHook {
         return hook.generateDistributions();
     }
 
-    /* ================================================== *\
-                    All the simple subclasses
-    \* ================================================== */
-
     abstract class PluginSpecificHook {
 
         protected boolean noLongerUsable = false; // Set if some incompatability is found later down the line

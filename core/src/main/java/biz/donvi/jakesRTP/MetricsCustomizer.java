@@ -1,6 +1,7 @@
 package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.claimsIntegrations.ClaimsManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ class MetricsCustomizer {
     private final RandomTeleporter r;
     private final Metrics m;
 
-    MetricsCustomizer(final JakesRtpPlugin plugin, final Metrics metrics) {
+    MetricsCustomizer(final @NotNull JakesRtpPlugin plugin, final Metrics metrics) {
         p = plugin;
         r = plugin.getRandomTeleporter();
         m = metrics;
@@ -33,13 +34,6 @@ class MetricsCustomizer {
 
         addAdvancedPie("rtp-region-shape", r::getRtpSettings,
                 settings -> settings.distribution.shape.shape()); // TODO MAKE SURE WORKS ON bSTATS
-//       // Replaced by ↑
-//        m.addCustomChart(new Metrics.AdvancedPie("rtp-region-shape", () -> {
-//            Map<String, Integer> pie = new HashMap<>();
-//            for (RtpSettings settings : r.getRtpSettings())
-//                pie.merge(settings.distribution.shape.shape(), 1, Integer::sum);
-//            return pie;
-//        }));
 
         addAdvancedPie("rtp-cooldown", r::getRtpSettings,
                 settings -> readableTime(settings.coolDown.coolDownTime)); // TODO ADD TO bSTATS
@@ -78,7 +72,7 @@ class MetricsCustomizer {
             if (cm == null) { // This feature is forcibly disabled
                 isUsed = false;
                 innerMap.put("Disabled", 1);
-            } else if (names.size() == 0) { // Not forcibly disabled, but no things are being used
+            } else if (names.isEmpty()) { // Not forcibly disabled, but no things are being used
                 isUsed = false;
                 innerMap.put("No supporting plugins found", 1);
             } else { // This means we have support ENABLED and there ARE loaded support things

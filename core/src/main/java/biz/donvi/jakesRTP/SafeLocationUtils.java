@@ -1,4 +1,3 @@
-
 package biz.donvi.jakesRTP;
 
 import org.bukkit.Bukkit;
@@ -13,10 +12,6 @@ public class SafeLocationUtils {
 
     private SafeLocationUtils() {
     }
-
-    /* ================================================== *\
-                    Material checking utils
-    \* ================================================== */
 
     static int chunkXZ(final double blockXZ) {
         return (int) Math.floor((double) blockXZ / 16);
@@ -88,10 +83,6 @@ public class SafeLocationUtils {
         }
     }
 
-    /* ================================================== *\
-                    Location checking utils
-    \* ================================================== */
-
     /**
      * Checks if the given material is any type of tree leaf.
      *
@@ -117,10 +108,6 @@ public class SafeLocationUtils {
         //I am leaving the method in place though so if I decide to add more materials later, it will be easy.
         return isTreeLeaves(mat);
     }
-
-    /* ================================================== *\
-                    Location moving utils
-    \* ================================================== */
 
     /**
      * Checks if the location is in a tree. To be in a tree, you must both be on a log, and in leaves.<p>
