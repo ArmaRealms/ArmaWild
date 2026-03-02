@@ -21,7 +21,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":api"))
+    implementation(libs.paperlib)
+    implementation(project(":api"))
     compileOnly(libs.paper)
     compileOnly(libs.dynmap)
     compileOnly(libs.chunkyCommon)
@@ -33,7 +34,6 @@ dependencies {
     compileOnly(libs.worldguard)
     compileOnly(libs.huskTowns)
     compileOnly(libs.landsAPI)
-    implementation(libs.paperlib)
 }
 
 tasks.processResources {
