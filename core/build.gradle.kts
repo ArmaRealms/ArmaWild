@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly(project(":api"))
     compileOnly(libs.paper)
     compileOnly(libs.dynmap)
     compileOnly(libs.chunkyCommon)

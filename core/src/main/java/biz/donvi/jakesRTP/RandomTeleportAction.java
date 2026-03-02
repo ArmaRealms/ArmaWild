@@ -1,5 +1,6 @@
 package biz.donvi.jakesRTP;
 
+import biz.donvi.jakesRTP.api.event.PlayerRtpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -225,6 +226,14 @@ public class RandomTeleportAction {
                     logMessage +
                             "Player did not teleport.");
         rtpCount++;
+        if (teleported) {
+            final PlayerRtpEvent rtpEvent = new PlayerRtpEvent(player, landingLoc.clone(), rtpProfile.cost, rtpProfile.name);
+            if (Bukkit.isPrimaryThread()) {
+                Bukkit.getPluginManager().callEvent(rtpEvent);
+            } else {
+                Bukkit.getScheduler().runTask(JakesRtpPlugin.plugin, () -> Bukkit.getPluginManager().callEvent(rtpEvent));
+            }
+        }
         if (rtpProfile.commandsToRun.length != 0)
             for (final String command : rtpProfile.commandsToRun)
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillPlaceholders(command, placeholders));
