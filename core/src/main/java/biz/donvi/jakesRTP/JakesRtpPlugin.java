@@ -1,5 +1,6 @@
 package biz.donvi.jakesRTP;
 
+import biz.donvi.jakesRTP.api.JakesRtpAPI;
 import biz.donvi.jakesRTP.claimsIntegrations.ClaimsManager;
 import biz.donvi.jakesRTP.commands.CmdForceRtp;
 import biz.donvi.jakesRTP.commands.CmdRtp;
@@ -10,6 +11,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
@@ -27,17 +29,15 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static biz.donvi.jakesRTP.claimsIntegrations.LrWorldGuard.registerWorldGuardFlag;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public final class JakesRtpPlugin extends JavaPlugin {
+public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
     private static final String LANG_SETTINGS_FILE_NAME = "language-settings.yml";
     private static final String BLANK_LANG_FILE_NAME = "translations/lang_%s.yml";
     public static JakesRtpPlugin plugin;
@@ -98,6 +98,10 @@ public final class JakesRtpPlugin extends JavaPlugin {
             claimsManager = new ClaimsManager(this, getConfig().getConfigurationSection("land-claim-support"));
         else claimsManager = new ClaimsManager();
         new MetricsCustomizer(this, new Metrics(this, 9843));
+
+        // register the JakesRtpAPI as a service so that other plugins can hook into it.
+        getServer().getServicesManager().register(JakesRtpAPI.class, this, this, ServicePriority.Normal);
+
         infoLog("Loading complete.");
     }
 
@@ -120,7 +124,8 @@ public final class JakesRtpPlugin extends JavaPlugin {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void loadConfigs() {
+    @Override
+    public void loadConfigs() {
         // If there is no config files, save the default ones
         if (!Files.exists(Paths.get(this.getDataFolder().getPath(), "config.yml"))) saveDefaultConfig();
         // For the rtpSettings...
@@ -166,6 +171,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
     }
 
     @SuppressWarnings("ConstantConditions")
+    @Override
     public void loadRandomTeleporter() {
         this.reloadConfig();
         try {
@@ -176,11 +182,11 @@ public final class JakesRtpPlugin extends JavaPlugin {
             registerCommandExecutor("forcertp", new CmdForceRtp(theRandomTeleporter));
             getServer().getPluginManager().registerEvents(new RtpOnEvent(theRandomTeleporter), this);
         } catch (final Exception e) {
-            plugin.getLogger().log(Level.WARNING, "RTP Command could not be loaded!");
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "RTP Command could not be loaded!", e);
         }
     }
 
+    @Override
     public void loadLocationCacheFiller() {
         //First end the current runnable if it exists
         if (locFinderRunnable != null) locFinderRunnable.markAsOver();
@@ -197,6 +203,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
     }
 
     @SuppressWarnings("ConstantConditions")
+    @Override
     public void loadMessageMap() {
         // Copy the langSettingsFile if it doesn't already exist.
         if (!Files.exists(Paths.get(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME)))
@@ -205,7 +212,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
                         getClassLoader().getResourceAsStream(LANG_SETTINGS_FILE_NAME),
                         Paths.get(getDataFolder().getPath(), LANG_SETTINGS_FILE_NAME));
             } catch (final IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().log(Level.WARNING, "Could not copy default language settings file.", e);
             }
         else
             try {
@@ -245,10 +252,10 @@ public final class JakesRtpPlugin extends JavaPlugin {
                 }
 
             } catch (final IOException ex) {
-                for (final Throwable subEx : ex.getSuppressed()) subEx.printStackTrace();
-                ex.printStackTrace();
+                for (final Throwable subEx : ex.getSuppressed()) {
+                    plugin.getLogger().log(Level.WARNING, "Could not update language settings file header.", subEx);
+                }
             }
-
 
         // Read message overrides (this also tells us which language to use!)
         Map<String, String> languageOverrides = null;
@@ -256,7 +263,7 @@ public final class JakesRtpPlugin extends JavaPlugin {
         try {
             messageOverrides = new Yaml().load(new FileInputStream(new File(getDataFolder(), LANG_SETTINGS_FILE_NAME)));
         } catch (final FileNotFoundException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Could not load language settings file to read message overrides.", e);
         }
         // Load default messages
         infoLog("Setting default messages.");
