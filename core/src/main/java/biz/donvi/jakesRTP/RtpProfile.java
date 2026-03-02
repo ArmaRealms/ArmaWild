@@ -124,7 +124,7 @@ public class RtpProfile {
                 if (!tempCallFromWorlds.contains(testByWorld) &&
                         Pattern.compile(callFromWorld).matcher(testByWorld.getName()).matches()
                 ) tempCallFromWorlds.add(testByWorld);
-        if (tempCallFromWorlds.size() == 0)
+        if (tempCallFromWorlds.isEmpty())
             if (defaults.callFromWorlds != null) tempCallFromWorlds.addAll(defaults.callFromWorlds);
             else tempCallFromWorlds.add(landingWorld);
         callFromWorlds = Collections.unmodifiableList(tempCallFromWorlds);
@@ -188,7 +188,7 @@ public class RtpProfile {
                 ? defaults.checkProfile
                 : LocCheckProfiles.values()[config.getString("location-checking-profile").toLowerCase().charAt(0) - 'a'];
         infoLog(nameInLog + infoStringLocationCheckProfile(false));
-        commandsToRun = config.getStringList("then-execute").size() == 0
+        commandsToRun = config.getStringList("then-execute").isEmpty()
                 ? defaults.commandsToRun
                 : config.getStringList("then-execute").toArray(new String[0]);
         canUseLocQueue = distribution.center != DistributionSettings.CenterTypes.PLAYER_LOCATION &&
@@ -275,30 +275,26 @@ public class RtpProfile {
             lines.add(infoStringLocationCheckProfile(mcFormat));
             lines.add(infoStringLocationCaching(mcFormat));
         }
-        if (!mcFormat) for (int i = 0; i < lines.size(); i++) lines.set(i, name + lines.get(i));
+        if (!mcFormat) lines.replaceAll(s -> name + s);
 
         return lines;
     }
 
 
     public String getRtpRegionCenterAsString(final boolean mcFormat) {
-        switch (distribution.center) {
-            case WORLD_SPAWN:
-                return MessageFormat.format(
-                        "World Spawn {0}({1}, {2}){0}",
-                        mcFormat ? "\u00A7o" : "",
-                        (int) landingWorld.getSpawnLocation().getX(),
-                        (int) landingWorld.getSpawnLocation().getZ());
-            case PRESET_VALUE:
-                return MessageFormat.format(
-                        "Specified in Config {0}({1}, {2}){0}",
-                        mcFormat ? "\u00A7o" : "",
-                        distribution.centerX,
-                        distribution.centerZ);
-            case PLAYER_LOCATION:
-                return "Player's Location";
-        }
-        return "??";
+        return switch (distribution.center) {
+            case WORLD_SPAWN -> MessageFormat.format(
+                    "World Spawn {0}({1}, {2}){0}",
+                    mcFormat ? "§o" : "",
+                    (int) landingWorld.getSpawnLocation().getX(),
+                    (int) landingWorld.getSpawnLocation().getZ());
+            case PRESET_VALUE -> MessageFormat.format(
+                    "Specified in Config {0}({1}, {2}){0}",
+                    mcFormat ? "§o" : "",
+                    distribution.centerX,
+                    distribution.centerZ);
+            case PLAYER_LOCATION -> "Player's Location";
+        };
     }
 
     public String getQueueSizesAsString() {

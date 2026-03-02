@@ -234,9 +234,8 @@ public class RandomTeleportAction {
                 Bukkit.getScheduler().runTask(JakesRtpPlugin.plugin, () -> Bukkit.getPluginManager().callEvent(rtpEvent));
             }
         }
-        if (rtpProfile.commandsToRun.length != 0)
-            for (final String command : rtpProfile.commandsToRun)
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillPlaceholders(command, placeholders));
+        for (final String command : rtpProfile.commandsToRun)
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillPlaceholders(command, placeholders));
     }
 
     static class RandomTeleportActionAlreadyUsedException extends RuntimeException {
