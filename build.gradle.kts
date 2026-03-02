@@ -18,8 +18,8 @@ subprojects {
 
     repositories {
         mavenLocal()
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         mavenCentral()
+        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven("https://papermc.io/repo/repository/maven-public/")
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://jitpack.io")
