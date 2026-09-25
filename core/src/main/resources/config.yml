@@ -8,6 +8,15 @@
 # Old configs may not run correctly. Please don't edit config-version.
 config-version: 2.0
 
+#### rtp-confirmation
+# Paid RTP commands require confirmation before starting the warmup or teleport.
+# Usage: /rtp confirm or /rtp <profile> confirm (also works with /wild).
+# The subcommand is case-insensitive and accepts letters, numbers, '_' and '-'.
+# It is reserved; choose a value different from your profile names.
+# The MiniMessage prompt can be overridden with 'confirm-paid-rtp' in language-settings.yml.
+rtp-confirmation:
+  subcommand: 'confirm'
+
 #### rtp-on-first-join
 # If enabled, when a new player joins the server, they will be teleported according to the given rtpSettings, and will
 #   land in the given world.

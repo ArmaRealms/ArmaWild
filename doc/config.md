@@ -6,6 +6,40 @@ Go to the bottom of this page for the simplified config.
 
 ---
 
+### `rtp-confirmation`
+
+RTP commands with an active economy provider and a positive profile `cost` require an explicit confirmation.
+Free RTP commands continue normally. No warmup, cooldown or charge starts when showing the prompt.
+
+```yaml
+rtp-confirmation:
+  subcommand: 'confirm'
+```
+
+Players use `/rtp confirm` or `/rtp <profile> confirm`. Aliases such as `/wild` also work.
+The subcommand is case-insensitive and must contain only letters, numbers, `_` or `-`.
+Invalid values fall back to `confirm` with a console warning. Choose a value different from your profile names,
+because this word is reserved for confirmation. Missing settings default to `confirm`, including existing installations.
+Confirmation is explicit in the command; it does not require a previous pending request.
+Permissions, current profile, balance, cooldown and warmup checks are evaluated again when confirming.
+
+Override `confirm-paid-rtp` in `language-settings.yml` to customize the prompt using MiniMessage:
+
+```yaml
+confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'
+```
+
+- `<cost>`: cost formatted by the economy provider.
+- `<profile>`: selected RTP profile.
+- `<command>`: full confirmation command, including the alias and optional profile.
+- `<confirm>...</confirm>`: makes the enclosed text run the confirmation command when clicked.
+
+Standard MiniMessage tags, including `<click:run_command:...>` and `<hover:show_text:...>`, are supported.
+Use MiniMessage colors for this message; legacy `&` colors and numbered placeholders are used by the other messages.
+Apply configuration changes with `/rtp-admin reload` and message changes with `/rtp-admin reload-messages`.
+
+---
+
 ### `config-version`
 
 This is an internal setting, and it should not be touched.

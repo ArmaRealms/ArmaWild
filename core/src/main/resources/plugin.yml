@@ -27,7 +27,7 @@ commands:
     aliases: [ 'wild' ]
     permission: 'jakesrtp.use'
     permission-message: 'Could not run command. Missing permission node: jakesrtp.use'
-    usage: '/rtp'
+    usage: '/rtp [profile] [confirmation]'
   forcertp:
     description: 'Teleports the specified user to a random location'
     permission: 'jakesrtp.others'

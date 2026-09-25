@@ -1,5 +1,8 @@
 package biz.donvi.jakesRTP;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
@@ -28,6 +31,7 @@ public enum Messages {
     WARMUP_CANCEL_BECAUSE_MOVE("moved-during-warmup"),
     WARMUP_RTP_ALREADY_CALLED("rtp-called-while-in-warmup"),
     ECON_NOT_ENOUGH_MONEY("not-enough-money"),
+    ECON_CONFIRM_RTP("confirm-paid-rtp"),
     ECON_NO_LONGER_ENOUGH_MONEY("no-longer-enough-money"),
     ECON_YOU_WERE_CHARGED_X("you-were-charged-x"),
     ECON_ERROR("economy-error"),
@@ -48,7 +52,7 @@ public enum Messages {
     static void setMap(final Map<String, String> newMap) {
         final ArrayList<String> emptyValues = new ArrayList<>();
         for (final Messages m : Messages.values()) {
-            mappedValues[m.ordinal()] = reformat(newMap.remove(m.key));
+            mappedValues[m.ordinal()] = newMap.remove(m.key);
             if (mappedValues[m.ordinal()] == null) emptyValues.add(m.name() + " ~ " + m.key);
         }
         if (!newMap.isEmpty()) {
@@ -66,7 +70,7 @@ public enum Messages {
         for (final Messages m : Messages.values()) {
             final String value = newMap.remove(m.key);
             if (value != null) {
-                mappedValues[m.ordinal()] = reformat(value);
+                mappedValues[m.ordinal()] = value;
                 numValuesAdded++;
             }
         }
@@ -82,10 +86,16 @@ public enum Messages {
     }
 
     String raw() {
-        return mappedValues[this.ordinal()];
+        return reformat(mappedValues[this.ordinal()]);
     }
 
     public @NotNull String format(final Object... args) {
         return MessageFormat.format(raw(), args);
+    }
+
+    /** Parse MiniMessage directly, preserving quotes in click/hover tags and literal placeholder values. */
+    public @NotNull Component formatMiniMessage(final TagResolver... placeholders) {
+        return MiniMessage.miniMessage().deserialize(
+                replaceWrittenLineBreaks(mappedValues[this.ordinal()]), placeholders);
     }
 }
