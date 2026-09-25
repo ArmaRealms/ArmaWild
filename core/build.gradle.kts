@@ -56,7 +56,7 @@ tasks.named("build") {
 }
 
 tasks.named<RunServer>("runServer") {
-        minecraftVersion("1.20.4")
+        minecraftVersion("1.21.11")
         jvmArguments.add("-Dcom.mojang.eula.agree=true")
         jvmArguments.add("-Dnet.kyori.ansi.colorLevel=truecolor")
         jvmArguments.add("-Dfile.encoding=UTF8")

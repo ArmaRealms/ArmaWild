@@ -8,7 +8,7 @@ subprojects {
     // Configure Java toolchain for all subprojects (avoid using version catalog here)
     extensions.configure<JavaPluginExtension> {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get().toInt()))
         }
     }
 

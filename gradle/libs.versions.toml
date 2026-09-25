@@ -1,6 +1,6 @@
 [versions]
-jvm = "21"
-paper = "1.20.4-R0.1-SNAPSHOT"
+jvm = "25"
+paper = "1.21.11-R0.1-SNAPSHOT"
 dynmap = "3.1"
 chunkyCommon = "1.2.86"
 chunkyBorderCommon = "1.0.59"
