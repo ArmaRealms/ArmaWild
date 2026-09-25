@@ -68,7 +68,7 @@ I explain how the config works, and how to do multiple configs.
 `/forcertp <playerName>` will randomly teleport the given player (assuming you have permission)  
 `/forcertp <playerName> [-c <rtpConfigName> | -w <destinedWorld>]` (extra
 settings)  
-`/rtp-admin reload` will reload the config from the file(assuming you have permission)
+`/rtp-admin reload` will reload the config from the file (assuming you have permission)
 
 Go [here](doc/commands.md) for a more detailed explination.
 

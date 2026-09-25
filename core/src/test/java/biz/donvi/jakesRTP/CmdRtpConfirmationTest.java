@@ -26,9 +26,18 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 class CmdRtpConfirmationTest {
     private RandomTeleporter teleporter;
@@ -38,6 +47,23 @@ class CmdRtpConfirmationTest {
     private BukkitScheduler scheduler;
     private Command command;
     private YamlConfiguration config;
+
+    private static boolean hasClick(final Component component, final String command) {
+        return ClickEvent.runCommand(command).equals(component.clickEvent())
+                || component.children().stream().anyMatch(child -> hasClick(child, command));
+    }
+
+    private static boolean hasHoverText(final Component component, final String expected) {
+        return (component.hoverEvent() != null && component.hoverEvent().value() instanceof Component text
+                && PlainTextComponentSerializer.plainText().serialize(text).equals(expected))
+                || component.children().stream().anyMatch(child -> hasHoverText(child, expected));
+    }
+
+    private static void setField(final Object target, final String name, final Object value) throws Exception {
+        final Field field = target.getClass().getField(name);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -116,7 +142,7 @@ class CmdRtpConfirmationTest {
     @Test
     void namedConfirmationStillRequiresPermission() throws Exception {
         invoke("rtp", "survival", "confirm");
-        verify(player).sendMessage(Messages.NP_NO_PERMISSION.format("jakesrtp.usebyname"));
+        verify(player).sendMessage(Messages.NP_NO_PERMISSION.format(Placeholder.unparsed("permission", "jakesrtp.usebyname")));
         verify(teleporter, never()).getRtpSettingsByNameForPlayer(any(), anyString());
         verifyNoInteractions(scheduler);
     }
@@ -143,7 +169,7 @@ class CmdRtpConfirmationTest {
         when(economy.getBalance(player)).thenReturn(0.0);
         when(economy.format(0.0)).thenReturn("0 coins");
         invoke("rtp", "confirm");
-        verify(player).sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format("25 coins", "0 coins"));
+        verify(player).sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(Placeholder.unparsed("cost", "25 coins"), Placeholder.unparsed("balance", "0 coins")));
         verifyNoInteractions(scheduler);
     }
 
@@ -198,17 +224,10 @@ class CmdRtpConfirmationTest {
     void miniMessagePreservesQuotedTagsAndDoesNotParsePlaceholderContent() {
         Messages.addMap(new HashMap<>(Map.of("confirm-paid-rtp",
                 "<click:run_command:'/wild aceitar'><hover:show_text:'Confirmar'><cost></hover></click>")));
-        final Component result = Messages.ECON_CONFIRM_RTP.formatMiniMessage(
+        final Component result = Messages.ECON_CONFIRM_RTP.format(
                 Placeholder.unparsed("cost", "<red>25 coins</red>"));
         assertEquals("<red>25 coins</red>", PlainTextComponentSerializer.plainText().serialize(result));
         assertTrue(hasClick(result, "/wild aceitar"));
-    }
-
-    @Test
-    void legacyMessagesKeepTheirExistingFormatting() {
-        Messages.addMap(new HashMap<>(Map.of("not-enough-money", "&cCost: {0}\\nBalance: {1}")));
-        assertEquals("§cCost: 25 coins\nBalance: 100 coins",
-                Messages.ECON_NOT_ENOUGH_MONEY.format("25 coins", "100 coins"));
     }
 
     private void invoke(final String label, final String... args) {
@@ -226,22 +245,5 @@ class CmdRtpConfirmationTest {
         assertTrue(PlainTextComponentSerializer.plainText().serialize(message.getValue()).contains("25 coins"));
         assertTrue(hasClick(message.getValue(), expectedCommand));
         assertTrue(hasHoverText(message.getValue(), expectedCommand));
-    }
-
-    private static boolean hasClick(final Component component, final String command) {
-        return ClickEvent.runCommand(command).equals(component.clickEvent())
-                || component.children().stream().anyMatch(child -> hasClick(child, command));
-    }
-
-    private static boolean hasHoverText(final Component component, final String expected) {
-        return (component.hoverEvent() != null && component.hoverEvent().value() instanceof Component text
-                && PlainTextComponentSerializer.plainText().serialize(text).equals(expected))
-                || component.children().stream().anyMatch(child -> hasHoverText(child, expected));
-    }
-
-    private static void setField(final Object target, final String name, final Object value) throws Exception {
-        final Field field = target.getClass().getField(name);
-        field.setAccessible(true);
-        field.set(target, value);
     }
 }

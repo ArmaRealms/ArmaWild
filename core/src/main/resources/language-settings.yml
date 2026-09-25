@@ -10,23 +10,24 @@ language: 'en'
 
 # - - - - - - - - - - -
 # ~ MESSAGE OVERRIDES ~
-# All non-error messages sent by the plugin will appear in the `lang_en` file (and eventually in all other language
+# All configurable messages sent by the plugin will appear in the `lang_en` file (and eventually in all other language
 #   files as well), and any message that is stored in the language file can be overridden here. To override a message,
 #   just add the existing key of the message from the original language file, and set the value to whatever message you
 #   would like. A list of all messages can be found here:
 #   https://github.com/donvi-bz/JakesRTP/blob/master/Core/src/main/resources/translations/lang_en.yml
 # Notes on formatting:
-#   To make a line break, type this: \n
-#   To use a legacy color code, place an `&` in front of a hex digit (0-9|a-f) like this: &8
-#   You can use full hex codes (if you are in the right version of minecraft) like this: {#00FFC8}
+#   All messages use MiniMessage: <gray>, <#00FFC8>, <bold>, <click:...>, <hover:...>.
+#   Use <newline> for a line break. Written \n is also supported.
+#   Use named placeholders documented in lang_en.yml, such as <time>, <cost> and <player>.
+#   Replace old numbered placeholders and legacy colors in existing overrides.
 # Finally, if you know another language and would like to help translate this plugin, you can copy the `lang_en.yml`
 #   file found here https://github.com/donvi-bz/JakesRTP/tree/master/Core/src/main/resources/translations then
 #   translate the new language and make a PR. Or you could send me the file another way. Either way, if you do this,
 #   thank you so much. ♥
 
-need-to-wait-for-cooldown: 'Whoops! You still have to wait {0}'
+need-to-wait-for-cooldown: '<yellow>Whoops! You still have to wait <time></yellow>'
 
 # Paid RTP confirmation uses MiniMessage (including click and hover tags).
 # <cost>, <profile> and <command> insert text; <confirm>...</confirm> runs the confirmation command on click.
-# Use MiniMessage colors such as <yellow>, instead of &e or {#RRGGBB}, for this message.
+# Use MiniMessage colors such as <yellow> for all messages.
 # confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'

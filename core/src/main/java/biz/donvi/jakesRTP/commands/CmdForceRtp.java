@@ -6,6 +6,7 @@ import biz.donvi.jakesRTP.Messages;
 import biz.donvi.jakesRTP.RandomTeleportAction;
 import biz.donvi.jakesRTP.RandomTeleporter;
 import biz.donvi.jakesRTP.RtpProfile;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -50,11 +51,11 @@ public class CmdForceRtp implements TabExecutor {
                 return false;
             }
         } catch (final JrtpBaseException.NotPermittedException npe) {
-            sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
+            sender.sendMessage(Messages.NP_GENERIC.format(Placeholder.component("reason", JrtpBaseException.userMessage(npe))));
         } catch (final JrtpBaseException e) {
-            sender.sendMessage(e.getMessage());
+            sender.sendMessage(JrtpBaseException.userMessage(e));
         } catch (final Exception e) {
-            sender.sendMessage(Messages.NP_UNEXPECTED_EXCEPTION.format(e.getMessage()));
+            sender.sendMessage(Messages.NP_UNEXPECTED_EXCEPTION.format(Placeholder.component("reason", JrtpBaseException.userMessage(e))));
             e.printStackTrace();
         }
         return true;
@@ -63,7 +64,7 @@ public class CmdForceRtp implements TabExecutor {
     private void subForceRtpWithConfig(final CommandSender sender, final String playerName, final String configName) throws Exception {
         final Player playerToTp = sender.getServer().getPlayerExact(playerName);
         if (playerToTp == null) {
-            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(playerName));
+            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(Placeholder.unparsed("player", playerName)));
             return;
         }
         final RtpProfile rtpProfile = randomTeleporter.getRtpSettingsByName(configName);
@@ -79,12 +80,12 @@ public class CmdForceRtp implements TabExecutor {
     private void subForceRtpWithWorld(final CommandSender sender, final String playerName, final String worldName) throws Exception {
         final Player playerToTp = sender.getServer().getPlayerExact(playerName);
         if (playerToTp == null) {
-            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(playerName));
+            sender.sendMessage(Messages.PLAYER_NOT_FOUND.format(Placeholder.unparsed("player", playerName)));
             return;
         }
         final World destWorld = GeneralUtil.getWorldIgnoreCase(sender.getServer(), worldName);
         if ((destWorld) == null) {
-            sender.sendMessage(Messages.WORLD_NOT_FOUND.format(worldName));
+            sender.sendMessage(Messages.WORLD_NOT_FOUND.format(Placeholder.unparsed("world", worldName)));
             return;
         }
 

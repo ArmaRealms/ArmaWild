@@ -1,5 +1,7 @@
 package biz.donvi.jakesRTP;
 
+import net.kyori.adventure.text.Component;
+
 import java.util.HashMap;
 
 public class CoolDownTracker {
@@ -126,6 +128,10 @@ public class CoolDownTracker {
      */
     public String timeLeftWords(final String playerName) {
         return GeneralUtil.readableTime(timeLeft(playerName));
+    }
+
+    public Component timeLeftComponent(final String playerName) {
+        return GeneralUtil.readableTimeComponent(timeLeft(playerName));
     }
 
     /**

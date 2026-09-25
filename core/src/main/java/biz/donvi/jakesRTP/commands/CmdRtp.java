@@ -60,7 +60,7 @@ public class CmdRtp implements TabExecutor {
 
             // Confirmation alone does not require permission to select a profile by name.
             if (profileArgs == 1 && !sender.hasPermission("jakesrtp.usebyname")) {
-                player.sendMessage(Messages.NP_NO_PERMISSION.format("jakesrtp.usebyname"));
+                player.sendMessage(Messages.NP_NO_PERMISSION.format(Placeholder.unparsed("permission", "jakesrtp.usebyname")));
                 return true;
             }
 
@@ -75,7 +75,7 @@ public class CmdRtp implements TabExecutor {
             final boolean cooldownOk = relSettings.coolDown.check(player.getName());
             if (!(bypassCooldown || cooldownOk)) {
                 player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
-                        relSettings.coolDown.timeLeftWords(player.getName())));
+                        Placeholder.component("time", relSettings.coolDown.timeLeftComponent(player.getName()))));
                 return true;
             }
 
@@ -94,15 +94,15 @@ public class CmdRtp implements TabExecutor {
             final boolean needsPayment = plugin.canUseEconomy() && relSettings.cost > 0;
             if (needsPayment && plugin.getEconomy().getBalance(player) < relSettings.cost) {
                 player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
-                        plugin.getEconomy().format(relSettings.cost),
-                        plugin.getEconomy().format(plugin.getEconomy().getBalance(player))));
+                        Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
+                        Placeholder.unparsed("balance", plugin.getEconomy().format(plugin.getEconomy().getBalance(player)))));
                 return true;
             }
 
             if (needsPayment && !confirmed) {
                 final String confirmationCommand = "/" + label
                         + (profileArgs == 1 ? " " + args[0] : "") + " " + confirmationSubcommand;
-                player.sendMessage(Messages.ECON_CONFIRM_RTP.formatMiniMessage(
+                player.sendMessage(Messages.ECON_CONFIRM_RTP.format(
                         Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
                         Placeholder.unparsed("command", confirmationCommand),
                         Placeholder.unparsed("profile", relSettings.name),
@@ -121,9 +121,9 @@ public class CmdRtp implements TabExecutor {
                 execRtp.run();
             }
         } catch (final JrtpBaseException.NotPermittedException npe) {
-            sender.sendMessage(Messages.NP_GENERIC.format(npe.getMessage()));
+            sender.sendMessage(Messages.NP_GENERIC.format(Placeholder.component("reason", JrtpBaseException.userMessage(npe))));
         } catch (final JrtpBaseException e) {
-            sender.sendMessage(e.getMessage());
+            sender.sendMessage(JrtpBaseException.userMessage(e));
             e.printStackTrace();
         }
         return true;
@@ -132,7 +132,7 @@ public class CmdRtp implements TabExecutor {
     private void scheduleCooldownEndNotice(final Player player, final @NotNull RtpProfile profile) {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline()) {
-                player.sendMessage(Messages.COOLDOWN_OVER.format(profile.name));
+                player.sendMessage(Messages.COOLDOWN_OVER.format(Placeholder.unparsed("profile", profile.name)));
                 player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
             }
         }, profile.coolDown.getCoolDownTimeInTicks());
@@ -171,7 +171,7 @@ public class CmdRtp implements TabExecutor {
             private void countDown() {
                 player.sendMessage(Messages.
                         WARMUP_TELEPORTING_IN_X.format(
-                                rtpProfile.warmup - timeDifInSeconds()
+                                Placeholder.unparsed("seconds", Integer.toString(rtpProfile.warmup - timeDifInSeconds()))
                         ));
             }
 
@@ -200,13 +200,13 @@ public class CmdRtp implements TabExecutor {
                     if (rtpProfile.cost > 0) {
                         final EconomyResponse er = plugin.getEconomy().withdrawPlayer(player, rtpProfile.cost);
                         if (er.transactionSuccess()) player.sendMessage(Messages.ECON_YOU_WERE_CHARGED_X.format(
-                                plugin.getEconomy().format(er.amount),
-                                plugin.getEconomy().format(er.balance)));
+                                Placeholder.unparsed("amount", plugin.getEconomy().format(er.amount)),
+                                Placeholder.unparsed("balance", plugin.getEconomy().format(er.balance))));
                         else player.sendMessage(Messages.ECON_ERROR.format(
-                                "An economy error occurred: {0}", er.errorMessage));
+                                Placeholder.unparsed("error", String.valueOf(er.errorMessage))));
                     }
                 } catch (final Exception e) {
-                    player.sendMessage(Messages.NP_UNEXPECTED_EXCEPTION.format(e.getMessage()));
+                    player.sendMessage(Messages.NP_UNEXPECTED_EXCEPTION.format(Placeholder.component("reason", JrtpBaseException.userMessage(e))));
                     e.printStackTrace();
                 } finally {
                     cancelTask();
@@ -243,7 +243,7 @@ public class CmdRtp implements TabExecutor {
         final boolean useByName = sender.hasPermission("jakesrtp.usebyname");
         if (args.length == 2 && (!useByName
                 || randomTeleporter.getRtpSettingsNamesForPlayer(player).stream()
-                        .noneMatch(name -> name.equalsIgnoreCase(args[0])))) {
+                .noneMatch(name -> name.equalsIgnoreCase(args[0])))) {
             return List.of();
         }
         final String prefix = (args.length == 0 ? "" : args[args.length - 1]).toLowerCase(Locale.ROOT);
