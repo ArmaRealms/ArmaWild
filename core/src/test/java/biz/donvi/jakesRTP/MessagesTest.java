@@ -60,7 +60,7 @@ class MessagesTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"en", "es", "hu", "is", "it", "nl", "pl", "ru"})
+    @ValueSource(strings = {"en", "es", "hu", "is", "it", "nl", "pl", "pt", "ru"})
     void bundledTranslationsHaveValidYamlAndResolveNamedPlaceholders(final String language) {
         final Map<String, String> translations = new Yaml().load(
                 getClass().getResourceAsStream("/translations/lang_" + language + ".yml"));

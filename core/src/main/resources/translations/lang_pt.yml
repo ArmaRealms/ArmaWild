@@ -1,0 +1,63 @@
+# - - - - - - - - - - - - - - -
+# Mensagens em português (pt)
+# - - - - - - - - - - - - - - -
+# Para ativar, defina language: 'pt' em language-settings.yml.
+# Todas as mensagens aceitam MiniMessage e placeholders nomeados.
+# Para personalizar uma mensagem, copie sua chave para language-settings.yml.
+
+# <reason>: motivo pelo qual o RTP foi negado ou falhou.
+not-permitted-generic: 'Não foi possível realizar o RTP. Motivo: <reason>'
+not-permitted-major-error: 'Erro ao realizar o RTP. Motivo: <reason><newline>Consulte o console para mais informações sobre a falha no teleporte.'
+
+# <code>: identificador de diagnóstico.
+not-enabled-in-this-world: 'O RTP não está habilitado neste mundo. <code>'
+
+# <profile>: nome do perfil de RTP solicitado.
+no-settings-found-with-name: 'Nenhum perfil de RTP encontrado com o nome <profile>.'
+no-settings-found-with-name-for-player: 'Nenhum perfil de RTP disponível com o nome <profile>.'
+
+# <permission>: permissão necessária para executar a ação.
+no-permission: 'Você não tem a permissão <permission> para executar esta ação.'
+too-many-failed-attempts: 'Não foi possível encontrar um local seguro após várias tentativas.'
+
+# <player>: nome do jogador solicitado; <world>: nome do mundo solicitado.
+player-not-found: 'Jogador <player> não encontrado.'
+world-not-found: 'Mundo <world> não encontrado.'
+
+# <profile>: nome do perfil; <world>: mundo solicitado ou permitido.
+rtp-settings-no-contain-world: 'O mundo "<world>" não está habilitado no perfil de RTP "<profile>".'
+rtp-settings-must-use-world: 'O perfil de RTP "<profile>" só permite teleportar para o mundo "<world>".'
+
+# <time>: tempo restante, formatado pelas mensagens readable-time abaixo.
+need-to-wait-for-cooldown: 'Aguarde <time> para usar o RTP novamente.'
+# <seconds>: quantidade de segundos restantes antes do teleporte.
+teleporting-in-x-seconds: 'Teleportando em <seconds> segundos...'
+moved-during-warmup: 'Você se moveu. RTP cancelado.'
+rtp-called-while-in-warmup: 'Você já está aguardando um RTP!'
+
+# <cost>: custo formatado pela economia; <balance>: saldo do jogador.
+not-enough-money: 'Você não tem saldo suficiente. Custo: <cost>. Saldo: <balance>.'
+# <cost>: custo; <profile>: perfil; <command>: comando completo de confirmação.
+# <confirm>...</confirm>: texto clicável que executa o comando de confirmação.
+confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'
+no-longer-enough-money: 'Você não tem mais saldo suficiente para realizar este RTP.'
+# <amount>: valor cobrado; <balance>: saldo restante.
+you-were-charged-x: 'Foram cobrados <amount>. Seu saldo agora é <balance>.'
+# <error>: descrição do erro retornado pelo sistema de economia.
+economy-error: 'Ocorreu um erro no sistema de economia: <error>'
+# <profile>: perfil cujo tempo de espera terminou.
+cooldown-over: 'Você já pode usar o RTP do perfil "<profile>" novamente.'
+
+# Unidades de tempo com valor zero são omitidas.
+# <days>, <hours>, <minutes> e <seconds>: unidades já formatadas.
+# <amount>: quantidade da unidade correspondente.
+readable-time: '<days><hours><minutes><seconds>'
+readable-time-word-days: '<amount> dias, '
+readable-time-word-hours: '<amount> horas, '
+readable-time-word-minutes: '<amount> minutos, '
+readable-time-word-seconds: '<amount> segundos'
+
+# Mensagens dos comandos administrativos.
+reloaded: 'Configurações recarregadas.'
+# <profile>: perfil solicitado; <profiles>: lista de perfis disponíveis.
+settings-not-found: 'Nenhum perfil encontrado com o nome <profile>. Perfis disponíveis: <profiles>'
