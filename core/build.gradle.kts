@@ -21,7 +21,6 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.paperlib)
     implementation(project(":api"))
     compileOnly(libs.paper)
     compileOnly(libs.dynmap) {
