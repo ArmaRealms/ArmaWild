@@ -1,5 +1,8 @@
 package biz.donvi.jakesRTP;
 
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
+import biz.donvi.jakesRTP.exception.NotPermittedException;
+import biz.donvi.jakesRTP.exception.PluginDisabledException;
 import org.bukkit.Bukkit;
 
 import java.lang.ref.WeakReference;
@@ -42,11 +45,9 @@ public class LocationCacheFiller implements Runnable {
                             pluginMain().getRandomTeleporter().fillQueue(settings);
                         } catch (final JrtpBaseException ex) {
                             issueCounter += 2;
-                            if (ex instanceof JrtpBaseException.PluginDisabledException) throw ex;
-                            if (ex instanceof JrtpBaseException.NotPermittedException)
-                                infoLog(
-                                        "An exception has occurred that should be impossible to occur. Please report this" +
-                                                ".");
+                            if (ex instanceof PluginDisabledException) throw ex;
+                            if (ex instanceof NotPermittedException)
+                                infoLog("An exception has occurred that should be impossible to occur. Please report this" + ".");
                             else if (issueCounter < issueCounterMax)
                                 infoLog("Something has gone wrong, but this is most likely not an issue.");
                             else
@@ -60,7 +61,7 @@ public class LocationCacheFiller implements Runnable {
 
                 patientlyWait(recheckTime);
             }
-        } catch (final JrtpBaseException.PluginDisabledException ignored) {
+        } catch (final PluginDisabledException ignored) {
             infoLog("[J-RTP] Plugin disabled while finding a location. Location scrapped.");
         } catch (final ReferenceNonExistentException ignored) {
             infoLog("[J-RTP] Plugin no longer exists.");

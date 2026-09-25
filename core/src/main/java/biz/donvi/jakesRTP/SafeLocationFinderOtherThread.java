@@ -1,5 +1,7 @@
 package biz.donvi.jakesRTP;
 
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
+import biz.donvi.jakesRTP.exception.PluginDisabledException;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
@@ -59,22 +61,22 @@ public class SafeLocationFinderOtherThread extends SafeLocationFinder {
      * @param loc The location to get the material for.
      */
     @Override
-    protected Material getLocMaterial(final Location loc) throws JrtpBaseException.PluginDisabledException, TimeoutException {
+    protected Material getLocMaterial(final Location loc) throws PluginDisabledException, TimeoutException {
         return SafeLocationUtils.util.locMatFromSnapshot(loc, getChunkForLocation(loc));
     }
 
     @Override
-    protected void dropToGround() throws JrtpBaseException.PluginDisabledException, TimeoutException {
+    protected void dropToGround() throws PluginDisabledException, TimeoutException {
         SafeLocationUtils.util.dropToGround(loc, lowBound, highBound, getChunkForLocation(loc));
     }
 
     @Override
-    protected void dropToMiddle() throws JrtpBaseException.PluginDisabledException, TimeoutException {
+    protected void dropToMiddle() throws PluginDisabledException, TimeoutException {
         SafeLocationUtils.util.dropToMiddle(loc, lowBound, highBound, getChunkForLocation(loc));
     }
 
     private ChunkSnapshot getChunkForLocation(final Location loc)
-            throws JrtpBaseException.PluginDisabledException, TimeoutException {
+            throws PluginDisabledException, TimeoutException {
 
         final String chunkKey = chunkXZ(loc.getX()) + " " + chunkXZ(loc.getZ());
 
@@ -84,7 +86,7 @@ public class SafeLocationFinderOtherThread extends SafeLocationFinder {
         }
 
         if (!plugin.locCache()) {
-            throw new JrtpBaseException.PluginDisabledException();
+            throw new PluginDisabledException();
         }
 
         final Location chunkAt = loc.clone();
@@ -96,7 +98,7 @@ public class SafeLocationFinderOtherThread extends SafeLocationFinder {
                     .get(timeout, TimeUnit.SECONDS);
 
             if (!plugin.locCache()) {
-                throw new JrtpBaseException.PluginDisabledException();
+                throw new PluginDisabledException();
             }
 
             chunkSnapshotMap.put(chunkKey, snapshot);
@@ -105,13 +107,13 @@ public class SafeLocationFinderOtherThread extends SafeLocationFinder {
 
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new JrtpBaseException.PluginDisabledException();
+            throw new PluginDisabledException();
 
         } catch (final ExecutionException e) {
             throw new IllegalStateException("Failed to load chunk snapshot.", e);
 
         } catch (final CancellationException e) {
-            throw new JrtpBaseException.PluginDisabledException();
+            throw new PluginDisabledException();
         }
     }
 

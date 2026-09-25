@@ -1,5 +1,7 @@
 package biz.donvi.jakesRTP;
 
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
+import biz.donvi.jakesRTP.exception.NotPermittedException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -107,7 +109,7 @@ class MessagesTest {
     void exceptionReasonsKeepFormattingButLogsRemainPlainText() {
         override(Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER,
                 "<red><click:run_command:'/rtp'>Missing <profile></click></red>");
-        final JrtpBaseException error = new JrtpBaseException.NotPermittedException(
+        final JrtpBaseException error = new NotPermittedException(
                 Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER.format(Placeholder.unparsed("profile", "survival")));
         final Component wrapped = Messages.NP_GENERIC.format(Placeholder.component("reason", JrtpBaseException.userMessage(error)));
         assertEquals("Missing survival", error.getMessage());

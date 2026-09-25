@@ -1,6 +1,10 @@
 package biz.donvi.jakesRTP;
 
+import biz.donvi.jakesRTP.exception.ConfigurationException;
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
 import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.Objects;
 
 public class DistributionSettings {
 
@@ -17,25 +21,25 @@ public class DistributionSettings {
         this.centerZ = centerZ;
     }
 
-    DistributionSettings(final ConfigurationSection settings) throws JrtpBaseException.ConfigurationException {
-        String shapeString = null;
+    DistributionSettings(final ConfigurationSection settings) throws ConfigurationException {
+        String shapeString;
         try {
-            shapeString = settings.getString("shape").toLowerCase();
+            shapeString = Objects.requireNonNull(settings.getString("shape")).toLowerCase();
         } catch (final NullPointerException npe) {
-            throw new JrtpBaseException.ConfigurationException("Configuration shape not properly defined.");
+            throw new ConfigurationException("Configuration shape not properly defined.");
         }
         switch (shapeString) {
             case "square" -> shape = new DistributionShape.Square(settings);
             case "circle" -> shape = new DistributionShape.Circle(settings);
             case "rectangle" -> shape = new DistributionShape.Rectangle(settings);
-            default -> throw new JrtpBaseException.ConfigurationException(
+            default -> throw new ConfigurationException(
                     "Distribution shape not properly defined: " + shapeString);
         }
         try {
-            final char centerChar = settings.getString("center.option").toLowerCase().charAt(0);
+            final char centerChar = Objects.requireNonNull(settings.getString("center.option")).toLowerCase().charAt(0);
             center = CenterTypes.values()[centerChar - 'a'];
         } catch (final NullPointerException npe) {
-            throw new JrtpBaseException.ConfigurationException("Configuration center not properly defined.");
+            throw new ConfigurationException("Configuration center not properly defined.");
         }
         if (center == CenterTypes.PRESET_VALUE) {
             centerX = settings.getInt("center.c-custom.x");

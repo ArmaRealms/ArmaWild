@@ -1,6 +1,7 @@
 package biz.donvi.jakesRTP;
 
-import biz.donvi.jakesRTP.JrtpBaseException.PluginDisabledException;
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
+import biz.donvi.jakesRTP.exception.PluginDisabledException;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -98,7 +99,7 @@ public abstract class SafeLocationFinder {
      *            Ex: if {@code avm = 1}, the block itself, 1 up, and 1 down will be checked.
      * @return True if the location is safe, false if it is not.
      */
-    public final boolean checkSafety(final int avm) throws JrtpBaseException.PluginDisabledException, TimeoutException {
+    public final boolean checkSafety(final int avm) throws PluginDisabledException, TimeoutException {
         if (avm < 0) throw new IllegalArgumentException("Avm can not be less than 0.");
         // Make a temporary location so we don't edit the main one unless its safe.
         final Location tempLoc = loc.clone().add(0, avm + 1, 0);
