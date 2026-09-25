@@ -5,6 +5,7 @@ import biz.donvi.jakesRTP.claimsIntegrations.ClaimsManager;
 import biz.donvi.jakesRTP.commands.CmdForceRtp;
 import biz.donvi.jakesRTP.commands.CmdRtp;
 import biz.donvi.jakesRTP.commands.CmdRtpAdmin;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -282,6 +283,13 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
             messageOverrides.remove("language");
             infoLog("Overwriting messages with custom messages.");
             customMessageCount = Messages.addMap(messageOverrides);
+        }
+        // Bukkit owns permission checks before command executors run. Keep their messages in the same format.
+        for (final String commandName : getDescription().getCommands().keySet()) {
+            final PluginCommand command = getCommand(commandName);
+            if (command != null && command.getPermission() != null)
+                command.permissionMessage(Messages.NP_NO_PERMISSION.format(
+                        Placeholder.unparsed("permission", command.getPermission())));
         }
     }
 

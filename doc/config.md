@@ -35,8 +35,57 @@ confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_te
 - `<confirm>...</confirm>`: makes the enclosed text run the confirmation command when clicked.
 
 Standard MiniMessage tags, including `<click:run_command:...>` and `<hover:show_text:...>`, are supported.
-Use MiniMessage colors for this message; legacy `&` colors and numbered placeholders are used by the other messages.
+All configurable messages use MiniMessage colors and named placeholders; see [message formatting](#message-formatting).
 Apply configuration changes with `/rtp-admin reload` and message changes with `/rtp-admin reload-messages`.
+
+---
+
+### Message formatting
+
+Every message in `language-settings.yml` and the translations supports MiniMessage, including colors,
+gradients, click and hover events. Permission denials also use `no-permission` from this file.
+Values such as player names, profile names and economy text are inserted literally and cannot inject tags.
+Nested configured messages, such as the cooldown duration or an error reason, keep their formatting.
+
+```yaml
+need-to-wait-for-cooldown: '<yellow>Aguarde <time> para usar o RTP novamente.</yellow>'
+teleporting-in-x-seconds: '<green>Teleportando em <seconds> segundos...</green>'
+not-enough-money: '<red>Você precisa de <cost>. Saldo: <balance>.</red>'
+you-were-charged-x: '<green>Foram cobrados <amount>. Saldo: <balance>.</green>'
+no-permission: '<red>Você não tem a permissão <permission>.</red>'
+cooldown-over: '<green>O RTP de <profile> está disponível!</green>'
+readable-time: '<days><hours><minutes><seconds>'
+readable-time-word-seconds: '<aqua><amount> segundos</aqua>'
+```
+
+Use the placeholders assigned to each message:
+
+| Message key                                                                                                       | Placeholders                                                 |
+|-------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `not-permitted-generic`, `not-permitted-major-error`                                                              | `<reason>`                                                   |
+| `not-enabled-in-this-world`                                                                                       | `<code>`                                                     |
+| `no-settings-found-with-name`, `no-settings-found-with-name-for-player`, `cooldown-over`                          | `<profile>`                                                  |
+| `no-permission`                                                                                                   | `<permission>`                                               |
+| `player-not-found`                                                                                                | `<player>`                                                   |
+| `world-not-found`                                                                                                 | `<world>`                                                    |
+| `rtp-settings-no-contain-world`, `rtp-settings-must-use-world`                                                    | `<profile>`, `<world>`                                       |
+| `need-to-wait-for-cooldown`                                                                                       | `<time>`                                                     |
+| `teleporting-in-x-seconds`                                                                                        | `<seconds>`                                                  |
+| `not-enough-money`                                                                                                | `<cost>`, `<balance>`                                        |
+| `confirm-paid-rtp`                                                                                                | `<cost>`, `<profile>`, `<command>`, `<confirm>...</confirm>` |
+| `you-were-charged-x`                                                                                              | `<amount>`, `<balance>`                                      |
+| `economy-error`                                                                                                   | `<error>`                                                    |
+| `settings-not-found`                                                                                              | `<profile>`, `<profiles>`                                    |
+| `readable-time`                                                                                                   | `<days>`, `<hours>`, `<minutes>`, `<seconds>`                |
+| `readable-time-word-days`, `readable-time-word-hours`, `readable-time-word-minutes`, `readable-time-word-seconds` | `<amount>`                                                   |
+
+The remaining message keys do not need placeholders. `reloaded` controls the configuration reload acknowledgement.
+Use `<newline>` for line breaks; written `\n` is also accepted.
+
+**Existing installations:** update custom overrides manually. Replace numbered placeholders such as `{0}`
+with the corresponding names above, `&c` with `<red>`, and `{#00FFC8}` with `<#00FFC8>`.
+Legacy formatting and numbered placeholders are no longer interpreted. Existing files are not overwritten.
+Reload messages with `/rtp-admin reload-messages` after editing them.
 
 ---
 
@@ -74,8 +123,8 @@ and then of course you can read the new settings and decide if you want to chang
 
 **Quick description:**
 If this is enabled, all new players will spawn in a random location chosen
-as if they ran `/rtp` while in the world \[world], making sure to use the settings \[default].
-_<sub>Note: The values \[default] and \[world] are fillers.
+as if they ran `/rtp` while in the world \[world], making sure to use the settings \[default]. _<sub>Note: The values
+\[default] and \[world] are fillers.
 They do work with the stock config, but you can change them to any valid world or rtp-settings._</sub>
 
 ```yaml
@@ -89,16 +138,16 @@ Enabled:
 Should we spawn players randomly?
 
 Settings:
-The plugin needs to know _how_ to find the random point, and it uses a rtp-config-section
-(also commonly referred to as rtp-settings in this documentation) to define how to get the location.
+The plugin needs to know _how_ to find the random point, and it uses a rtp-config-section (also commonly referred to as
+rtp-settings in this documentation) to define how to get the location.
 Each rtp-config-section that you define requires a unique name, and that name is what you put here after settings
-in place of \[default].
-_<sub>Note: If you do not change the name of the stock rtp-config-section, default is a fully valid name here.</sub>_
+in place of \[default]. _<sub>Note: If you do not change the name of the stock rtp-config-section, default is a fully
+valid name here.</sub>_
 
 World:
 Again, the plugin needs to know how to find the random point, and since rtp-settings allow multiple worlds,
-you must say which world to spawn the player in.
-_<sub>Note: the world name IS case-sensitive, and it MUST be listed as an enabled world in the rtp-settings</sub>_
+you must say which world to spawn the player in. _<sub>Note: the world name IS case-sensitive, and it MUST be listed as
+an enabled world in the rtp-settings</sub>_
 
 ---
 

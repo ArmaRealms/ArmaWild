@@ -5,12 +5,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static biz.donvi.jakesRTP.GeneralUtil.replaceLegacyColors;
-import static biz.donvi.jakesRTP.GeneralUtil.replaceNewColors;
 import static biz.donvi.jakesRTP.GeneralUtil.replaceWrittenLineBreaks;
 import static java.util.logging.Level.WARNING;
 
@@ -36,6 +33,8 @@ public enum Messages {
     ECON_YOU_WERE_CHARGED_X("you-were-charged-x"),
     ECON_ERROR("economy-error"),
     COOLDOWN_OVER("cooldown-over"),
+    RELOADED("reloaded"),
+    SETTINGS_NOT_FOUND("settings-not-found"),
     READABLE_TIME("readable-time"),
     READABLE_TIME_WORD_DAYS("readable-time-word-days"),
     READABLE_TIME_WORD_HOURS("readable-time-word-hours"),
@@ -81,20 +80,10 @@ public enum Messages {
         return numValuesAdded;
     }
 
-    private static String reformat(final String s) {
-        return s == null ? null : replaceNewColors(replaceLegacyColors(replaceWrittenLineBreaks(s)));
-    }
-
-    String raw() {
-        return reformat(mappedValues[this.ordinal()]);
-    }
-
-    public @NotNull String format(final Object... args) {
-        return MessageFormat.format(raw(), args);
-    }
-
-    /** Parse MiniMessage directly, preserving quotes in click/hover tags and literal placeholder values. */
-    public @NotNull Component formatMiniMessage(final TagResolver... placeholders) {
+    /**
+     * Parse MiniMessage directly, preserving quotes in click/hover tags and literal placeholder values.
+     */
+    public @NotNull Component format(final TagResolver... placeholders) {
         return MiniMessage.miniMessage().deserialize(
                 replaceWrittenLineBreaks(mappedValues[this.ordinal()]), placeholders);
     }

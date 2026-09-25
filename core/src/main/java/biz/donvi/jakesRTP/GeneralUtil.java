@@ -1,5 +1,8 @@
 package biz.donvi.jakesRTP;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -126,6 +129,10 @@ public final class GeneralUtil {
     }
 
     public static String readableTime(final long milliseconds) {
+        return PlainTextComponentSerializer.plainText().serialize(readableTimeComponent(milliseconds));
+    }
+
+    public static Component readableTimeComponent(final long milliseconds) {
         final int days;
         final int hours;
         final int minutes;
@@ -135,10 +142,14 @@ public final class GeneralUtil {
         hours = (int) (milliseconds / (1000 * 60 * 60)) % 24;
         days = (int) (milliseconds / (1000 * 60 * 60 * 24));
         return Messages.READABLE_TIME.format(
-                (days > 0 ? Messages.READABLE_TIME_WORD_DAYS.format(days) : ""),
-                (hours > 0 ? Messages.READABLE_TIME_WORD_HOURS.format(hours) : ""),
-                (minutes > 0 ? Messages.READABLE_TIME_WORD_MINUTES.format(minutes) : ""),
-                (seconds > 0 ? Messages.READABLE_TIME_WORD_SECONDS.format(seconds) : ""));
+                Placeholder.component("days", timeUnit(Messages.READABLE_TIME_WORD_DAYS, days)),
+                Placeholder.component("hours", timeUnit(Messages.READABLE_TIME_WORD_HOURS, hours)),
+                Placeholder.component("minutes", timeUnit(Messages.READABLE_TIME_WORD_MINUTES, minutes)),
+                Placeholder.component("seconds", timeUnit(Messages.READABLE_TIME_WORD_SECONDS, seconds)));
+    }
+
+    private static Component timeUnit(final Messages message, final int amount) {
+        return amount > 0 ? message.format(Placeholder.unparsed("amount", Integer.toString(amount))) : Component.empty();
     }
 
     public static boolean isDirEmpty(final Path directory) throws IOException {

@@ -31,6 +31,10 @@ public class PlayerRtpEvent extends PlayerEvent {
         this.profileName = profileName;
     }
 
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
     /**
      * @return A copy of the location the player was teleported to.
      */
@@ -54,10 +58,6 @@ public class PlayerRtpEvent extends PlayerEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 }

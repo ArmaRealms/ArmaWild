@@ -3,8 +3,10 @@ package biz.donvi.jakesRTP.commands;
 import biz.donvi.jakesRTP.GeneralUtil;
 import biz.donvi.jakesRTP.GeneralUtil.Pair;
 import biz.donvi.jakesRTP.JakesRtpPlugin;
+import biz.donvi.jakesRTP.Messages;
 import biz.donvi.jakesRTP.RandomTeleporter;
 import biz.donvi.jakesRTP.RtpProfile;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -70,7 +72,7 @@ public class CmdRtpAdmin implements TabExecutor {
         JakesRtpPlugin.plugin.reloadCommands();
         JakesRtpPlugin.plugin.loadRandomTeleporter();
         JakesRtpPlugin.plugin.loadLocationCacheFiller();
-        sender.sendMessage("Reloaded.");
+        sender.sendMessage(Messages.RELOADED.format());
     }
 
     private void subReloadMessages(final CommandSender sender) {
@@ -108,8 +110,9 @@ public class CmdRtpAdmin implements TabExecutor {
                 sender.sendMessage(message);
         } catch (final Exception e) {
             sender.sendMessage(
-                    "Could not find any settings with the name " + args[0] + ", " +
-                            GeneralUtil.listText(theRandomTeleporter.getRtpSettingsNames())
+                    Messages.SETTINGS_NOT_FOUND.format(
+                            Placeholder.unparsed("profile", args[0]),
+                            Placeholder.unparsed("profiles", GeneralUtil.listText(theRandomTeleporter.getRtpSettingsNames())))
             );
         }
     }

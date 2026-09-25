@@ -1,6 +1,8 @@
 package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.GeneralUtil.Pair;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -222,7 +224,8 @@ public class RandomTeleporter {
                     break;
                 }
         if (finSettings != null) return finSettings;
-        else throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NOT_ENABLED.format("~ECW"));
+        else
+            throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECW")));
     }
 
     /**
@@ -236,7 +239,7 @@ public class RandomTeleporter {
         for (final RtpProfile settings : rtpSettings)
             if (settings.name.equals(name))
                 return settings;
-        throw new JrtpBaseException(Messages.NP_R_NO_RTPSETTINGS_NAME.format(name));
+        throw new JrtpBaseException(Messages.NP_R_NO_RTPSETTINGS_NAME.format(Placeholder.unparsed("profile", name)));
     }
 
     /**
@@ -265,7 +268,8 @@ public class RandomTeleporter {
                     break;
                 }
         if (finSettings != null) return finSettings;
-        else throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NOT_ENABLED.format("~ECP"));
+        else
+            throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECP")));
     }
 
     /**
@@ -290,7 +294,7 @@ public class RandomTeleporter {
                     (!settings.requireExplicitPermission || player.hasPermission(EXPLICIT_PERM_PREFIX + settings.name)))
                 // Note: We never check priority because the name must be unique
                 return settings;
-        throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER.format(name));
+        throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER.format(Placeholder.unparsed("profile", name)));
     }
 
     /**
@@ -346,8 +350,8 @@ public class RandomTeleporter {
      *                      empty.
      * @return A random location that can be safely teleported to by a player.
      * @throws JrtpBaseException Only two points of this code are expected to be able to throw an exception:
-     *                   getWorldRtpSettings() will throw an exception if the world is not RTP enabled.
-     *                   getRtpXZ() will throw an exception if the rtp shape is not defined.
+     *                           getWorldRtpSettings() will throw an exception if the world is not RTP enabled.
+     *                           getRtpXZ() will throw an exception if the rtp shape is not defined.
      */
     public Location getRtpLocation(final RtpProfile rtpProfile, final Location callFromLoc, final boolean takeFromQueue)
             throws JrtpBaseException {
@@ -376,10 +380,10 @@ public class RandomTeleporter {
             potentialRtpLocation = getPotentialRtpLocation(callFromLoc, rtpProfile);
             if (++randAttemptCount > rtpProfile.maxAttempts)
                 throw new JrtpBaseException(
-                        Messages.NP_R_TOO_MANY_FAILED_ATTEMPTS.format() + "\n[" +
+                        Messages.NP_R_TOO_MANY_FAILED_ATTEMPTS.format().append(Component.text("\n[" +
                                 "FailedToWorldBorder: " + failedToWorldBorder + ", " +
                                 "FailedToClaims: " + failedToClaimedLand + ", " +
-                                "FailedToSafety: " + failedToSafetyCheck + "]");
+                                "FailedToSafety: " + failedToSafetyCheck + "]")));
 
             // Currently, I ASSUME that the `tryAndMakeSafe()` is by far the most expensive method, so I do the easy
             //   checks before (so we can avoid trying to make it safe) but then we also have to check them again at
@@ -454,8 +458,8 @@ public class RandomTeleporter {
      * @param settings The rtpSettings to use for the world
      * @return The number of locations added to the queue. (The result can be ignored if deemed unnecessary)
      * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException Should not realistically get thrown, but may occur if the
-     *                                                 world is not
-     *                                                 enabled in the settings.
+     *                                                                    world is not
+     *                                                                    enabled in the settings.
      */
     public int fillQueue(final RtpProfile settings)
             throws JrtpBaseException {

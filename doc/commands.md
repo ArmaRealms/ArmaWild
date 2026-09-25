@@ -18,7 +18,8 @@ This selects an RTP settings profile by name.
 Paid RTPs show a clickable confirmation prompt before starting. Confirm with `/rtp confirm`
 or `/rtp <profile> confirm`. The word `confirm` is configurable through `rtp-confirmation.subcommand`
 in `config.yml`. `/wild` supports the same syntax. Confirmation alone does not require `jakesrtp.usebyname`.
-The message can be customized with MiniMessage in `language-settings.yml`; see [configuration](config.md#rtp-confirmation).
+The message can be customized with MiniMessage in `language-settings.yml`;
+see [configuration](config.md#rtp-confirmation).
 
 ## `/rtp-admin` - The general admin command for this plugin.
 
@@ -39,17 +40,17 @@ Permission: `jakesrtp.admin` defaults to: `op`
 | Permission:  | `jakesrtp.use` defaults to: `all`   
 | Description: | Teleports you to a random location. 
 
-|             | Named profile                                                    |
-|-------------|------------------------------------------------------------------|
-| Usage       | `/rtp <profile>`                                                 |
-| Permissions | `jakesrtp.use` & `jakesrtp.usebyname`                              |
-| Description | Teleports you using the selected profile.                        |
+|             | Named profile                             |
+|-------------|-------------------------------------------|
+| Usage       | `/rtp <profile>`                          |
+| Permissions | `jakesrtp.use` & `jakesrtp.usebyname`     |
+| Description | Teleports you using the selected profile. |
 
 |             | Paid RTP confirmation                                            |
 |-------------|------------------------------------------------------------------|
-| Usage       | `/rtp confirm` or `/rtp <profile> confirm`                        |
-| Permissions | `jakesrtp.use`; named profiles also require `jakesrtp.usebyname`   |
-| Description | Confirms the cost and proceeds with the regular RTP checks.       |
+| Usage       | `/rtp confirm` or `/rtp <profile> confirm`                       |
+| Permissions | `jakesrtp.use`; named profiles also require `jakesrtp.usebyname` |
+| Description | Confirms the cost and proceeds with the regular RTP checks.      |
 
 ## `/rtp-admin` - The general admin command for this plugin.
 
