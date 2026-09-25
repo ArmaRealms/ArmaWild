@@ -24,16 +24,32 @@ dependencies {
     implementation(libs.paperlib)
     implementation(project(":api"))
     compileOnly(libs.paper)
-    compileOnly(libs.dynmap)
+    compileOnly(libs.dynmap) {
+        exclude(group = "org.bukkit")
+        exclude(group = "org.spigotmc")
+    }
     compileOnly(libs.chunkyCommon)
     compileOnly(libs.chunkyBorderCommon)
     compileOnly(libs.chunkyBorderBukkit)
-    compileOnly(libs.worldBorder)
+    compileOnly(libs.worldBorder) {
+        exclude(group = "org.bukkit")
+        exclude(group = "org.spigotmc")
+    }
     compileOnly(libs.vaultAPI)
     compileOnly(libs.griefPrevention)
     compileOnly(libs.worldguard)
     compileOnly(libs.huskTowns)
     compileOnly(libs.landsAPI)
+
+    testImplementation(libs.paper)
+    testImplementation(libs.vaultAPI)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+    testImplementation("org.mockito:mockito-core:5.20.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.processResources {
@@ -56,13 +72,12 @@ tasks.named("build") {
 }
 
 tasks.named<RunServer>("runServer") {
-        minecraftVersion("1.21.11")
-        jvmArguments.add("-Dcom.mojang.eula.agree=true")
-        jvmArguments.add("-Dnet.kyori.ansi.colorLevel=truecolor")
-        jvmArguments.add("-Dfile.encoding=UTF8")
-        systemProperty("terminal.jline", false)
-        systemProperty("terminal.ansi", true)
+    minecraftVersion("1.21.11")
+    jvmArguments.add("-Dcom.mojang.eula.agree=true")
+    jvmArguments.add("-Dnet.kyori.ansi.colorLevel=truecolor")
+    jvmArguments.add("-Dfile.encoding=UTF8")
+    systemProperty("terminal.jline", false)
+    systemProperty("terminal.ansi", true)
 }
-
 
 
