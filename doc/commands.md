@@ -12,12 +12,13 @@ Permission: `jakesrtp.use` defaults to: `all`
 
 **Extended usages...**
 
-`/rtp [playerName]` which requires extra perm `jakesRtp.others`   
-This will teleport the given user randomly, acting as if they ran `/rtp`.
+`/rtp <profile>` requires the extra permission `jakesrtp.usebyname`.
+This selects an RTP settings profile by name.
 
-`/rtp <playername> [worldName]` which requires extra perm `jakesRtp.others`   
-This will teleport the given user randomly, acting as if they ran `/rtp` while
-standing in at the spawn point of the given world.
+Paid RTPs show a clickable confirmation prompt before starting. Confirm with `/rtp confirm`
+or `/rtp <profile> confirm`. The word `confirm` is configurable through `rtp-confirmation.subcommand`
+in `config.yml`. `/wild` supports the same syntax. Confirmation alone does not require `jakesrtp.usebyname`.
+The message can be customized with MiniMessage in `language-settings.yml`; see [configuration](config.md#rtp-confirmation).
 
 ## `/rtp-admin` - The general admin command for this plugin.
 
@@ -38,17 +39,17 @@ Permission: `jakesrtp.admin` defaults to: `op`
 | Permission:  | `jakesrtp.use` defaults to: `all`   
 | Description: | Teleports you to a random location. 
 
-|             | ForceRtp Example 1                                                        | 
-|-------------|---------------------------------------------------------------------------|
-| Usage       | `/rtp <playerName>`                                                       
-| Permissions | `jakesrtp.use` & `jakesRtp.others`                                        
-| Description | This will teleport the given user randomly, acting as if they ran `/rtp`. 
+|             | Named profile                                                    |
+|-------------|------------------------------------------------------------------|
+| Usage       | `/rtp <profile>`                                                 |
+| Permissions | `jakesrtp.use` & `jakesrtp.usebyname`                              |
+| Description | Teleports you using the selected profile.                        |
 
-|             | ForceRtp Example 2                                                                                                             |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------| 
-| Usage       | `/rtp <playername> <worldName>`                                                                                                
-| Permissions | `jakesrtp.use` & `jakesRtp.others`                                                                                             
-| Description | This will teleport the given user randomly, acting as if they ran `/rtp` while standing at the spawn point of the given world. 
+|             | Paid RTP confirmation                                            |
+|-------------|------------------------------------------------------------------|
+| Usage       | `/rtp confirm` or `/rtp <profile> confirm`                        |
+| Permissions | `jakesrtp.use`; named profiles also require `jakesrtp.usebyname`   |
+| Description | Confirms the cost and proceeds with the regular RTP checks.       |
 
 ## `/rtp-admin` - The general admin command for this plugin.
 

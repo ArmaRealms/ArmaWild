@@ -59,6 +59,10 @@ rtp-called-while-in-warmup: 'You are already waiting on an RTP warmup!'
 #   {0} - The cost
 #   {1} - The player's balance
 not-enough-money: 'You do not have enough money for this. Cost: {0}. Balance: {1}.'
+# Paid RTP confirmation. Uses MiniMessage, not legacy colors or numbered placeholders.
+# <cost>: formatted cost; <profile>: selected profile; <command>: full confirmation command.
+# <confirm>...</confirm>: clickable text that runs <command>, preserving the alias and profile.
+confirm-paid-rtp: '<yellow>This RTP costs <cost>. <confirm><green><hover:show_text:"<command>">[Click to confirm]</hover></green></confirm></yellow>'
 # For when the player had enough money to run the command, but does not have enough by the time they get charged.
 # This will only really happen if a player tries to get around paying by emptying their balance before the warmup is over.
 no-longer-enough-money: 'You no longer have the required funds to do this.'

@@ -5,6 +5,10 @@ import biz.donvi.jakesRTP.Messages;
 import biz.donvi.jakesRTP.RandomTeleportAction;
 import biz.donvi.jakesRTP.RandomTeleporter;
 import biz.donvi.jakesRTP.RtpProfile;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,14 +23,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
 
 public class CmdRtp implements TabExecutor {
     private final RandomTeleporter randomTeleporter;
+    private final String confirmationSubcommand;
 
     public CmdRtp(final RandomTeleporter randomTeleporter) {
         this.randomTeleporter = randomTeleporter;
+        final String configured = plugin.getConfig().getString("rtp-confirmation.subcommand", "confirm").trim();
+        if (configured.matches("[a-zA-Z0-9_-]+")) {
+            confirmationSubcommand = configured;
+        } else {
+            plugin.getLogger().warning("Invalid rtp-confirmation.subcommand; using 'confirm'. Use letters, numbers, '_' or '-'.");
+            confirmationSubcommand = "confirm";
+        }
     }
 
     /**
@@ -37,18 +50,22 @@ public class CmdRtp implements TabExecutor {
     public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command,
                              final @NotNull String label, final String[] args) {
         try {
-            // Only handle when sender is a player and argument count is valid (0 or 1)
+            // Accept /rtp [profile] [confirmation], including command aliases.
             if (!(sender instanceof final Player player)) return true;
-            if (args.length > 1) return true;
+            if (args.length > 2) return true;
+            final boolean confirmed = args.length > 0
+                    && args[args.length - 1].equalsIgnoreCase(confirmationSubcommand);
+            final int profileArgs = args.length - (confirmed ? 1 : 0);
+            if (profileArgs > 1) return true;
 
-            // If using by name (1 arg), require permission
-            if (args.length == 1 && !sender.hasPermission("jakesrtp.usebyname")) {
+            // Confirmation alone does not require permission to select a profile by name.
+            if (profileArgs == 1 && !sender.hasPermission("jakesrtp.usebyname")) {
                 player.sendMessage(Messages.NP_NO_PERMISSION.format("jakesrtp.usebyname"));
                 return true;
             }
 
             // Resolve profile (by world or by provided name)
-            final RtpProfile relSettings = (args.length == 0)
+            final RtpProfile relSettings = (profileArgs == 0)
                     ? randomTeleporter.getRtpSettingsByWorldForPlayer(player)
                     : randomTeleporter.getRtpSettingsByNameForPlayer(player, args[0]);
 
@@ -79,6 +96,17 @@ public class CmdRtp implements TabExecutor {
                 player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
                         plugin.getEconomy().format(relSettings.cost),
                         plugin.getEconomy().format(plugin.getEconomy().getBalance(player))));
+                return true;
+            }
+
+            if (needsPayment && !confirmed) {
+                final String confirmationCommand = "/" + label
+                        + (profileArgs == 1 ? " " + args[0] : "") + " " + confirmationSubcommand;
+                player.sendMessage(Messages.ECON_CONFIRM_RTP.formatMiniMessage(
+                        Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
+                        Placeholder.unparsed("command", confirmationCommand),
+                        Placeholder.unparsed("profile", relSettings.name),
+                        TagResolver.resolver("confirm", Tag.styling(ClickEvent.runCommand(confirmationCommand)))));
                 return true;
             }
 
@@ -208,18 +236,24 @@ public class CmdRtp implements TabExecutor {
     @Override
     public List<String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command,
                                       final @NotNull String alias, final String[] args) {
-        // When sender can't use by name or isn't a player, no suggestions.
-        if (!(sender instanceof final Player player)
-                || !sender.hasPermission("jakesrtp.usebyname")
-                || args.length > 1) {
+        if (!(sender instanceof final Player player) || args.length > 2) {
             return List.of();
         }
 
-        // Provide suggestions even when args.length == 0 (alias like /wild often sends empty args during completion)
-        final String prefix = args.length == 0 ? "" : args[0];
+        final boolean useByName = sender.hasPermission("jakesrtp.usebyname");
+        if (args.length == 2 && (!useByName
+                || randomTeleporter.getRtpSettingsNamesForPlayer(player).stream()
+                        .noneMatch(name -> name.equalsIgnoreCase(args[0])))) {
+            return List.of();
+        }
+        final String prefix = (args.length == 0 ? "" : args[args.length - 1]).toLowerCase(Locale.ROOT);
         final ArrayList<String> out = new ArrayList<>();
-        for (final String name : randomTeleporter.getRtpSettingsNamesForPlayer(player))
-            if (name.toLowerCase().startsWith(prefix.toLowerCase())) out.add(name);
+        if (confirmationSubcommand.toLowerCase(Locale.ROOT).startsWith(prefix)) out.add(confirmationSubcommand);
+        if (args.length < 2 && useByName) {
+            for (final String name : randomTeleporter.getRtpSettingsNamesForPlayer(player))
+                if (!name.equalsIgnoreCase(confirmationSubcommand)
+                        && name.toLowerCase(Locale.ROOT).startsWith(prefix)) out.add(name);
+        }
         return out;
     }
 }

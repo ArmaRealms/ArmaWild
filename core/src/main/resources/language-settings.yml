@@ -25,3 +25,8 @@ language: 'en'
 #   thank you so much. ♥
 
 need-to-wait-for-cooldown: 'Whoops! You still have to wait {0}'
+
+# Paid RTP confirmation uses MiniMessage (including click and hover tags).
+# <cost>, <profile> and <command> insert text; <confirm>...</confirm> runs the confirmation command on click.
+# Use MiniMessage colors such as <yellow>, instead of &e or {#RRGGBB}, for this message.
+# confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'
