@@ -47,7 +47,10 @@ dependencies {
     compileOnly(libs.landsAPI)
 
     testImplementation(libs.paper)
-    testImplementation(libs.vaultAPI)
+    testImplementation(libs.vaultAPI) {
+        exclude(group = "org.bukkit")
+        exclude(group = "org.spigotmc")
+    }
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testImplementation("org.mockito:mockito-core:5.20.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
