@@ -35,9 +35,15 @@ dependencies {
         exclude(group = "org.bukkit")
         exclude(group = "org.spigotmc")
     }
-    compileOnly(libs.vaultAPI)
+    compileOnly(libs.vaultAPI) {
+        exclude(group = "org.bukkit")
+        exclude(group = "org.spigotmc")
+    }
     compileOnly(libs.griefPrevention)
-    compileOnly(libs.worldguard)
+    compileOnly(libs.worldguard) {
+        exclude(group = "org.bukkit")
+        exclude(group = "org.spigotmc")
+    }
     compileOnly(libs.huskTowns)
     compileOnly(libs.landsAPI)
 
@@ -64,7 +70,6 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveClassifier.set("")
     archiveVersion.set(project.version.toString())
     destinationDirectory.set(rootProject.layout.projectDirectory.dir("out"))
-    relocate("io.papermc", "biz.donvi.jakesRTP.libs.io.papermc")
 }
 
 tasks.named("build") {

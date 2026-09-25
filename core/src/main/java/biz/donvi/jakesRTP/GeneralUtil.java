@@ -1,6 +1,5 @@
 package biz.donvi.jakesRTP;
 
-import org.apache.commons.lang.text.StrBuilder;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -44,7 +43,7 @@ public final class GeneralUtil {
         final String[] posS = new String[3];
         final String worldName = loc.getWorld() == null ? "" : loc.getWorld().getName();
         final DecimalFormat decimalFormat = decimalPlaces == 0 ? new DecimalFormat("0")
-                : new DecimalFormat(new StrBuilder("0.").append(stringOf('#', decimalPlaces)).toString());
+                : new DecimalFormat("0." + stringOf('#', decimalPlaces));
         for (int i = 0; i < pos.length; i++) posS[i] = decimalFormat.format(pos[i]);
         return worldName + " (" + posS[0] + ", " + posS[1] + ", " + posS[2] + ")";
     }
