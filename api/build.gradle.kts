@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    add("compileOnly", libs.paper)
+    compileOnly(libs.paper)
 }
 
 tasks.named<Jar>("jar") {

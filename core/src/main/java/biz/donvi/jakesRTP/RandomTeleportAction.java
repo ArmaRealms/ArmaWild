@@ -1,6 +1,7 @@
 package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.api.event.PlayerRtpEvent;
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

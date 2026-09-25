@@ -1,4 +1,4 @@
-package biz.donvi.jakesRTP;
+package biz.donvi.jakesRTP.exception;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -39,24 +39,5 @@ public class JrtpBaseException extends Exception {
         if (error instanceof final JrtpBaseException rtpError && rtpError.componentMessage != null)
             return rtpError.componentMessage;
         return Component.text(Objects.toString(error.getMessage(), error.getClass().getSimpleName()));
-    }
-
-    static class PluginDisabledException extends JrtpBaseException {
-    }
-
-    public static class NotPermittedException extends JrtpBaseException {
-        public NotPermittedException(final Component message) {
-            super(message);
-        }
-
-        public NotPermittedException(final String message) {
-            super(message);
-        }
-    }
-
-    static class ConfigurationException extends JrtpBaseException {
-        public ConfigurationException(final String message) {
-            super(message);
-        }
     }
 }

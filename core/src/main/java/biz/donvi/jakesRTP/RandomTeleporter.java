@@ -1,6 +1,10 @@
 package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.GeneralUtil.Pair;
+import biz.donvi.jakesRTP.exception.ConfigurationException;
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
+import biz.donvi.jakesRTP.exception.NotPermittedException;
+import biz.donvi.jakesRTP.exception.PluginDisabledException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
@@ -77,9 +81,8 @@ public class RandomTeleporter {
         for (final Pair<String, FileConfiguration> item : distributions)
             try {
                 distributionSettings.put(item.key, new DistributionSettings(item.value));
-            } catch (final JrtpBaseException.ConfigurationException e) {
-                log(Level.WARNING, "Could not load distribution settings " + item.key);
-                e.printStackTrace();
+            } catch (final ConfigurationException e) {
+                log(Level.WARNING, "Could not load distribution settings " + item.key, e.fillInStackTrace());
             }
         distributionSettings.putAll(worldBorderPluginHook.generateDistributions());
         // Modular settings:
@@ -211,9 +214,9 @@ public class RandomTeleporter {
      *
      * @param world World to get RTP settings for
      * @return The RtpSettings of that world
-     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException If the world does not exist.
+     * @throws NotPermittedException If the world does not exist.
      */
-    public RtpProfile getRtpSettingsByWorld(final World world) throws JrtpBaseException.NotPermittedException {
+    public RtpProfile getRtpSettingsByWorld(final World world) throws NotPermittedException {
         RtpProfile finSettings = null;
         for (final RtpProfile settings : rtpSettings)
             for (final World settingWorld : settings.callFromWorlds)
@@ -225,7 +228,7 @@ public class RandomTeleporter {
                 }
         if (finSettings != null) return finSettings;
         else
-            throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECW")));
+            throw new NotPermittedException(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECW")));
     }
 
     /**
@@ -248,9 +251,9 @@ public class RandomTeleporter {
      *
      * @param player The player whose information will be used to determine the relevant rtp settings
      * @return The RtpSettings for the player to use, normally for when they run the {@code /rtp} command.
-     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException If no settings can be used.
+     * @throws NotPermittedException If no settings can be used.
      */
-    public RtpProfile getRtpSettingsByWorldForPlayer(final Player player) throws JrtpBaseException.NotPermittedException {
+    public RtpProfile getRtpSettingsByWorldForPlayer(final Player player) throws NotPermittedException {
         RtpProfile finSettings = null;
         final World playerWorld = player.getWorld();
         for (final RtpProfile settings : rtpSettings)
@@ -269,7 +272,7 @@ public class RandomTeleporter {
                 }
         if (finSettings != null) return finSettings;
         else
-            throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECP")));
+            throw new NotPermittedException(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECP")));
     }
 
     /**
@@ -281,10 +284,10 @@ public class RandomTeleporter {
      * @param name   The name of the settings to find.
      * @return The {@code rtpSettings} object with the matching name. If no valid {@code rtpSettings} is found, an
      * an exception will be thrown.
-     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException if no valid {@code rtpSettings} object is found.
+     * @throws NotPermittedException if no valid {@code rtpSettings} object is found.
      */
     public RtpProfile getRtpSettingsByNameForPlayer(final Player player, final String name)
-            throws JrtpBaseException.NotPermittedException {
+            throws NotPermittedException {
         for (final RtpProfile settings : rtpSettings)
             // First check if this settings can be called by a player command
             if (settings.commandEnabled &&
@@ -294,7 +297,7 @@ public class RandomTeleporter {
                     (!settings.requireExplicitPermission || player.hasPermission(EXPLICIT_PERM_PREFIX + settings.name)))
                 // Note: We never check priority because the name must be unique
                 return settings;
-        throw new JrtpBaseException.NotPermittedException(Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER.format(Placeholder.unparsed("profile", name)));
+        throw new NotPermittedException(Messages.NP_R_NO_RTPSETTINGS_NAME_FOR_PLAYER.format(Placeholder.unparsed("profile", name)));
     }
 
     /**
@@ -457,7 +460,7 @@ public class RandomTeleporter {
      *
      * @param settings The rtpSettings to use for the world
      * @return The number of locations added to the queue. (The result can be ignored if deemed unnecessary)
-     * @throws biz.donvi.jakesRTP.JrtpBaseException.NotPermittedException Should not realistically get thrown, but may occur if the
+     * @throws NotPermittedException Should not realistically get thrown, but may occur if the
      *                                                                    world is not
      *                                                                    enabled in the settings.
      */
@@ -482,11 +485,10 @@ public class RandomTeleporter {
                 changesMade++;
             }
             return changesMade;
-        } catch (final JrtpBaseException.PluginDisabledException pluginDisabledException) {
+        } catch (final PluginDisabledException pluginDisabledException) {
             throw pluginDisabledException;
         } catch (final Exception exception) {
-            if (exception instanceof JrtpBaseException) throw (JrtpBaseException) exception;
-            else exception.printStackTrace();
+            log(Level.SEVERE, exception.getMessage(), exception);
             return 0;
         }
     }

@@ -59,6 +59,10 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
         logger.log(level, msg);
     }
 
+    public static void log(final Level level, final String msg, final Throwable thrown) {
+        logger.log(level, msg, thrown);
+    }
+
     public static void infoLog(final String msg) {
         log(Level.INFO, msg);
     }

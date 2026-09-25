@@ -1,10 +1,11 @@
 package biz.donvi.jakesRTP.commands;
 
-import biz.donvi.jakesRTP.JrtpBaseException;
+import biz.donvi.jakesRTP.exception.JrtpBaseException;
 import biz.donvi.jakesRTP.Messages;
 import biz.donvi.jakesRTP.RandomTeleportAction;
 import biz.donvi.jakesRTP.RandomTeleporter;
 import biz.donvi.jakesRTP.RtpProfile;
+import biz.donvi.jakesRTP.exception.NotPermittedException;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -120,7 +121,7 @@ public class CmdRtp implements TabExecutor {
             } else {
                 execRtp.run();
             }
-        } catch (final JrtpBaseException.NotPermittedException npe) {
+        } catch (final NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(Placeholder.component("reason", JrtpBaseException.userMessage(npe))));
         } catch (final JrtpBaseException e) {
             sender.sendMessage(JrtpBaseException.userMessage(e));
