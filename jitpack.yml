@@ -1,5 +1,8 @@
 jdk:
   - openjdk25
 
+before_install:
+  - git config --global --add safe.directory /build
+
 install:
-  - ./gradlew clean build publishToMavenLocal --no-daemon
+  - ./gradlew :api:publishToMavenLocal --configure-on-demand --no-daemon
