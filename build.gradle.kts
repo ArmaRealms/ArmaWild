@@ -6,8 +6,13 @@ subprojects {
     group = "biz.donvi"
     version = "0.15.0"
 
-    tasks.withType<JavaCompile> {
+    extensions.configure<org.gradle.api.plugins.JavaPluginExtension> {
+        toolchain.languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(25))
+    }
+
+    tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
+        options.release.set(25)
     }
 
     repositories {
