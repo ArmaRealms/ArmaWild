@@ -2,12 +2,18 @@ defaultTasks("build")
 
 subprojects {
     apply(plugin = "java-library")
+    apply(plugin = "maven-publish")
 
-    group = "biz.donvi"
-    version = "0.15.0"
+    group = providers.gradleProperty("group")
+        .orElse("com.github.ArmaRealms")
+        .get()
+    version = providers.gradleProperty("version")
+        .orElse("1.0.0")
+        .get()
 
     extensions.configure<org.gradle.api.plugins.JavaPluginExtension> {
         toolchain.languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(25))
+        withSourcesJar()
     }
 
     tasks.withType<JavaCompile>().configureEach {
@@ -23,6 +29,14 @@ subprojects {
         maven("https://jitpack.io")
         maven("https://maven.enginehub.org/repo/")
         maven("https://repo.mikeprimm.com/")
+    }
+
+    extensions.configure<org.gradle.api.publish.PublishingExtension> {
+        publications {
+            create<org.gradle.api.publish.maven.MavenPublication>("maven") {
+                from(components["java"])
+            }
+        }
     }
 
     // Per-module dependencies are declared in each module's build.gradle.kts
