@@ -4,7 +4,7 @@ subprojects {
     apply(plugin = "java-library")
 
     group = "biz.donvi"
-    version = "0.14.9"
+    version = "0.15.0"
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
