@@ -2,14 +2,10 @@ package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.api.JakesRtpAPI;
 import biz.donvi.jakesRTP.claimsIntegrations.ClaimsManager;
-import biz.donvi.jakesRTP.commands.CmdForceRtp;
-import biz.donvi.jakesRTP.commands.CmdRtp;
-import biz.donvi.jakesRTP.commands.CmdRtpAdmin;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import biz.donvi.jakesRTP.commands.BrigadierCommands;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
@@ -94,9 +90,10 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
 
         hasEconomy = setupEconomy();
         loadConfigs(); // Loads the default configs if no configs are there
-        registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
         loadMessageMap(); // Loads all the messages that get sent by the plugin
         loadRandomTeleporter(); // Loads the random teleporter
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
+                event -> BrigadierCommands.register(this, event.registrar()));
         loadLocationCacheFiller(); // Loads the location cache filler
 
         if (!getConfig().getBoolean("land-claim-support.force-disable-all", false))
@@ -183,9 +180,7 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
             theRandomTeleporter = new RandomTeleporter(this.getConfig(),
                     GeneralUtil.getFileConfigFromFile(toRtpSettings.toFile().listFiles()),
                     GeneralUtil.getFileConfigFromFile(toDistSettings.toFile().listFiles()));
-            registerCommandExecutor("rtp", new CmdRtp(theRandomTeleporter));
-            registerCommandExecutor("forcertp", new CmdForceRtp(theRandomTeleporter));
-            getServer().getPluginManager().registerEvents(new RtpOnEvent(theRandomTeleporter), this);
+                getServer().getPluginManager().registerEvents(new RtpOnEvent(theRandomTeleporter), this);
         } catch (final Exception e) {
             plugin.getLogger().log(Level.WARNING, "RTP Command could not be loaded!", e);
         }
@@ -288,13 +283,6 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
             infoLog("Overwriting messages with custom messages.");
             customMessageCount = Messages.addMap(messageOverrides);
         }
-        // Bukkit owns permission checks before command executors run. Keep their messages in the same format.
-        for (final String commandName : getDescription().getCommands().keySet()) {
-            final PluginCommand command = getCommand(commandName);
-            if (command != null && command.getPermission() != null)
-                command.permissionMessage(Messages.NP_NO_PERMISSION.format(
-                        Placeholder.unparsed("permission", command.getPermission())));
-        }
     }
 
     public Economy getEconomy() {
@@ -313,21 +301,4 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
         return theRandomTeleporter;
     }
 
-    private void registerCommandExecutor(final String name, final TabExecutor executor) {
-        final PluginCommand cmd = getCommand(name);
-        if (cmd == null) {
-            getLogger().warning("Command '" + name + "' is not defined in plugin.yml; skipping registration.");
-            return;
-        }
-        if (executor == null) {
-            getLogger().warning("Attempted to register null executor for command '" + name + "'.");
-            return;
-        }
-        try {
-            cmd.setExecutor(executor);
-            cmd.setTabCompleter(executor);
-        } catch (final Exception ex) {
-            getLogger().log(Level.WARNING, "Failed to register executor for command '" + name + "'", ex);
-        }
-    }
 }
