@@ -11,6 +11,7 @@ config-version: 2.0
 #### rtp-confirmation
 # Paid RTP commands require confirmation before starting the warmup or teleport.
 # Usage: /rtp confirm or /rtp <profile> confirm (also works with /wild).
+# Profile shortcuts (e.g. /end) use /end confirm for paid RTPs.
 # The subcommand is case-insensitive and accepts letters, numbers, '_' and '-'.
 # It is reserved; choose a value different from your profile names.
 # The MiniMessage prompt can be overridden with 'confirm-paid-rtp' in language-settings.yml.
