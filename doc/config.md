@@ -23,19 +23,25 @@ because this word is reserved for confirmation. Missing settings default to `con
 Confirmation is explicit in the command; it does not require a previous pending request.
 Permissions, current profile, balance, cooldown and warmup checks are evaluated again when confirming.
 
-Override `confirm-paid-rtp` in `language-settings.yml` to customize the prompt using MiniMessage:
+Paid RTP requests without `confirm` show a **native confirmation dialog** with the
+selected profile and formatted cost. The Confirm button executes the same command with
+`confirm`; the Cancel button and Escape close it without running any command. No money,
+cooldown or warmup is consumed when merely showing the dialog.
+
+Override its MiniMessage strings in `language-settings.yml`:
 
 ```yaml
-confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'
+confirm-rtp-dialog-title: '<gold>Confirmar teleporte</gold>'
+confirm-rtp-dialog-body: '<gray>Deseja teleportar usando <yellow><profile></yellow> por <gold><cost></gold>?<newline>O valor será cobrado somente se você confirmar.</gray>'
+confirm-rtp-dialog-accept: '<green>Confirmar</green>'
+confirm-rtp-dialog-cancel: '<red>Cancelar</red>'
 ```
 
 - `<cost>`: cost formatted by the economy provider.
 - `<profile>`: selected RTP profile.
-- `<command>`: full confirmation command, including the alias and optional profile.
-- `<confirm>...</confirm>`: makes the enclosed text run the confirmation command when clicked.
+- The `confirm-paid-rtp` key is legacy and no longer displayed by the command.
+- The dialog uses the Paper API (requires 1.21.7+).
 
-Standard MiniMessage tags, including `<click:run_command:...>` and `<hover:show_text:...>`, are supported.
-All configurable messages use MiniMessage colors and named placeholders; see [message formatting](#message-formatting).
 Apply configuration changes with `/rtp-admin reload` and message changes with `/rtp-admin reload-messages`.
 
 ---
@@ -72,7 +78,7 @@ Use the placeholders assigned to each message:
 | `need-to-wait-for-cooldown`                                                                                       | `<time>`                                                     |
 | `teleporting-in-x-seconds`                                                                                        | `<seconds>`                                                  |
 | `not-enough-money`                                                                                                | `<cost>`, `<balance>`                                        |
-| `confirm-paid-rtp`                                                                                                | `<cost>`, `<profile>`, `<command>`, `<confirm>...</confirm>` |
+| `confirm-rtp-dialog-body`                                                                                       | `<cost>`, `<profile>`                                     |
 | `you-were-charged-x`                                                                                              | `<amount>`, `<balance>`                                      |
 | `economy-error`                                                                                                   | `<error>`                                                    |
 | `settings-not-found`                                                                                              | `<profile>`, `<profiles>`                                    |

@@ -2,7 +2,7 @@ package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.commands.CmdRtp;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import io.papermc.paper.dialog.Dialog;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.yaml.snakeyaml.Yaml;
 
 import java.lang.reflect.Field;
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -45,17 +47,8 @@ class CmdRtpConfirmationTest {
     private Economy economy;
     private BukkitScheduler scheduler;
     private YamlConfiguration config;
-
-    private static boolean hasClick(final Component component, final String command) {
-        return ClickEvent.runCommand(command).equals(component.clickEvent())
-                || component.children().stream().anyMatch(child -> hasClick(child, command));
-    }
-
-    private static boolean hasHoverText(final Component component, final String expected) {
-        return (component.hoverEvent() != null && component.hoverEvent().value() instanceof Component text
-                && PlainTextComponentSerializer.plainText().serialize(text).equals(expected))
-                || component.children().stream().anyMatch(child -> hasHoverText(child, expected));
-    }
+    private Dialog dialog;
+    private MockedStatic<Dialog> dialogFactory;
 
     private static void setField(final Object target, final String name, final Object value) throws Exception {
         final Field field = target.getClass().getField(name);
@@ -96,17 +89,21 @@ class CmdRtpConfirmationTest {
         when(teleporter.getRtpSettingsByNameForPlayer(player, "survival")).thenReturn(profile);
         when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(new ArrayList<>(List.of("survival")));
         Messages.setMap(new Yaml().load(getClass().getResourceAsStream("/translations/lang_en.yml")));
+        dialog = mock(Dialog.class);
+        dialogFactory = mockStatic(Dialog.class);
+        dialogFactory.when(() -> Dialog.create(any())).thenReturn(dialog);
     }
 
     @AfterEach
     void tearDown() {
+        dialogFactory.close();
         JakesRtpPlugin.plugin = null;
     }
 
     @Test
     void paidRtpOnlyPromptsWithoutStartingWarmupOrCharging() {
         invoke("rtp");
-        assertPrompt("/rtp confirm");
+        assertDialog();
         assertTrue(teleporter.playersInWarmup.isEmpty());
         assertEquals(-1, profile.coolDown.timeDifference(player.getName()));
         verifyNoInteractions(scheduler);
@@ -117,22 +114,23 @@ class CmdRtpConfirmationTest {
     void paidRtpWithoutWarmupStillRequiresConfirmation() throws Exception {
         setField(profile, "warmupEnabled", false);
         invoke("rtp");
-        assertPrompt("/rtp confirm");
+        assertDialog();
         verify(economy, never()).withdrawPlayer(eq(player), anyDouble());
     }
 
     @Test
-    void namedPromptPreservesAliasAndProfileWithCustomSubcommand() {
+    void namedPaidRtpWithCustomSubcommandOpensDialog() {
         config.set("rtp-confirmation.subcommand", "aceitar");
         when(player.hasPermission("jakesrtp.usebyname")).thenReturn(true);
         invoke("wild", "survival");
-        assertPrompt("/wild survival aceitar");
+        assertDialog();
     }
 
     @Test
     void confirmationDoesNotRequireNamedProfilePermission() {
         invoke("rtp", "CONFIRM");
         assertWarmupStarted();
+        verify(player, never()).showDialog(any(Dialog.class));
         verify(player, never()).sendMessage(any(Component.class));
     }
 
@@ -157,6 +155,7 @@ class CmdRtpConfirmationTest {
         setField(profile, "cost", 0.0);
         invoke("rtp");
         assertWarmupStarted();
+        verify(player, never()).showDialog(any(Dialog.class));
         verifyNoInteractions(economy);
     }
 
@@ -195,9 +194,9 @@ class CmdRtpConfirmationTest {
     }
 
     @Test
-    void shortcutPromptsWithoutNamedProfilePermission() {
+    void shortcutOpensDialogWithoutNamedProfilePermission() {
         invokeShortcut("survival", "survival");
-        assertPrompt("/survival confirm");
+        assertDialog();
         verifyNoInteractions(scheduler);
     }
 
@@ -205,6 +204,7 @@ class CmdRtpConfirmationTest {
     void shortcutConfirmationBypassesNamedPermissionAndStartsWarmup() {
         invokeShortcut("survival", "survival", "CONFIRM");
         assertWarmupStarted();
+        verify(player, never()).showDialog(any(Dialog.class));
         verify(player, never()).sendMessage(Messages.NP_NO_PERMISSION.format(
                 Placeholder.unparsed("permission", "jakesrtp.usebyname")));
     }
@@ -213,7 +213,7 @@ class CmdRtpConfirmationTest {
     void invalidSubcommandFallsBackToConfirm() {
         config.set("rtp-confirmation.subcommand", "two words");
         invoke("rtp");
-        assertPrompt("/rtp confirm");
+        assertDialog();
     }
 
     @Test
@@ -224,13 +224,20 @@ class CmdRtpConfirmationTest {
     }
 
     @Test
-    void miniMessagePreservesQuotedTagsAndDoesNotParsePlaceholderContent() {
-        Messages.addMap(new HashMap<>(Map.of("confirm-paid-rtp",
-                "<click:run_command:'/wild aceitar'><hover:show_text:'Confirmar'><cost></hover></click>")));
-        final Component result = Messages.ECON_CONFIRM_RTP.format(
+    void miniMessageDoesNotParseInjectedEconomyPlaceholderContent() {
+        Messages.addMap(new HashMap<>(Map.of("confirm-rtp-dialog-body", "<cost>")));
+        final Component result = Messages.ECON_CONFIRM_DIALOG_BODY.format(
                 Placeholder.unparsed("cost", "<red>25 coins</red>"));
         assertEquals("<red>25 coins</red>", PlainTextComponentSerializer.plainText().serialize(result));
-        assertTrue(hasClick(result, "/wild aceitar"));
+    }
+
+    @Test
+    void insufficientFundsDoNotOpenDialog() {
+        when(economy.getBalance(player)).thenReturn(0.0);
+        when(economy.format(0.0)).thenReturn("0 coins");
+        invoke("rtp");
+        verify(player, never()).showDialog(any(Dialog.class));
+        verifyNoInteractions(scheduler);
     }
 
     private void invoke(final String label, final String... args) {
@@ -246,11 +253,9 @@ class CmdRtpConfirmationTest {
         assertEquals(42, teleporter.playersInWarmup.get(player.getUniqueId()));
     }
 
-    private void assertPrompt(final String expectedCommand) {
-        final ArgumentCaptor<Component> message = ArgumentCaptor.forClass(Component.class);
-        verify(player).sendMessage(message.capture());
-        assertTrue(PlainTextComponentSerializer.plainText().serialize(message.getValue()).contains("25 coins"));
-        assertTrue(hasClick(message.getValue(), expectedCommand));
-        assertTrue(hasHoverText(message.getValue(), expectedCommand));
+    private void assertDialog() {
+        verify(player).showDialog(dialog);
+        dialogFactory.verify(() -> Dialog.create(any()));
+        verify(player, never()).sendMessage(any(Component.class));
     }
 }

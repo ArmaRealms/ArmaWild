@@ -6,10 +6,7 @@ import biz.donvi.jakesRTP.RandomTeleportAction;
 import biz.donvi.jakesRTP.RandomTeleporter;
 import biz.donvi.jakesRTP.RtpProfile;
 import biz.donvi.jakesRTP.exception.NotPermittedException;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -98,11 +95,8 @@ public class CmdRtp {
             if (needsPayment && !confirmed) {
                 final String confirmationCommand = "/" + label
                         + (shortcutProfile == null && profileArgs == 1 ? " " + args[0] : "") + " " + confirmationSubcommand;
-                player.sendMessage(Messages.ECON_CONFIRM_RTP.format(
-                        Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
-                        Placeholder.unparsed("command", confirmationCommand),
-                        Placeholder.unparsed("profile", relSettings.name),
-                        TagResolver.resolver("confirm", Tag.styling(ClickEvent.runCommand(confirmationCommand)))));
+                RtpConfirmationDialog.show(player, relSettings.name,
+                        plugin.getEconomy().format(relSettings.cost), confirmationCommand);
                 return true;
             }
 

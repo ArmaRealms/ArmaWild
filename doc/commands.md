@@ -15,10 +15,13 @@ Permission: `jakesrtp.use` defaults to: `all`
 `/rtp <profile>` requires the extra permission `jakesrtp.usebyname`.
 This selects an RTP settings profile by name.
 
-Paid RTPs show a clickable confirmation prompt before starting. Confirm with `/rtp confirm`
-or `/rtp <profile> confirm`. The word `confirm` is configurable through `rtp-confirmation.subcommand`
+Paid RTPs show a native Paper confirmation dialog with the profile, price and
+**Confirm** / **Cancel** buttons before starting. Confirm reruns the equivalent
+`/rtp confirm` or `/rtp <profile> confirm` command and rechecks permissions,
+cooldown and balance. Cancel (or Escape) closes the dialog without teleporting
+or charging. Explicit confirmation commands skip the dialog. The word `confirm` is configurable through `rtp-confirmation.subcommand`
 in `config.yml`. `/wild` supports the same syntax. Confirmation alone does not require `jakesrtp.usebyname`.
-The message can be customized with MiniMessage in `language-settings.yml`;
+The dialog title, body and button labels can be customized with MiniMessage in `language-settings.yml`;
 see [configuration](config.md#rtp-confirmation).
 
 ## `/rtp-admin` - The general admin command for this plugin.
@@ -50,7 +53,7 @@ Permission: `jakesrtp.admin` defaults to: `op`
 |-------------|------------------------------------------------------------------|
 | Usage       | `/rtp confirm` or `/rtp <profile> confirm`                       |
 | Permissions | `jakesrtp.use`; named profiles also require `jakesrtp.usebyname` |
-| Description | Confirms the cost and proceeds with the regular RTP checks.      |
+| Description | Skips the payment dialog and proceeds with the regular RTP checks. |
 
 ## `/rtp-admin` - The general admin command for this plugin.
 
@@ -76,8 +79,10 @@ The full `/rtp end` syntax continues to require `jakesrtp.usebyname`.
 
 Shortcuts require `jakesrtp.use` and respect `command-enabled` and
 `require-explicit-permission` for each profile. They do not require
-`jakesrtp.usebyname`. Paid shortcuts prompt with `/end confirm` (or the
-configured confirmation literal), preserving cooldown, warmup and cost checks.
+`jakesrtp.usebyname`. Paid shortcuts open a native Paper confirmation dialog;
+the Confirm button runs `/end confirm` (or the configured confirmation
+literal) and Cancel closes without charging. The normal cooldown, warmup and
+cost checks still apply. Requires Paper 1.21.7+ (project targets 1.21.11).
 
 Profile names must match `[a-zA-Z0-9_-]+` and may not use reserved command
 names or the confirmation literal. The plugin skips root aliases if another
