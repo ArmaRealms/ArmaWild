@@ -71,7 +71,7 @@ public final class BrigadierCommands {
                         .executes(ctx -> admin(ctx, new String[]{"reload-messages"})))
                 .then(Commands.literal("status")
                         .executes(ctx -> admin(ctx, new String[]{"status"}))
-                        .then(Commands.argument("profile", StringArgumentType.word())
+                        .then(Commands.argument("profile", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
                                     suggest(builder, "#static");
                                     return suggestProfiles(plugin, ctx, builder, false, confirm);
