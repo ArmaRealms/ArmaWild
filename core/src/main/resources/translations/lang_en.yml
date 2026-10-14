@@ -64,9 +64,10 @@ not-enough-money: 'You do not have enough money for this. Cost: <cost>. Balance:
 # <confirm>...</confirm>: clickable text that runs <command>, preserving the alias and profile.
 confirm-paid-rtp: '<yellow>This RTP costs <cost>. <confirm><green><hover:show_text:"<command>">[Click to confirm]</hover></green></confirm></yellow>'
 # Native confirmation dialog for paid teleports. These values support MiniMessage.
-# <profile>: RTP profile name; <cost>: price formatted by the economy provider.
+# <profile>: RTP profile name; <value>: price formatted by the economy provider.
+# <cost>: legacy placeholder, still supported in custom messages.
 confirm-rtp-dialog-title: '<gold>Confirm teleport</gold>'
-confirm-rtp-dialog-body: '<gray>Teleport using <yellow><profile></yellow> for <gold><cost></gold>?<newline>You will only be charged if you confirm.</gray>'
+confirm-rtp-dialog-body: 'Do you want to teleport to <profile> for <value>?'
 confirm-rtp-dialog-accept: '<green>Confirm teleport</green>'
 confirm-rtp-dialog-cancel: '<red>Cancel</red>'
 

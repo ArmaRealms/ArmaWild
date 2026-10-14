@@ -32,12 +32,13 @@ Override its MiniMessage strings in `language-settings.yml`:
 
 ```yaml
 confirm-rtp-dialog-title: '<gold>Confirmar teleporte</gold>'
-confirm-rtp-dialog-body: '<gray>Deseja teleportar usando <yellow><profile></yellow> por <gold><cost></gold>?<newline>O valor será cobrado somente se você confirmar.</gray>'
+confirm-rtp-dialog-body: 'Deseja teleportar pro <profile> por <value>?'
 confirm-rtp-dialog-accept: '<green>Confirmar</green>'
 confirm-rtp-dialog-cancel: '<red>Cancelar</red>'
 ```
 
-- `<cost>`: cost formatted by the economy provider.
+- `<value>`: price formatted by the economy provider.
+- `<cost>`: previous placeholder, still accepted in existing custom dialog messages.
 - `<profile>`: selected RTP profile.
 - The `confirm-paid-rtp` key is legacy and no longer displayed by the command.
 - The dialog uses the Paper API (requires 1.21.7+).
@@ -78,7 +79,7 @@ Use the placeholders assigned to each message:
 | `need-to-wait-for-cooldown`                                                                                       | `<time>`                                                     |
 | `teleporting-in-x-seconds`                                                                                        | `<seconds>`                                                  |
 | `not-enough-money`                                                                                                | `<cost>`, `<balance>`                                        |
-| `confirm-rtp-dialog-body`                                                                                       | `<cost>`, `<profile>`                                     |
+| `confirm-rtp-dialog-body`                                                                                       | `<value>`, `<profile>` (`<cost>` legado)                  |
 | `you-were-charged-x`                                                                                              | `<amount>`, `<balance>`                                      |
 | `economy-error`                                                                                                   | `<error>`                                                    |
 | `settings-not-found`                                                                                              | `<profile>`, `<profiles>`                                    |

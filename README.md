@@ -6,6 +6,8 @@
 
 # Jake's Random Teleporter `[J-RTP]`
 
+[Histórico de alterações (SemVer)](CHANGELOGS.md)
+
 What does it do? • Teleports a player to a random location by when they type `/rtp` or `/wild`, or when they join the
 server for the first time • Tons of configuration from basic shape and size to multiple configs and distribution
 patterns
