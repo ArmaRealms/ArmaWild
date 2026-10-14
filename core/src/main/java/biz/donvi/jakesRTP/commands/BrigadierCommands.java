@@ -93,6 +93,11 @@ public final class BrigadierCommands {
                 plugin.getLogger().warning("Skipping invalid or reserved RTP shortcut: " + profileName);
                 continue;
             }
+            if (registrar.getDispatcher().getRoot().getChild(alias) != null
+                    || plugin.getServer().getCommandMap().getCommand(alias) != null) {
+                plugin.getLogger().warning("Skipping RTP shortcut already owned by another command: " + alias);
+                continue;
+            }
             registrar.register(Commands.literal(alias)
                     .requires(source -> source.getSender() instanceof Player player
                             && player.hasPermission("jakesrtp.use")
