@@ -30,7 +30,7 @@ public class CmdRtpAdmin {
     }
 
     private void subReload(final CommandSender sender) {
-        JakesRtpPlugin.plugin.reloadCommands();
+        JakesRtpPlugin.plugin.reloadRtpListeners();
         JakesRtpPlugin.plugin.loadRandomTeleporter();
         JakesRtpPlugin.plugin.loadLocationCacheFiller();
         sender.sendMessage(Messages.RELOADED.format());
