@@ -18,6 +18,7 @@ Este histórico parte da versão **0.15.0**. As seções são organizadas por ve
 - Simplificada a mensagem padrão do diálogo para **`Deseja teleportar pro <profile> por <value>?`** em português; `<value>` usa a formatação da economia. O placeholder anterior `<cost>` continua reconhecido em mensagens personalizadas. (Este PR)
 
 ### Corrigido
+- Corrigidos os testes de confirmação de RTP para verificar a requisição do diálogo sem depender de mock estático da fábrica do Paper. O diálogo exibido aos jogadores permanece inalterado. (Este PR)
 - Evitada a criação de atalhos de perfis com nomes inválidos, reservados ou já ocupados por outro comando no momento do registro. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Ajustado o argumento `#static` em `/rtp-admin status` para a árvore Brigadier. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Removido um registro Bukkit obsoleto do método de recarga de listeners após a migração. [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
