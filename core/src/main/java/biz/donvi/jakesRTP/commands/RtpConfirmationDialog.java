@@ -25,6 +25,7 @@ final class RtpConfirmationDialog {
                         .body(List.of(DialogBody.plainMessage(
                                 Messages.ECON_CONFIRM_DIALOG_BODY.format(
                                         Placeholder.unparsed("profile", profile),
+                                        Placeholder.unparsed("value", cost),
                                         Placeholder.unparsed("cost", cost)))))
                         .build())
                 .type(DialogType.confirmation(
