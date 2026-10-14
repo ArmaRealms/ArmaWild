@@ -8,7 +8,6 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.command.Command;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -21,7 +20,6 @@ import org.yaml.snakeyaml.Yaml;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -45,7 +43,6 @@ class CmdRtpConfirmationTest {
     private Player player;
     private Economy economy;
     private BukkitScheduler scheduler;
-    private Command command;
     private YamlConfiguration config;
 
     private static boolean hasClick(final Component component, final String command) {
@@ -97,7 +94,6 @@ class CmdRtpConfirmationTest {
         when(teleporter.getRtpSettingsByWorldForPlayer(player)).thenReturn(profile);
         when(teleporter.getRtpSettingsByNameForPlayer(player, "survival")).thenReturn(profile);
         when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(new ArrayList<>(List.of("survival")));
-        command = mock(Command.class);
         Messages.setMap(new Yaml().load(getClass().getResourceAsStream("/translations/lang_en.yml")));
     }
 
@@ -198,12 +194,18 @@ class CmdRtpConfirmationTest {
     }
 
     @Test
-    void completionIncludesConfirmationWithoutNamedProfilePermission() {
-        final CmdRtp executor = new CmdRtp(teleporter);
-        assertEquals(List.of("confirm"), executor.onTabComplete(player, command, "rtp", new String[]{"co"}));
-        assertTrue(executor.onTabComplete(player, command, "rtp", new String[]{"survival", ""}).isEmpty());
-        when(player.hasPermission("jakesrtp.usebyname")).thenReturn(true);
-        assertEquals(List.of("confirm"), executor.onTabComplete(player, command, "rtp", new String[]{"SURVIVAL", "co"}));
+    void shortcutPromptsWithoutNamedProfilePermission() {
+        invokeShortcut("survival", "survival");
+        assertPrompt("/survival confirm");
+        verifyNoInteractions(scheduler);
+    }
+
+    @Test
+    void shortcutConfirmationBypassesNamedPermissionAndStartsWarmup() {
+        invokeShortcut("survival", "survival", "CONFIRM");
+        assertWarmupStarted();
+        verify(player, never()).sendMessage(Messages.NP_NO_PERMISSION.format(
+                Placeholder.unparsed("permission", "jakesrtp.usebyname")));
     }
 
     @Test
@@ -231,7 +233,11 @@ class CmdRtpConfirmationTest {
     }
 
     private void invoke(final String label, final String... args) {
-        assertTrue(new CmdRtp(teleporter).onCommand(player, command, label, args));
+        assertTrue(new CmdRtp(teleporter).execute(player, label, args, null));
+    }
+
+    private void invokeShortcut(final String label, final String profileName, final String... args) {
+        assertTrue(new CmdRtp(teleporter).execute(player, label, args, profileName));
     }
 
     private void assertWarmupStarted() {
