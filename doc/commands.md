@@ -80,8 +80,9 @@ Shortcuts require `jakesrtp.use` and respect `command-enabled` and
 configured confirmation literal), preserving cooldown, warmup and cost checks.
 
 Profile names must match `[a-zA-Z0-9_-]+` and may not use reserved command
-names or the confirmation literal. Paper can override another plugin's root
-command if a profile has the same name; review name collisions before deploying.
+names or the confirmation literal. The plugin skips root aliases if another
+command already occupies the label at registration time; review collisions with
+plugins that load later.
 The shortcut set and confirmation literal are registered on Paper's command
 lifecycle events. A plugin-level `/rtp-admin reload` reloads RTP settings,
 but adding/removing/renaming profiles requires a server restart to refresh
