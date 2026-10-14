@@ -120,7 +120,7 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
         return locCache;
     }
 
-    public void reloadCommands() {
+    public void reloadRtpListeners() {
         HandlerList.unregisterAll(this);
         registerCommandExecutor("rtp-admin", new CmdRtpAdmin());
     }
