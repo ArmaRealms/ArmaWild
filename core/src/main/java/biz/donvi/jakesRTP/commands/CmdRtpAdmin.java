@@ -8,7 +8,6 @@ import biz.donvi.jakesRTP.RtpProfile;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 
-
 public class CmdRtpAdmin {
 
     public boolean execute(final CommandSender sender, final String[] args) {
