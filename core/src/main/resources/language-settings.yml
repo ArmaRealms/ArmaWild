@@ -30,8 +30,9 @@ need-to-wait-for-cooldown: '<yellow>Whoops! You still have to wait <time></yello
 
 # Paid RTP shows a native Paper dialog (no command runs on Cancel / Escape).
 # Override these keys to customize its title, body and buttons using MiniMessage.
-# <cost> and <profile> are inserted literally; neither can inject formatting tags.
+# <value> and <profile> are inserted literally; neither can inject formatting tags.
+# <cost> remains supported in existing custom messages.
 # confirm-rtp-dialog-title: '<gold>Confirmar teleporte</gold>'
-# confirm-rtp-dialog-body: '<gray>O teleporte para <profile> custa <cost>. Deseja confirmar?</gray>'
+# confirm-rtp-dialog-body: 'Deseja teleportar pro <profile> por <value>?'
 # confirm-rtp-dialog-accept: '<green>Confirmar</green>'
 # confirm-rtp-dialog-cancel: '<red>Cancelar</red>'
