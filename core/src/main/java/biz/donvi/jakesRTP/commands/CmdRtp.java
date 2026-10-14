@@ -95,7 +95,7 @@ public class CmdRtp {
             if (needsPayment && !confirmed) {
                 final String confirmationCommand = "/" + label
                         + (shortcutProfile == null && profileArgs == 1 ? " " + args[0] : "") + " " + confirmationSubcommand;
-                RtpConfirmationDialog.show(player, relSettings.name,
+                showConfirmationDialog(player, relSettings.name,
                         plugin.getEconomy().format(relSettings.cost), confirmationCommand);
                 return true;
             }
@@ -117,6 +117,15 @@ public class CmdRtp {
             e.printStackTrace();
         }
         return true;
+    }
+
+    /**
+     * Isolated so command tests can inspect a confirmation request without mocking Paper's
+     * static dialog factory. Production always delegates to the native Paper dialog.
+     */
+    protected void showConfirmationDialog(final Player player, final String profile,
+                                          final String formattedCost, final String command) {
+        RtpConfirmationDialog.show(player, profile, formattedCost, command);
     }
 
     private void scheduleCooldownEndNotice(final Player player, final @NotNull RtpProfile profile) {
