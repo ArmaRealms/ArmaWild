@@ -103,7 +103,7 @@ class CmdRtpConfirmationTest {
     @Test
     void paidRtpOnlyPromptsWithoutStartingWarmupOrCharging() {
         invoke("rtp");
-        assertDialog("/rtp confirm");
+        assertDialog();
         assertTrue(teleporter.playersInWarmup.isEmpty());
         assertEquals(-1, profile.coolDown.timeDifference(player.getName()));
         verifyNoInteractions(scheduler);
@@ -114,16 +114,16 @@ class CmdRtpConfirmationTest {
     void paidRtpWithoutWarmupStillRequiresConfirmation() throws Exception {
         setField(profile, "warmupEnabled", false);
         invoke("rtp");
-        assertDialog("/rtp confirm");
+        assertDialog();
         verify(economy, never()).withdrawPlayer(eq(player), anyDouble());
     }
 
     @Test
-    void namedPromptPreservesAliasAndProfileWithCustomSubcommand() {
+    void namedPaidRtpWithCustomSubcommandOpensDialog() {
         config.set("rtp-confirmation.subcommand", "aceitar");
         when(player.hasPermission("jakesrtp.usebyname")).thenReturn(true);
         invoke("wild", "survival");
-        assertDialog("/wild survival aceitar");
+        assertDialog();
     }
 
     @Test
@@ -194,9 +194,9 @@ class CmdRtpConfirmationTest {
     }
 
     @Test
-    void shortcutPromptsWithoutNamedProfilePermission() {
+    void shortcutOpensDialogWithoutNamedProfilePermission() {
         invokeShortcut("survival", "survival");
-        assertDialog("/survival confirm");
+        assertDialog();
         verifyNoInteractions(scheduler);
     }
 
@@ -213,7 +213,7 @@ class CmdRtpConfirmationTest {
     void invalidSubcommandFallsBackToConfirm() {
         config.set("rtp-confirmation.subcommand", "two words");
         invoke("rtp");
-        assertDialog("/rtp confirm");
+        assertDialog();
     }
 
     @Test
@@ -253,7 +253,7 @@ class CmdRtpConfirmationTest {
         assertEquals(42, teleporter.playersInWarmup.get(player.getUniqueId()));
     }
 
-    private void assertDialog(final String expectedCommand) {
+    private void assertDialog() {
         verify(player).showDialog(dialog);
         dialogFactory.verify(() -> Dialog.create(any()));
         verify(player, never()).sendMessage(any(Component.class));
