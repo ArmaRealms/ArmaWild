@@ -59,3 +59,30 @@ Permission: `jakesrtp.admin` defaults to: `op`
 | Usage       | `/rtp-admin <reload`&#124;`status>`                     
 | Permission  | `jakesrtp.admin` defaults to: `op only`                 
 | Description | All the admin functionality (of J-RTP) in its own place 
+
+
+## Paper Brigadier commands and profile shortcuts
+
+All commands are registered using Paper's Brigadier command lifecycle. Base commands:
+`/rtp` (alias `/wild`), `/forcertp <player> -c <profile>`,
+`/forcertp <player> -w <world>`, and `/rtp-admin reload|status|reload-messages`.
+Tab completion suggests accessible profiles, online players, and world names.
+
+Each enabled, command-enabled file in `plugins/JakesRTP/rtpSettings/` gets a shortcut
+named after the file (without `.yml`). With `end.yml`, `nether.yml`, `recursos.yml`,
+`mundo.yml` and `legado.yml`, the shortcuts are
+`/end`, `/nether`, `/recursos`, `/mundo` and `/legado`.
+The full `/rtp end` syntax continues to require `jakesrtp.usebyname`.
+
+Shortcuts require `jakesrtp.use` and respect `command-enabled` and
+`require-explicit-permission` for each profile. They do not require
+`jakesrtp.usebyname`. Paid shortcuts prompt with `/end confirm` (or the
+configured confirmation literal), preserving cooldown, warmup and cost checks.
+
+Profile names must match `[a-zA-Z0-9_-]+` and may not use reserved command
+names or the confirmation literal. Paper can override another plugin's root
+command if a profile has the same name; review name collisions before deploying.
+The shortcut set and confirmation literal are registered on Paper's command
+lifecycle events. A plugin-level `/rtp-admin reload` reloads RTP settings,
+but adding/removing/renaming profiles requires a server restart to refresh
+the root commands.
