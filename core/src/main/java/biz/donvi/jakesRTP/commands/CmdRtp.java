@@ -20,7 +20,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-
 import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
 
 public class CmdRtp {
