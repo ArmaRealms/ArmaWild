@@ -68,7 +68,7 @@ class MessagesTest {
                 getClass().getResourceAsStream("/translations/lang_" + language + ".yml"));
         final TagResolver.Builder placeholders = TagResolver.builder();
         for (final String name : new String[]{"reason", "code", "profile", "profiles", "permission", "player", "world",
-                "time", "seconds", "cost", "balance", "amount", "error", "days", "hours", "minutes", "command"})
+                "time", "seconds", "cost", "value", "balance", "amount", "error", "days", "hours", "minutes", "command"})
             placeholders.resolver(Placeholder.unparsed(name, "VALUE"));
         placeholders.resolver(Placeholder.styling("confirm", ClickEvent.runCommand("/rtp confirm")));
         for (final Map.Entry<String, String> entry : translations.entrySet()) {
@@ -76,6 +76,34 @@ class MessagesTest {
             final Component rendered = MiniMessage.miniMessage().deserialize(entry.getValue(), placeholders.build());
             assertFalse(plain(rendered).contains("<"), language + ": " + entry.getKey());
         }
+    }
+
+    @Test
+    void portugueseDialogUsesProfileAndValueInRequestedWording() {
+        final Map<String, String> pt = new Yaml().load(
+                getClass().getResourceAsStream("/translations/lang_pt.yml"));
+        Messages.setMap(pt);
+        final Component rendered = Messages.ECON_CONFIRM_DIALOG_BODY.format(
+                Placeholder.unparsed("profile", "end"),
+                Placeholder.unparsed("value", "50.000 coins"));
+        assertEquals("Deseja teleportar pro end por 50.000 coins?", plain(rendered));
+    }
+
+    @Test
+    void englishDialogUsesValuePlaceholder() {
+        final Component rendered = Messages.ECON_CONFIRM_DIALOG_BODY.format(
+                Placeholder.unparsed("profile", "nether"),
+                Placeholder.unparsed("value", "25,000 coins"));
+        assertEquals("Do you want to teleport to nether for 25,000 coins?", plain(rendered));
+    }
+
+    @Test
+    void legacyDialogCostPlaceholderRemainsSupported() {
+        override(Messages.ECON_CONFIRM_DIALOG_BODY, "<cost>");
+        final Component rendered = Messages.ECON_CONFIRM_DIALOG_BODY.format(
+                Placeholder.unparsed("value", "25 coins"),
+                Placeholder.unparsed("cost", "25 coins"));
+        assertEquals("25 coins", plain(rendered));
     }
 
     @Test
