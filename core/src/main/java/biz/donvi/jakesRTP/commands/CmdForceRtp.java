@@ -12,8 +12,6 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-
-
 public class CmdForceRtp {
 
     private final RandomTeleporter randomTeleporter;
