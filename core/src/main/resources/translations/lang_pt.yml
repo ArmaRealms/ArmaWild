@@ -42,9 +42,10 @@ not-enough-money: 'Você não tem saldo suficiente. Custo: <cost>. Saldo: <balan
 confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'
 no-longer-enough-money: 'Você não tem mais saldo suficiente para realizar este RTP.'
 # Diálogo nativo de confirmação do teleporte pago (MiniMessage).
-# <profile>: nome do perfil; <cost>: valor formatado pelo provedor de economia.
+# <profile>: nome do perfil; <value>: valor formatado pelo provedor de economia.
+# <cost>: placeholder legado, disponível em mensagens personalizadas.
 confirm-rtp-dialog-title: '<gold>Confirmar teleporte</gold>'
-confirm-rtp-dialog-body: '<gray>Deseja teleportar usando <yellow><profile></yellow> por <gold><cost></gold>?<newline>O valor será cobrado somente se você confirmar.</gray>'
+confirm-rtp-dialog-body: 'Deseja teleportar pro <profile> por <value>?'
 confirm-rtp-dialog-accept: '<green>Confirmar</green>'
 confirm-rtp-dialog-cancel: '<red>Cancelar</red>'
 
