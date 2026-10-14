@@ -9,17 +9,12 @@ import biz.donvi.jakesRTP.RtpProfile;
 import biz.donvi.jakesRTP.exception.NotPermittedException;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.World;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.bukkit.Bukkit.getServer;
 
-public class CmdForceRtp implements TabExecutor {
+public class CmdForceRtp {
 
     private final RandomTeleporter randomTeleporter;
 
@@ -27,16 +22,7 @@ public class CmdForceRtp implements TabExecutor {
         this.randomTeleporter = randomTeleporter;
     }
 
-    private static List<String> filterPrefix(final List<String> items, final String prefix) {
-        final String p = prefix == null ? "" : prefix.toLowerCase();
-        final ArrayList<String> out = new ArrayList<>();
-        for (final String s : items)
-            if (s.toLowerCase().startsWith(p)) out.add(s);
-        return out;
-    }
-
-    @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean execute(final CommandSender sender, final String[] args) {
         try {
             // Expected: /forcertp <playerName> -c <configName> | -w <worldName>
             if (args.length < 3) return false;
@@ -102,34 +88,6 @@ public class CmdForceRtp implements TabExecutor {
                 true,
                 randomTeleporter.logRtpOnForceCommand, "Rtp-from-force-command triggered!"
         ).teleportAsync(playerToTp);
-    }
-
-    @Override
-    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        // Hide suggestions if sender lacks permission
-        if (!sender.hasPermission("jakesrtp.others")) return List.of();
-
-        if (args.length <= 1) {
-            // Suggest player names (prefix-filtered)
-            final String prefix = args.length == 0 ? "" : args[0];
-            final List<String> players = new ArrayList<>();
-            for (final Player player : getServer().getOnlinePlayers())
-                players.add(player.getName());
-            return filterPrefix(players, prefix);
-        } else if (args.length == 2) {
-            // Suggest flags -c or -w
-            return filterPrefix(List.of("-c", "-w"), args[1]);
-        } else if (args.length == 3) {
-            if ("-c".equalsIgnoreCase(args[1])) {
-                return filterPrefix(randomTeleporter.getRtpSettingsNames(), args[2]);
-            } else if ("-w".equalsIgnoreCase(args[1])) {
-                final List<String> worldNames = new ArrayList<>();
-                for (final World world : getServer().getWorlds())
-                    worldNames.add(world.getName());
-                return filterPrefix(worldNames, args[2]);
-            }
-        }
-        return List.of();
     }
 
 }
