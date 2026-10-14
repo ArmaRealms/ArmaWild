@@ -28,7 +28,10 @@ language: 'en'
 
 need-to-wait-for-cooldown: '<yellow>Whoops! You still have to wait <time></yellow>'
 
-# Paid RTP confirmation uses MiniMessage (including click and hover tags).
-# <cost>, <profile> and <command> insert text; <confirm>...</confirm> runs the confirmation command on click.
-# Use MiniMessage colors such as <yellow> for all messages.
-# confirm-paid-rtp: '<yellow>Este RTP custa <cost>. <confirm><green><hover:show_text:"<command>">[Clique para confirmar]</hover></green></confirm></yellow>'
+# Paid RTP shows a native Paper dialog (no command runs on Cancel / Escape).
+# Override these keys to customize its title, body and buttons using MiniMessage.
+# <cost> and <profile> are inserted literally; neither can inject formatting tags.
+# confirm-rtp-dialog-title: '<gold>Confirmar teleporte</gold>'
+# confirm-rtp-dialog-body: '<gray>O teleporte para <profile> custa <cost>. Deseja confirmar?</gray>'
+# confirm-rtp-dialog-accept: '<green>Confirmar</green>'
+# confirm-rtp-dialog-cancel: '<red>Cancelar</red>'
