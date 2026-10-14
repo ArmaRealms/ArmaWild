@@ -3,7 +3,7 @@ author: JakeTS
 main: biz.donvi.jakesRTP.JakesRtpPlugin
 prefix: 'J-RTP'
 version: '${version}'
-api-version: '1.20'
+api-version: '1.21'
 
 softdepend:
   # Needed for multi-world support
@@ -18,23 +18,6 @@ softdepend:
   - 'WorldGuard'
   - 'HuskTowns'
   - 'Lands'
-
-commands:
-  jrtpdebug:
-    description: 'Used for debugging, no practical purpose'
-  rtp:
-    description: 'Teleports you to a random location'
-    aliases: [ 'wild' ]
-    permission: 'jakesrtp.use'
-    usage: '/rtp [profile] [confirmation]'
-  forcertp:
-    description: 'Teleports the specified user to a random location'
-    permission: 'jakesrtp.others'
-    usage: '/forcertp <playerName> [-c <rtpConfigName> | -w <destinedWorld>]'
-  rtp-admin:
-    description: 'All the admin functionality (of J-RTP) in its own place'
-    permission: 'jakesrtp.admin'
-    usage: '/rtp-admin [reload|status]'
 
 permissions:
   jakesrtp.use:

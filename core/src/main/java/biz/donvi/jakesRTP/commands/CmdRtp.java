@@ -14,21 +14,15 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import static biz.donvi.jakesRTP.JakesRtpPlugin.plugin;
 
-public class CmdRtp implements TabExecutor {
+public class CmdRtp {
     private final RandomTeleporter randomTeleporter;
     private final String confirmationSubcommand;
 
@@ -47,26 +41,27 @@ public class CmdRtp implements TabExecutor {
      * This is called when a player runs the in-game "/rtp" command.
      * Anything (except errors) that directly deals with the player is done here.
      */
-    @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command,
-                             final @NotNull String label, final String[] args) {
+    public boolean execute(final @NotNull CommandSender sender, final @NotNull String label,
+                           final String[] args, final String shortcutProfile) {
         try {
             // Accept /rtp [profile] [confirmation], including command aliases.
             if (!(sender instanceof final Player player)) return true;
-            if (args.length > 2) return true;
+            if (args.length > (shortcutProfile == null ? 2 : 1)) return true;
             final boolean confirmed = args.length > 0
                     && args[args.length - 1].equalsIgnoreCase(confirmationSubcommand);
             final int profileArgs = args.length - (confirmed ? 1 : 0);
-            if (profileArgs > 1) return true;
+            if (profileArgs > (shortcutProfile == null ? 1 : 0)) return true;
 
             // Confirmation alone does not require permission to select a profile by name.
-            if (profileArgs == 1 && !sender.hasPermission("jakesrtp.usebyname")) {
+            if (shortcutProfile == null && profileArgs == 1 && !sender.hasPermission("jakesrtp.usebyname")) {
                 player.sendMessage(Messages.NP_NO_PERMISSION.format(Placeholder.unparsed("permission", "jakesrtp.usebyname")));
                 return true;
             }
 
             // Resolve profile (by world or by provided name)
-            final RtpProfile relSettings = (profileArgs == 0)
+            final RtpProfile relSettings = shortcutProfile != null
+                    ? randomTeleporter.getRtpSettingsByNameForPlayer(player, shortcutProfile)
+                    : (profileArgs == 0)
                     ? randomTeleporter.getRtpSettingsByWorldForPlayer(player)
                     : randomTeleporter.getRtpSettingsByNameForPlayer(player, args[0]);
 
@@ -102,7 +97,7 @@ public class CmdRtp implements TabExecutor {
 
             if (needsPayment && !confirmed) {
                 final String confirmationCommand = "/" + label
-                        + (profileArgs == 1 ? " " + args[0] : "") + " " + confirmationSubcommand;
+                        + (shortcutProfile == null && profileArgs == 1 ? " " + args[0] : "") + " " + confirmationSubcommand;
                 player.sendMessage(Messages.ECON_CONFIRM_RTP.format(
                         Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
                         Placeholder.unparsed("command", confirmationCommand),
@@ -234,27 +229,4 @@ public class CmdRtp implements TabExecutor {
         };
     }
 
-    @Override
-    public List<String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command,
-                                      final @NotNull String alias, final String[] args) {
-        if (!(sender instanceof final Player player) || args.length > 2) {
-            return List.of();
-        }
-
-        final boolean useByName = sender.hasPermission("jakesrtp.usebyname");
-        if (args.length == 2 && (!useByName
-                || randomTeleporter.getRtpSettingsNamesForPlayer(player).stream()
-                .noneMatch(name -> name.equalsIgnoreCase(args[0])))) {
-            return List.of();
-        }
-        final String prefix = (args.length == 0 ? "" : args[args.length - 1]).toLowerCase(Locale.ROOT);
-        final ArrayList<String> out = new ArrayList<>();
-        if (confirmationSubcommand.toLowerCase(Locale.ROOT).startsWith(prefix)) out.add(confirmationSubcommand);
-        if (args.length < 2 && useByName) {
-            for (final String name : randomTeleporter.getRtpSettingsNamesForPlayer(player))
-                if (!name.equalsIgnoreCase(confirmationSubcommand)
-                        && name.toLowerCase(Locale.ROOT).startsWith(prefix)) out.add(name);
-        }
-        return out;
-    }
 }
