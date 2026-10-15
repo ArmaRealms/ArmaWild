@@ -101,6 +101,64 @@ class BrigadierCommandsTest {
         assertFalse(end.getRequirement().test(source));
     }
 
+    @Test
+    void configurableAliasesRegisterDirectAndNestedCommandsWithoutByNamePermission() throws Exception {
+        final JakesRtpPlugin plugin = mock(JakesRtpPlugin.class);
+        final RandomTeleporter teleporter = mock(RandomTeleporter.class);
+        final Server server = mock(Server.class);
+        final CommandMap commandMap = mock(CommandMap.class);
+        final YamlConfiguration config = new YamlConfiguration();
+        config.set("aliases.recurso", List.of("minerar", "explorar", "confirm", "rtp",
+                "nether", "ocupado", "two words", "minerar"));
+        config.set("aliases.disabled", List.of("invalido"));
+        config.set("aliases.unknown", List.of("inexistente"));
+        when(plugin.getConfig()).thenReturn(config);
+        when(plugin.getRandomTeleporter()).thenReturn(teleporter);
+        when(plugin.getServer()).thenReturn(server);
+        when(server.getCommandMap()).thenReturn(commandMap);
+        when(commandMap.getCommand("ocupado")).thenReturn(mock(Command.class));
+        when(plugin.getLogger()).thenReturn(java.util.logging.Logger.getAnonymousLogger());
+        when(teleporter.getRtpSettings()).thenReturn(new ArrayList<>(List.of(
+                profile("recurso", true), profile("nether", true), profile("disabled", false)
+        )));
+
+        final List<LiteralCommandNode<CommandSourceStack>> nodes = new ArrayList<>();
+        final Commands registrar = mock(Commands.class, invocation -> {
+            if ("register".equals(invocation.getMethod().getName())) {
+                nodes.add(invocation.getArgument(0));
+                return Set.of();
+            }
+            return org.mockito.Answers.RETURNS_DEFAULTS.answer(invocation);
+        });
+        when(registrar.getDispatcher()).thenReturn(new CommandDispatcher<>());
+
+        BrigadierCommands.register(plugin, registrar);
+
+        assertEquals(List.of("rtp", "forcertp", "rtp-admin", "recurso", "nether", "minerar", "explorar"),
+                nodes.stream().map(LiteralCommandNode::getLiteral).toList());
+        final LiteralCommandNode<CommandSourceStack> rtp = nodes.get(0);
+        assertNotNull(rtp.getChild("profile"));
+        assertNull(rtp.getChild("recurso")); // Canonical /rtp <profile> still requires usebyname.
+        assertNotNull(rtp.getChild("minerar"));
+        assertNotNull(rtp.getChild("minerar").getChild("confirm"));
+        assertNotNull(nodes.get(5).getChild("confirm"));
+        assertNull(rtp.getChild("ocupado"));
+        assertNull(rtp.getChild("disabled"));
+
+        final Player player = mock(Player.class);
+        final CommandSourceStack source = mock(CommandSourceStack.class);
+        when(source.getSender()).thenReturn(player);
+        when(player.hasPermission("jakesrtp.use")).thenReturn(true);
+        when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(List.of("recurso"));
+        assertTrue(nodes.get(5).getRequirement().test(source));
+        assertTrue(rtp.getChild("minerar").getRequirement().test(source));
+        when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(List.of());
+        assertFalse(nodes.get(5).getRequirement().test(source));
+        assertFalse(rtp.getChild("minerar").getRequirement().test(source));
+        when(player.hasPermission("jakesrtp.use")).thenReturn(false);
+        assertFalse(nodes.get(5).getRequirement().test(source));
+    }
+
     private static RtpProfile profile(final String name, final boolean enabled) throws Exception {
         final RtpProfile profile = mock(RtpProfile.class);
         final Field nameField = RtpProfile.class.getField("name");
