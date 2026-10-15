@@ -24,8 +24,12 @@ confirmation rules. For paid RTPs, confirmation retains the invoked alias
 `jakesrtp.usebyname`; the original `/rtp recurso` still does.
 
 Names allow letters, numbers, underscores and hyphens. Reserved labels,
-existing commands, duplicate aliases, disabled or missing profiles are ignored
-with a warning. An omitted `aliases` section defaults to no extra shortcuts.
+duplicate aliases, and aliases for disabled or missing profiles are ignored
+with a warning. Valid aliases and profile shortcuts replace conflicting root
+command labels in the Paper CommandMap; other labels, including namespaced
+variants of the previous command, are preserved. Registration order matters
+if other plugins later register the same label. An omitted `aliases` section
+defaults to no extra shortcuts.
 Changes to aliases require a **server restart**, not just `/rtp-admin reload`.
 
 ---
