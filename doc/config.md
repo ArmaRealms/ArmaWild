@@ -6,6 +6,30 @@ Go to the bottom of this page for the simplified config.
 
 ---
 
+### `aliases`
+
+Configure extra command labels for profiles defined by `rtpSettings/<name>.yml`:
+
+```yaml
+aliases:
+  recurso:
+    - minerar
+```
+
+With `rtpSettings/recurso.yml` and `command-enabled: true`, players can use
+`/minerar`, `/rtp minerar` or `/wild minerar`. These are shortcuts for the
+`recurso` profile and follow its permission, warmup, cooldown, economy, and
+confirmation rules. For paid RTPs, confirmation retains the invoked alias
+(e.g. `/rtp minerar confirm`). The shortcut routes do not require
+`jakesrtp.usebyname`; the original `/rtp recurso` still does.
+
+Names allow letters, numbers, underscores and hyphens. Reserved labels,
+existing commands, duplicate aliases, disabled or missing profiles are ignored
+with a warning. An omitted `aliases` section defaults to no extra shortcuts.
+Changes to aliases require a **server restart**, not just `/rtp-admin reload`.
+
+---
+
 ### `rtp-confirmation`
 
 RTP commands with an active economy provider and a positive profile `cost` require an explicit confirmation.
