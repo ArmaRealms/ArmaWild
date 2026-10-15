@@ -90,7 +90,10 @@ and `/wild minerar` select the `recurso` profile. Unlike `/rtp recurso`, these a
 do not require `jakesrtp.usebyname`. They enforce the same `jakesrtp.use` and
 profile-specific permissions as `/recurso`. Paid RTP confirmations run `/minerar confirm`,
 `/rtp minerar confirm` or `/wild minerar confirm`, preserving the selected profile.
-Invalid, duplicate, reserved, or already-registered aliases are skipped with a log warning.
+Invalid, duplicate and reserved aliases are skipped with a log warning. If another
+plugin owns a root command label, ArmaWild replaces that label when registering the
+profile shortcut. The original command's other labels (including namespaced variants)
+remain in the CommandMap. Registration order can affect conflicts with plugins loaded later.
 Changing aliases requires restarting the server to rebuild Brigadier commands.
 
 Shortcuts require `jakesrtp.use` and respect `command-enabled` and
@@ -101,9 +104,9 @@ literal) and Cancel closes without charging. The normal cooldown, warmup and
 cost checks still apply. Requires Paper 1.21.7+ (project targets 1.21.11).
 
 Profile names must match `[a-zA-Z0-9_-]+` and may not use reserved command
-names or the confirmation literal. The plugin skips root aliases if another
-command already occupies the label at registration time; review collisions with
-plugins that load later.
+names or the confirmation literal. The plugin replaces an existing root command label when registering a profile
+shortcut. Other labels of the previous command are preserved. Review registration
+order when plugins define the same command name.
 The shortcut set and confirmation literal are registered on Paper's command
 lifecycle events. A plugin-level `/rtp-admin reload` reloads RTP settings,
 but adding/removing/renaming profiles requires a server restart to refresh
