@@ -7,7 +7,7 @@ Este histórico parte da versão **0.15.0**. As seções são organizadas por ve
 ## [Não lançado]
 
 ### Adicionado
-- Aliases configuráveis em `config.yml` por perfil `rtpSettings`, disponíveis como comandos diretos (`/minerar`) e subcomandos (`/rtp minerar` e `/wild minerar`). Mantêm permissões e confirmação paga do perfil original; nomes inválidos ou conflitantes são ignorados. (Este PR)
+- Aliases configuráveis em `config.yml` por perfil `rtpSettings`, disponíveis como comandos diretos (`/minerar`) e subcomandos (`/rtp minerar` e `/wild minerar`). Mantêm permissões e confirmação paga do perfil original; nomes inválidos ou reservados são ignorados. Conflitos com comandos raiz registrados previamente são substituídos sem remover outros aliases do comando anterior. (Este PR)
 - Comandos nativos pela **Paper Command API / Brigadier**, com registro em `LifecycleEvents.COMMANDS` para `/rtp`, `/wild`, `/forcertp` e `/rtp-admin`. Inclui sugestões de perfis, jogadores e mundos. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Atalhos gerados dos arquivos `rtpSettings/*.yml` com `command-enabled: true`: por exemplo, `end.yml` permite `/end`, além de `/rtp end`. Atalhos respeitam `jakesrtp.use` e permissões explícitas do perfil, sem exigir `jakesrtp.usebyname`; a forma `/rtp <perfil>` continua exigindo essa permissão. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Diálogo nativo do Paper para RTP com custo positivo quando o jogador não informa `confirm`. Exibe perfil e valor formatado pela economia; **Confirmar** executa o comando de confirmação correspondente, **Cancelar** e **ESC** fecham sem teleportar ou cobrar. [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
