@@ -9,6 +9,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -29,7 +31,7 @@ public final class BrigadierCommands {
         final String confirm = confirmationLiteral(plugin);
 
         final Map<String, String> configuredAliases = new LinkedHashMap<>();
-        final Map<String, String> shortcuts = loadShortcuts(plugin, registrar, confirm, configuredAliases);
+        final Map<String, String> shortcuts = loadShortcuts(plugin, confirm, configuredAliases);
 
         final var rtpCommand = Commands.literal("rtp")
                 .requires(source -> isPlayerWithPermission(source, "jakesrtp.use"))
@@ -99,6 +101,7 @@ public final class BrigadierCommands {
 
         for (final Map.Entry<String, String> shortcut : shortcuts.entrySet()) {
             final String profileName = shortcut.getValue();
+            removeConflictingKnownCommand(plugin, shortcut.getKey());
             registrar.register(Commands.literal(shortcut.getKey())
                     .requires(source -> canUseShortcut(plugin, source, profileName))
                     .executes(ctx -> rtp(plugin, ctx, new String[0], profileName))
@@ -108,7 +111,7 @@ public final class BrigadierCommands {
         }
     }
 
-    private static Map<String, String> loadShortcuts(final JakesRtpPlugin plugin, final Commands registrar,
+    private static Map<String, String> loadShortcuts(final JakesRtpPlugin plugin,
                                                      final String confirm, final Map<String, String> configuredAliases) {
         final Map<String, String> shortcuts = new LinkedHashMap<>();
         final RandomTeleporter teleporter = plugin.getRandomTeleporter();
@@ -120,7 +123,7 @@ public final class BrigadierCommands {
 
         for (final RtpProfile profile : profiles) {
             if (profile.commandEnabled)
-                addShortcut(plugin, registrar, reserved, shortcuts, profile.name, profile.name);
+                addShortcut(plugin, reserved, shortcuts, profile.name, profile.name);
         }
         // Profile names remain reserved even when they have no command shortcut.
         for (final RtpProfile profile : profiles) reserved.add(profile.name.toLowerCase(Locale.ROOT));
@@ -141,14 +144,14 @@ public final class BrigadierCommands {
                 continue;
             }
             for (final String name : aliases.getStringList(profileName)) {
-                if (addShortcut(plugin, registrar, reserved, shortcuts, name, profile.name))
+                if (addShortcut(plugin, reserved, shortcuts, name, profile.name))
                     configuredAliases.put(name.toLowerCase(Locale.ROOT), profile.name);
             }
         }
         return shortcuts;
     }
 
-    private static boolean addShortcut(final JakesRtpPlugin plugin, final Commands registrar,
+    private static boolean addShortcut(final JakesRtpPlugin plugin,
                                        final Set<String> reserved, final Map<String, String> shortcuts,
                                        final String name, final String profileName) {
         if (name == null || !name.matches("[a-zA-Z0-9_-]+")) {
@@ -160,13 +163,15 @@ public final class BrigadierCommands {
             plugin.getLogger().warning("Skipping reserved or duplicate RTP shortcut: " + name);
             return false;
         }
-        if (registrar.getDispatcher().getRoot().getChild(label) != null
-                || plugin.getServer().getCommandMap().getCommand(label) != null) {
-            plugin.getLogger().warning("Skipping RTP shortcut already owned by another command: " + label);
-            return false;
-        }
         shortcuts.put(label, profileName);
         return true;
+    }
+
+    private static void removeConflictingKnownCommand(final JakesRtpPlugin plugin, final String label) {
+        final CommandMap commandMap = plugin.getServer().getCommandMap();
+        final Command previous = commandMap.getKnownCommands().remove(label);
+        if (previous != null)
+            plugin.getLogger().info("Replacing command /" + label + " (" + previous.getName() + ") with RTP shortcut.");
     }
 
     private static boolean canUseShortcut(final JakesRtpPlugin plugin, final CommandSourceStack source,
