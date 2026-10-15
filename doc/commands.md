@@ -77,6 +77,22 @@ named after the file (without `.yml`). With `end.yml`, `nether.yml`, `recursos.y
 `/end`, `/nether`, `/recursos`, `/mundo` and `/legado`.
 The full `/rtp end` syntax continues to require `jakesrtp.usebyname`.
 
+You can define additional aliases in the global `config.yml`:
+
+```yaml
+aliases:
+  recurso:
+    - minerar
+```
+
+If `rtpSettings/recurso.yml` has `command-enabled: true`, `/minerar`, `/rtp minerar`
+and `/wild minerar` select the `recurso` profile. Unlike `/rtp recurso`, these aliases
+do not require `jakesrtp.usebyname`. They enforce the same `jakesrtp.use` and
+profile-specific permissions as `/recurso`. Paid RTP confirmations run `/minerar confirm`,
+`/rtp minerar confirm` or `/wild minerar confirm`, preserving the selected profile.
+Invalid, duplicate, reserved, or already-registered aliases are skipped with a log warning.
+Changing aliases requires restarting the server to rebuild Brigadier commands.
+
 Shortcuts require `jakesrtp.use` and respect `command-enabled` and
 `require-explicit-permission` for each profile. They do not require
 `jakesrtp.usebyname`. Paid shortcuts open a native Paper confirmation dialog;
