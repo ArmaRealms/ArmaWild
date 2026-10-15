@@ -149,10 +149,10 @@ class BrigadierCommandsTest {
         final CommandSourceStack source = mock(CommandSourceStack.class);
         when(source.getSender()).thenReturn(player);
         when(player.hasPermission("jakesrtp.use")).thenReturn(true);
-        when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(List.of("recurso"));
+        when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(new ArrayList<>(List.of("recurso")));
         assertTrue(nodes.get(5).getRequirement().test(source));
         assertTrue(rtp.getChild("minerar").getRequirement().test(source));
-        when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(List.of());
+        when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(new ArrayList<>());
         assertFalse(nodes.get(5).getRequirement().test(source));
         assertFalse(rtp.getChild("minerar").getRequirement().test(source));
         when(player.hasPermission("jakesrtp.use")).thenReturn(false);
