@@ -19,6 +19,13 @@ config-version: 2.0
 rtp-confirmation:
   subcommand: 'confirm'
 
+#### aliases
+# Extra shortcuts for enabled RTP profiles (names of files under rtpSettings, without .yml).
+# Example: aliases: {recurso: [minerar]} enables /minerar, /rtp minerar and /wild minerar.
+# Shortcuts use the target profile's permissions, cooldown, warmup and confirmation.
+# Adding or changing aliases requires a server restart to rebuild Paper commands.
+aliases: {}
+
 #### rtp-on-first-join
 # If enabled, when a new player joins the server, they will be teleported according to the given rtpSettings, and will
 #   land in the given world.

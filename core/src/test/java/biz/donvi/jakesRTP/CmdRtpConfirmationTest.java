@@ -199,6 +199,12 @@ class CmdRtpConfirmationTest {
     }
 
     @Test
+    void nestedShortcutPreservesAliasWhenConfirmingPaidTeleport() {
+        invokeShortcut("rtp minerar", "survival");
+        assertDialog("/rtp minerar confirm");
+    }
+
+    @Test
     void shortcutConfirmationBypassesNamedPermissionAndStartsWarmup() {
         invokeShortcut("survival", "survival", "CONFIRM");
         assertWarmupStarted();
