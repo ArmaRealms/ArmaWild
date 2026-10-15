@@ -7,6 +7,7 @@ Este histórico parte da versão **0.15.0**. As seções são organizadas por ve
 ## [Não lançado]
 
 ### Adicionado
+- Aliases configuráveis em `config.yml` por perfil `rtpSettings`, disponíveis como comandos diretos (`/minerar`) e subcomandos (`/rtp minerar` e `/wild minerar`). Mantêm permissões e confirmação paga do perfil original; nomes inválidos ou conflitantes são ignorados. (Este PR)
 - Comandos nativos pela **Paper Command API / Brigadier**, com registro em `LifecycleEvents.COMMANDS` para `/rtp`, `/wild`, `/forcertp` e `/rtp-admin`. Inclui sugestões de perfis, jogadores e mundos. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Atalhos gerados dos arquivos `rtpSettings/*.yml` com `command-enabled: true`: por exemplo, `end.yml` permite `/end`, além de `/rtp end`. Atalhos respeitam `jakesrtp.use` e permissões explícitas do perfil, sem exigir `jakesrtp.usebyname`; a forma `/rtp <perfil>` continua exigindo essa permissão. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Diálogo nativo do Paper para RTP com custo positivo quando o jogador não informa `confirm`. Exibe perfil e valor formatado pela economia; **Confirmar** executa o comando de confirmação correspondente, **Cancelar** e **ESC** fecham sem teleportar ou cobrar. [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
@@ -26,7 +27,7 @@ Este histórico parte da versão **0.15.0**. As seções são organizadas por ve
 
 ### Compatibilidade e migração
 - O registro Brigadier e os diálogos exigem **Paper**. O projeto utiliza a API **Paper 1.21.11** e Java 25; a migração deixa de depender dos executores de comando tradicionais do Bukkit/Spigot. Avaliar a incompatibilidade de plataforma e API de comandos ao definir a próxima versão MAJOR segundo SemVer.
-- A criação, remoção ou renomeação de arquivos de perfil requer reinício para reconstruir os atalhos. `/rtp-admin reload` recarrega as configurações dos perfis existentes.
+- A criação, remoção ou renomeação de arquivos de perfil, ou a alteração de `aliases` no `config.yml`, requer reinício para reconstruir os atalhos. `/rtp-admin reload` recarrega as configurações dos perfis existentes.
 - As configurações de RTP do servidor permanecem externas ao JAR. Não foram adicionados perfis fixos de mundos ao plugin.
 
 ## [1.0.0] - 2026-10-06
