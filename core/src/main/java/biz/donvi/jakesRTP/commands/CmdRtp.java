@@ -54,7 +54,8 @@ public class CmdRtp {
                     ? randomTeleporter.getRtpSettingsByWorldForPlayer(player)
                     : randomTeleporter.getRtpSettingsByNameForPlayer(player, args[0]);
 
-            executionService.request(player, profile, confirmed, requiresNamedPermission);
+            executionService.request(player, profile, confirmed, requiresNamedPermission,
+                    shortcutProfile == null && profileArgs == 0);
         } catch (final NotPermittedException npe) {
             sender.sendMessage(Messages.NP_GENERIC.format(
                     Placeholder.component("reason", JrtpBaseException.userMessage(npe))));
