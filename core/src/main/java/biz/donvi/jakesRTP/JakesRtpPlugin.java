@@ -99,7 +99,6 @@ public final class JakesRtpPlugin extends JavaPlugin implements JakesRtpAPI {
         if (!getConfig().getBoolean("land-claim-support.force-disable-all", false))
             claimsManager = new ClaimsManager(this, getConfig().getConfigurationSection("land-claim-support"));
         else claimsManager = new ClaimsManager();
-        new MetricsCustomizer(this, new Metrics(this, 9843));
 
         // register the JakesRtpAPI as a service so that other plugins can hook into it.
         getServer().getServicesManager().register(JakesRtpAPI.class, this, this, ServicePriority.Normal);
