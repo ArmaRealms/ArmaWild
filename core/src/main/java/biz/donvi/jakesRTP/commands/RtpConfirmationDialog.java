@@ -11,13 +11,15 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 
+import java.util.function.Consumer;
+
 import java.util.List;
 
 final class RtpConfirmationDialog {
     private RtpConfirmationDialog() {
     }
 
-    static void show(final Player player, final String profile, final String cost, final String confirmationCommand) {
+    static void show(final Player player, final String profile, final String cost, final Consumer<Player> onConfirm) {
         player.showDialog(Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(Messages.ECON_CONFIRM_DIALOG_TITLE.format())
                         .canCloseWithEscape(true)
@@ -30,7 +32,12 @@ final class RtpConfirmationDialog {
                         .build())
                 .type(DialogType.confirmation(
                         ActionButton.create(Messages.ECON_CONFIRM_DIALOG_ACCEPT.format(), null, 150,
-                                DialogAction.staticAction(ClickEvent.runCommand(confirmationCommand))),
+                                DialogAction.staticAction(ClickEvent.callback(audience -> {
+                                    if (audience instanceof final Player teleporter
+                                            && teleporter.getUniqueId().equals(player.getUniqueId())) {
+                                        onConfirm.accept(teleporter);
+                                    }
+                                }))),
                         ActionButton.create(Messages.ECON_CONFIRM_DIALOG_CANCEL.format(), null, 150, null)))));
     }
 }
