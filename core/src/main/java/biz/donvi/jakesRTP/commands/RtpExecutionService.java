@@ -112,9 +112,10 @@ final class RtpExecutionService {
             final RtpProfile currentProfile = resolveByWorld
                     ? currentTeleporter.getRtpSettingsByWorldForPlayer(player)
                     : currentTeleporter.getRtpSettingsByNameForPlayer(player, profileName);
-            final boolean priceIncreased = plugin.canUseEconomy() && currentProfile.cost > presentedCost;
+            final boolean confirmationChanged = !currentProfile.name.equalsIgnoreCase(profileName)
+                    || plugin.canUseEconomy() && currentProfile.cost > presentedCost;
             new RtpExecutionService(currentTeleporter, confirmationPresenter)
-                    .request(player, currentProfile, !priceIncreased, requiresNamedPermission, resolveByWorld);
+                    .request(player, currentProfile, !confirmationChanged, requiresNamedPermission, resolveByWorld);
         } catch (final NotPermittedException npe) {
             player.sendMessage(Messages.NP_GENERIC.format(
                     Placeholder.component("reason", JrtpBaseException.userMessage(npe))));
