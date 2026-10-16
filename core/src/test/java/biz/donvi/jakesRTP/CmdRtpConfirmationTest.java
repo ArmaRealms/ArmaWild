@@ -362,7 +362,11 @@ class CmdRtpConfirmationTest {
     @Test
     void dialogCallbackRequestsNewConfirmationIfPriceIncreases() throws Exception {
         invoke("rtp");
-        setField(profile, "cost", 50.0);
+        final RtpProfile updatedProfile = mock(RtpProfile.class);
+        setField(updatedProfile, "name", "survival");
+        setField(updatedProfile, "cost", 50.0);
+        setField(updatedProfile, "coolDown", new CoolDownTracker(30));
+        when(teleporter.getRtpSettingsByWorldForPlayer(player)).thenReturn(updatedProfile);
         when(economy.format(50.0)).thenReturn("50 coins");
         dialogRequests.getFirst().onConfirm().accept(player);
         assertEquals(2, dialogRequests.size());
