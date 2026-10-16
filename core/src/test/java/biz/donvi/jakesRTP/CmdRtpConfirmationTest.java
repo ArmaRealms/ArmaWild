@@ -90,6 +90,7 @@ class CmdRtpConfirmationTest {
         teleporter = mock(RandomTeleporter.class);
         setField(teleporter, "playersInWarmup", new HashMap<UUID, Integer>());
         when(teleporter.getRtpSettingsByWorldForPlayer(player)).thenReturn(profile);
+        when(JakesRtpPlugin.plugin.getRandomTeleporter()).thenReturn(teleporter);
         when(teleporter.getRtpSettingsByNameForPlayer(player, "survival")).thenReturn(profile);
         when(teleporter.getRtpSettingsNamesForPlayer(player)).thenReturn(new ArrayList<>(List.of("survival")));
         Messages.setMap(new Yaml().load(getClass().getResourceAsStream("/translations/lang_en.yml")));
@@ -330,6 +331,18 @@ class CmdRtpConfirmationTest {
         when(otherPlayer.isOnline()).thenReturn(true);
         dialogRequests.getFirst().onConfirm().accept(otherPlayer);
         verifyNoInteractions(scheduler);
+    }
+
+    @Test
+    void dialogCallbackUsesCurrentTeleporterAfterReload() throws Exception {
+        invoke("rtp");
+        final RandomTeleporter replacement = mock(RandomTeleporter.class);
+        setField(replacement, "playersInWarmup", new HashMap<UUID, Integer>());
+        when(replacement.getRtpSettingsByWorldForPlayer(player)).thenReturn(profile);
+        when(JakesRtpPlugin.plugin.getRandomTeleporter()).thenReturn(replacement);
+        dialogRequests.getFirst().onConfirm().accept(player);
+        assertEquals(42, replacement.playersInWarmup.get(player.getUniqueId()));
+        assertTrue(teleporter.playersInWarmup.isEmpty());
     }
 
     @Test
