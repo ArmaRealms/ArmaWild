@@ -346,6 +346,20 @@ class CmdRtpConfirmationTest {
     }
 
     @Test
+    void dialogCallbackRequestsNewConfirmationWhenWorldProfileChanges() throws Exception {
+        final RtpProfile differentProfile = mock(RtpProfile.class);
+        setField(differentProfile, "name", "nether");
+        setField(differentProfile, "cost", 25.0);
+        setField(differentProfile, "coolDown", new CoolDownTracker(30));
+        when(teleporter.getRtpSettingsByWorldForPlayer(player)).thenReturn(profile, differentProfile);
+        invoke("rtp");
+        dialogRequests.getFirst().onConfirm().accept(player);
+        assertEquals(2, dialogRequests.size());
+        assertEquals("nether", dialogRequests.get(1).profile());
+        verifyNoInteractions(scheduler);
+    }
+
+    @Test
     void dialogCallbackRequestsNewConfirmationIfPriceIncreases() throws Exception {
         invoke("rtp");
         setField(profile, "cost", 50.0);
