@@ -38,7 +38,7 @@ final class RtpExecutionService {
     }
 
     void request(final Player player, final RtpProfile relSettings, final boolean confirmed,
-             final boolean requiresNamedPermission) throws JrtpBaseException {
+             final boolean requiresNamedPermission, final boolean resolveByWorld) throws JrtpBaseException {
         // Cooldown check with bypass permission
         final boolean bypassCooldown = player.hasPermission("jakesrtp.nocooldown")
                 || player.hasPermission("jakesrtp.nocooldown." + relSettings.name.toLowerCase());
@@ -73,7 +73,7 @@ final class RtpExecutionService {
             confirmationPresenter.show(player, relSettings.name,
                     plugin.getEconomy().format(relSettings.cost),
                     confirmedPlayer -> confirm(confirmedPlayer, player.getUniqueId(),
-                            relSettings.name, requiresNamedPermission, relSettings.cost));
+                            relSettings.name, requiresNamedPermission, resolveByWorld, relSettings.cost));
             return;
         }
 
@@ -90,7 +90,7 @@ final class RtpExecutionService {
     }
 
     private void confirm(final Player player, final UUID requesterId, final String profileName,
-                         final boolean requiresNamedPermission, final double presentedCost) {
+                         final boolean requiresNamedPermission, final boolean resolveByWorld, final double presentedCost) {
         if (!player.getUniqueId().equals(requesterId) || !player.isOnline() || !plugin.isEnabled()) return;
         if (!player.hasPermission("jakesrtp.use")) {
             player.sendMessage(Messages.NP_NO_PERMISSION.format(
@@ -104,9 +104,17 @@ final class RtpExecutionService {
         }
         try {
             // A callback must resolve the profile again: permissions, cost and other settings can change.
-            final RtpProfile currentProfile = randomTeleporter.getRtpSettingsByNameForPlayer(player, profileName);
+            final RandomTeleporter currentTeleporter = plugin.getRandomTeleporter();
+            if (currentTeleporter == null) {
+                player.sendMessage(Messages.NP_R_NOT_ENABLED.format(Placeholder.unparsed("code", "~ECP")));
+                return;
+            }
+            final RtpProfile currentProfile = resolveByWorld
+                    ? currentTeleporter.getRtpSettingsByWorldForPlayer(player)
+                    : currentTeleporter.getRtpSettingsByNameForPlayer(player, profileName);
             final boolean priceIncreased = plugin.canUseEconomy() && currentProfile.cost > presentedCost;
-            request(player, currentProfile, !priceIncreased, requiresNamedPermission);
+            new RtpExecutionService(currentTeleporter, confirmationPresenter)
+                    .request(player, currentProfile, !priceIncreased, requiresNamedPermission, resolveByWorld);
         } catch (final NotPermittedException npe) {
             player.sendMessage(Messages.NP_GENERIC.format(
                     Placeholder.component("reason", JrtpBaseException.userMessage(npe))));
