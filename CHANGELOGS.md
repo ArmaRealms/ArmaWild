@@ -14,6 +14,7 @@ Este histórico parte da versão **0.15.0**. As seções são organizadas por ve
 - Mensagens configuráveis via MiniMessage para título, corpo e botões do diálogo (`confirm-rtp-dialog-*`), com traduções em português e inglês. [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
 
 ### Alterado
+- Confirmação do diálogo de RTP pago por `ClickEvent.callback()` em vez de executar um comando. A lógica de cooldown, warmup, economia e teleporte foi extraída de `CmdRtp` para `RtpExecutionService`; a confirmação revalida perfil, permissões e custo antes de prosseguir. Os subcomandos manuais `confirm` continuam disponíveis. (Este PR)
 - Substituído o registro antigo via `TabExecutor` e as declarações de comandos em `plugin.yml` pelas árvores Brigadier; as definições de permissões permanecem em `plugin.yml`. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - A confirmação de RTP pago deixou de usar a mensagem clicável no chat e passou ao diálogo. Comandos `/rtp confirm`, `/rtp <perfil> confirm` e `/end confirm` continuam funcionando sem abrir o diálogo; o saldo, cooldown e warmup continuam sendo verificados no fluxo existente. A chave `confirm-paid-rtp` é legada e não é exibida nesse fluxo. [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
 - Simplificada a mensagem padrão do diálogo para **`Deseja teleportar pro <profile> por <value>?`** em português; `<value>` usa a formatação da economia. O placeholder anterior `<cost>` continua reconhecido em mensagens personalizadas. (Este PR)
