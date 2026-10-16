@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +48,7 @@ class CmdRtpConfirmationTest {
     private YamlConfiguration config;
     private final List<DialogRequest> dialogRequests = new ArrayList<>();
 
-    private record DialogRequest(Player player, String profile, String formattedCost, String confirmCommand) {
+    private record DialogRequest(Player player, String profile, String formattedCost, Consumer<Player> onConfirm) {
     }
 
     private static void setField(final Object target, final String name, final Object value) throws Exception {
@@ -69,6 +70,9 @@ class CmdRtpConfirmationTest {
         player = mock(Player.class);
         when(player.getUniqueId()).thenReturn(UUID.randomUUID());
         when(player.getName()).thenReturn("Player");
+        when(player.isOnline()).thenReturn(true);
+        when(player.hasPermission("jakesrtp.use")).thenReturn(true);
+        when(JakesRtpPlugin.plugin.isEnabled()).thenReturn(true);
         when(player.getLocation()).thenReturn(new Location(null, 0, 64, 0));
         when(economy.getBalance(player)).thenReturn(100.0);
         when(economy.format(25.0)).thenReturn("25 coins");
@@ -99,7 +103,7 @@ class CmdRtpConfirmationTest {
     @Test
     void paidRtpOnlyPromptsWithoutStartingWarmupOrCharging() {
         invoke("rtp");
-        assertDialog("/rtp confirm");
+        assertDialog();
         assertTrue(teleporter.playersInWarmup.isEmpty());
         assertEquals(-1, profile.coolDown.timeDifference(player.getName()));
         verifyNoInteractions(scheduler);
@@ -110,7 +114,7 @@ class CmdRtpConfirmationTest {
     void paidRtpWithoutWarmupStillRequiresConfirmation() throws Exception {
         setField(profile, "warmupEnabled", false);
         invoke("rtp");
-        assertDialog("/rtp confirm");
+        assertDialog();
         verify(economy, never()).withdrawPlayer(eq(player), anyDouble());
     }
 
@@ -119,7 +123,7 @@ class CmdRtpConfirmationTest {
         config.set("rtp-confirmation.subcommand", "aceitar");
         when(player.hasPermission("jakesrtp.usebyname")).thenReturn(true);
         invoke("wild", "survival");
-        assertDialog("/wild survival aceitar");
+        assertDialog();
     }
 
     @Test
@@ -194,14 +198,14 @@ class CmdRtpConfirmationTest {
     @Test
     void shortcutOpensDialogWithoutNamedProfilePermission() {
         invokeShortcut("survival", "survival");
-        assertDialog("/survival confirm");
+        assertDialog();
         verifyNoInteractions(scheduler);
     }
 
     @Test
     void nestedShortcutPreservesAliasWhenConfirmingPaidTeleport() {
         invokeShortcut("rtp minerar", "survival");
-        assertDialog("/rtp minerar confirm");
+        assertDialog();
     }
 
     @Test
@@ -218,7 +222,7 @@ class CmdRtpConfirmationTest {
     void invalidSubcommandFallsBackToConfirm() {
         config.set("rtp-confirmation.subcommand", "two words");
         invoke("rtp");
-        assertDialog("/rtp confirm");
+        assertDialog();
     }
 
     @Test
@@ -250,8 +254,8 @@ class CmdRtpConfirmationTest {
         return new CmdRtp(teleporter) {
             @Override
             protected void showConfirmationDialog(final Player player, final String profile,
-                                                  final String formattedCost, final String confirmCommand) {
-                dialogRequests.add(new DialogRequest(player, profile, formattedCost, confirmCommand));
+                                                  final String formattedCost, final Consumer<Player> onConfirm) {
+                dialogRequests.add(new DialogRequest(player, profile, formattedCost, onConfirm));
             }
         };
     }
@@ -269,9 +273,74 @@ class CmdRtpConfirmationTest {
         assertEquals(42, teleporter.playersInWarmup.get(player.getUniqueId()));
     }
 
-    private void assertDialog(final String confirmCommand) {
-        assertEquals(List.of(new DialogRequest(player, "survival", "25 coins", confirmCommand)), dialogRequests);
+    private void assertDialog() {
+        assertEquals(1, dialogRequests.size());
+        assertEquals(player, dialogRequests.getFirst().player());
+        assertEquals("survival", dialogRequests.getFirst().profile());
+        assertEquals("25 coins", dialogRequests.getFirst().formattedCost());
         verify(player, never()).showDialog(any(Dialog.class));
         verify(player, never()).sendMessage(any(Component.class));
     }
+
+    @Test
+    void dialogCallbackStartsRtpWithoutDispatchingACommand() {
+        invoke("rtp");
+        assertDialog();
+        dialogRequests.getFirst().onConfirm().accept(player);
+        assertWarmupStarted();
+    }
+
+    @Test
+    void dialogCallbackRechecksBalanceBeforeStartingWarmup() {
+        invoke("rtp");
+        when(economy.getBalance(player)).thenReturn(0.0);
+        when(economy.format(0.0)).thenReturn("0 coins");
+        dialogRequests.getFirst().onConfirm().accept(player);
+        verify(player).sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
+                Placeholder.unparsed("cost", "25 coins"),
+                Placeholder.unparsed("balance", "0 coins")));
+        verifyNoInteractions(scheduler);
+    }
+
+    @Test
+    void dialogCallbackRechecksNamedProfilePermission() {
+        when(player.hasPermission("jakesrtp.usebyname")).thenReturn(true);
+        invoke("rtp", "survival");
+        assertDialog();
+        when(player.hasPermission("jakesrtp.usebyname")).thenReturn(false);
+        dialogRequests.getFirst().onConfirm().accept(player);
+        verify(player).sendMessage(Messages.NP_NO_PERMISSION.format(
+                Placeholder.unparsed("permission", "jakesrtp.usebyname")));
+        verifyNoInteractions(scheduler);
+    }
+
+    @Test
+    void dialogCallbackRechecksCooldown() {
+        invoke("rtp");
+        profile.coolDown.log(player.getName());
+        dialogRequests.getFirst().onConfirm().accept(player);
+        verifyNoInteractions(scheduler);
+    }
+
+    @Test
+    void dialogCallbackIsBoundToOriginalPlayer() {
+        invoke("rtp");
+        final Player otherPlayer = mock(Player.class);
+        when(otherPlayer.getUniqueId()).thenReturn(UUID.randomUUID());
+        when(otherPlayer.isOnline()).thenReturn(true);
+        dialogRequests.getFirst().onConfirm().accept(otherPlayer);
+        verifyNoInteractions(scheduler);
+    }
+
+    @Test
+    void dialogCallbackRequestsNewConfirmationIfPriceIncreases() throws Exception {
+        invoke("rtp");
+        setField(profile, "cost", 50.0);
+        when(economy.format(50.0)).thenReturn("50 coins");
+        dialogRequests.getFirst().onConfirm().accept(player);
+        assertEquals(2, dialogRequests.size());
+        assertEquals("50 coins", dialogRequests.get(1).formattedCost());
+        verifyNoInteractions(scheduler);
+    }
 }
+
