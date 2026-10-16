@@ -38,55 +38,55 @@ final class RtpExecutionService {
     }
 
     void request(final Player player, final RtpProfile relSettings, final boolean confirmed,
-                 final boolean requiresNamedPermission) {
-            // Cooldown check with bypass permission
-            final boolean bypassCooldown = player.hasPermission("jakesrtp.nocooldown")
-                    || player.hasPermission("jakesrtp.nocooldown." + relSettings.name.toLowerCase());
-            final boolean cooldownOk = relSettings.coolDown.check(player.getName());
-            if (!(bypassCooldown || cooldownOk)) {
-                player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
-                        Placeholder.component("time", relSettings.coolDown.timeLeftComponent(player.getName()))));
-                return true;
-            }
+             final boolean requiresNamedPermission) throws JrtpBaseException {
+        // Cooldown check with bypass permission
+        final boolean bypassCooldown = player.hasPermission("jakesrtp.nocooldown")
+                || player.hasPermission("jakesrtp.nocooldown." + relSettings.name.toLowerCase());
+        final boolean cooldownOk = relSettings.coolDown.check(player.getName());
+        if (!(bypassCooldown || cooldownOk)) {
+            player.sendMessage(Messages.NEED_WAIT_COOLDOWN.format(
+                    Placeholder.component("time", relSettings.coolDown.timeLeftComponent(player.getName()))));
+            return;
+        }
 
-            // Already in warmup
-            if (randomTeleporter.playersInWarmup.containsKey(player.getUniqueId())) {
-                player.sendMessage(Messages.WARMUP_RTP_ALREADY_CALLED.format());
-                return true;
-            }
+        // Already in warmup
+        if (randomTeleporter.playersInWarmup.containsKey(player.getUniqueId())) {
+            player.sendMessage(Messages.WARMUP_RTP_ALREADY_CALLED.format());
+            return;
+        }
 
-            // Determine warmup necessity
-            final boolean warmup = relSettings.warmupEnabled
-                    && !player.hasPermission("jakesrtp.nowarmup")
-                    && !player.hasPermission("jakesrtp.nowarmup." + relSettings.name.toLowerCase());
+        // Determine warmup necessity
+        final boolean warmup = relSettings.warmupEnabled
+                && !player.hasPermission("jakesrtp.nowarmup")
+                && !player.hasPermission("jakesrtp.nowarmup." + relSettings.name.toLowerCase());
 
-            // Economy check: require funds if economy enabled and cost > 0
-            final boolean needsPayment = plugin.canUseEconomy() && relSettings.cost > 0;
-            if (needsPayment && plugin.getEconomy().getBalance(player) < relSettings.cost) {
-                player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
-                        Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
-                        Placeholder.unparsed("balance", plugin.getEconomy().format(plugin.getEconomy().getBalance(player)))));
-                return true;
-            }
+        // Economy check: require funds if economy enabled and cost > 0
+        final boolean needsPayment = plugin.canUseEconomy() && relSettings.cost > 0;
+        if (needsPayment && plugin.getEconomy().getBalance(player) < relSettings.cost) {
+            player.sendMessage(Messages.ECON_NOT_ENOUGH_MONEY.format(
+                    Placeholder.unparsed("cost", plugin.getEconomy().format(relSettings.cost)),
+                    Placeholder.unparsed("balance", plugin.getEconomy().format(plugin.getEconomy().getBalance(player)))));
+            return;
+        }
 
-            if (needsPayment && !confirmed) {
-                confirmationPresenter.show(player, relSettings.name,
-                        plugin.getEconomy().format(relSettings.cost),
-                        confirmedPlayer -> confirm(confirmedPlayer, player.getUniqueId(),
-                                relSettings.name, requiresNamedPermission, relSettings.cost));
-                return true;
-            }
+        if (needsPayment && !confirmed) {
+            confirmationPresenter.show(player, relSettings.name,
+                    plugin.getEconomy().format(relSettings.cost),
+                    confirmedPlayer -> confirm(confirmedPlayer, player.getUniqueId(),
+                            relSettings.name, requiresNamedPermission, relSettings.cost));
+            return;
+        }
 
-            // All checks passed: execute teleport (immediately or schedule warmup)
-            final Runnable execRtp = makeRunnable(player, relSettings, warmup);
-            if (warmup) {
-                final int taskID = player.getServer().getScheduler()
-                        .scheduleSyncRepeatingTask(plugin, execRtp, 2, 20);
-                if (taskID == -1) throw new JrtpBaseException("Could not schedule rtp-after-warmup.");
-                randomTeleporter.playersInWarmup.put(player.getUniqueId(), taskID);
-            } else {
-                execRtp.run();
-            }
+        // All checks passed: execute teleport (immediately or schedule warmup)
+        final Runnable execRtp = makeRunnable(player, relSettings, warmup);
+        if (warmup) {
+            final int taskID = player.getServer().getScheduler()
+                    .scheduleSyncRepeatingTask(plugin, execRtp, 2, 20);
+            if (taskID == -1) throw new JrtpBaseException("Could not schedule rtp-after-warmup.");
+            randomTeleporter.playersInWarmup.put(player.getUniqueId(), taskID);
+        } else {
+            execRtp.run();
+        }
     }
 
     private void confirm(final Player player, final UUID requesterId, final String profileName,
