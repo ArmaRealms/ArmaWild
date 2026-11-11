@@ -8,7 +8,7 @@ subprojects {
         .orElse("com.github.ArmaRealms")
         .get()
     version = providers.gradleProperty("version")
-        .orElse("1.0.0")
+        .orElse("2.0.0")
         .get()
 
     extensions.configure<org.gradle.api.plugins.JavaPluginExtension> {

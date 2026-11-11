@@ -62,6 +62,7 @@ public final class BrigadierCommands {
         registrar.register(Commands.literal("forcertp")
                 .requires(source -> source.getSender().hasPermission("jakesrtp.others"))
                 .then(Commands.argument("player", StringArgumentType.word())
+                        .executes(ctx -> force(plugin, ctx, StringArgumentType.getString(ctx, "player")))
                         .suggests((ctx, builder) -> {
                             for (final Player player : plugin.getServer().getOnlinePlayers())
                                 suggest(builder, player.getName());
@@ -70,7 +71,7 @@ public final class BrigadierCommands {
                         .then(Commands.literal("-c")
                                 .then(Commands.argument("profile", StringArgumentType.word())
                                         .suggests((ctx, builder) -> suggestProfiles(plugin, ctx, builder, false, confirm))
-                                        .executes(ctx -> force(plugin, ctx, "-c",
+                                        .executes(ctx -> force(plugin, ctx, StringArgumentType.getString(ctx, "player"), "-c",
                                                 StringArgumentType.getString(ctx, "profile")))))
                         .then(Commands.literal("-w")
                                 .then(Commands.argument("world", StringArgumentType.word())
@@ -78,7 +79,7 @@ public final class BrigadierCommands {
                                             plugin.getServer().getWorlds().forEach(world -> suggest(builder, world.getName()));
                                             return builder.buildFuture();
                                         })
-                                        .executes(ctx -> force(plugin, ctx, "-w",
+                                        .executes(ctx -> force(plugin, ctx, StringArgumentType.getString(ctx, "player"), "-w",
                                                 StringArgumentType.getString(ctx, "world"))))))
                 .build(), "Force a random teleport for an online player");
 
@@ -212,10 +213,9 @@ public final class BrigadierCommands {
     }
 
     private static int force(final JakesRtpPlugin plugin, final CommandContext<CommandSourceStack> ctx,
-                             final String flag, final String destination) {
+                             final String... args) {
         final RandomTeleporter teleporter = plugin.getRandomTeleporter();
-        if (teleporter != null) new CmdForceRtp(teleporter).execute(ctx.getSource().getSender(), new String[]{
-                StringArgumentType.getString(ctx, "player"), flag, destination});
+        if (teleporter != null) new CmdForceRtp(teleporter).execute(ctx.getSource().getSender(), args);
         return com.mojang.brigadier.Command.SINGLE_SUCCESS;
     }
 

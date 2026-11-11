@@ -2,12 +2,16 @@ package biz.donvi.jakesRTP;
 
 import biz.donvi.jakesRTP.commands.BrigadierCommands;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
@@ -18,17 +22,74 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class BrigadierCommandsTest {
+    @Test
+    void forceRtpUsesTargetWorldByDefaultAndAcceptsExplicitDestinations() throws Exception {
+        final JakesRtpPlugin plugin = mock(JakesRtpPlugin.class);
+        final RandomTeleporter teleporter = mock(RandomTeleporter.class);
+        when(plugin.getConfig()).thenReturn(new YamlConfiguration());
+        when(plugin.getRandomTeleporter()).thenReturn(teleporter);
+        when(teleporter.getRtpSettings()).thenReturn(new ArrayList<>());
+        final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
+        final Commands registrar = mock(Commands.class, invocation -> {
+            if ("register".equals(invocation.getMethod().getName())) {
+                dispatcher.getRoot().addChild(invocation.getArgument(0));
+                return Set.of();
+            }
+            return org.mockito.Answers.RETURNS_DEFAULTS.answer(invocation);
+        });
+        BrigadierCommands.register(plugin, registrar);
+
+        final CommandSourceStack source = mock(CommandSourceStack.class);
+        final CommandSender sender = mock(CommandSender.class);
+        final Server server = mock(Server.class);
+        final Player target = mock(Player.class);
+        final World targetWorld = mock(World.class);
+        final World otherWorld = mock(World.class);
+        final Location origin = new Location(targetWorld, 0, 64, 0);
+        final Location otherSpawn = new Location(otherWorld, 0, 64, 0);
+        final Location landing = new Location(otherWorld, 100, 64, 100);
+        when(source.getSender()).thenReturn(sender);
+        when(sender.getServer()).thenReturn(server);
+        when(server.getPlayerExact("Steve")).thenReturn(target);
+        when(server.getWorlds()).thenReturn(List.of(otherWorld));
+        when(otherWorld.getName()).thenReturn("other");
+        when(otherWorld.getSpawnLocation()).thenReturn(otherSpawn);
+        when(target.getLocation()).thenReturn(origin);
+        when(teleporter.getRtpSettingsByWorld(targetWorld)).thenReturn(RtpProfile.DEFAULT_SETTINGS);
+        when(teleporter.getRtpSettingsByName("mundo")).thenReturn(RtpProfile.DEFAULT_SETTINGS);
+        when(teleporter.getRtpSettingsByWorld(otherWorld)).thenReturn(RtpProfile.DEFAULT_SETTINGS);
+        when(teleporter.getRtpLocation(RtpProfile.DEFAULT_SETTINGS, origin, true)).thenReturn(landing);
+        when(teleporter.getRtpLocation(RtpProfile.DEFAULT_SETTINGS, otherSpawn, true)).thenReturn(landing);
+        when(target.teleportAsync(landing)).thenReturn(new CompletableFuture<>());
+
+        assertThrows(CommandSyntaxException.class, () -> dispatcher.execute("forcertp Steve", source));
+        when(sender.hasPermission("jakesrtp.others")).thenReturn(true);
+        dispatcher.execute("forcertp Steve", source);
+        dispatcher.execute("forcertp Steve -c mundo", source);
+        dispatcher.execute("forcertp Steve -w other", source);
+
+        verify(teleporter).getRtpSettingsByWorld(targetWorld);
+        verify(teleporter).getRtpSettingsByName("mundo");
+        verify(teleporter).getRtpSettingsByWorld(otherWorld);
+        verify(teleporter).getRtpLocation(RtpProfile.DEFAULT_SETTINGS, otherSpawn, true);
+        verify(target, times(3)).teleportAsync(landing);
+    }
+
     @Test
     void profileShortcutOverridesExistingCommandWithoutRemovingItsNamespace() throws Exception {
         final JakesRtpPlugin plugin = mock(JakesRtpPlugin.class);

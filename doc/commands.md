@@ -67,8 +67,9 @@ Permission: `jakesrtp.admin` defaults to: `op`
 ## Paper Brigadier commands and profile shortcuts
 
 All commands are registered using Paper's Brigadier command lifecycle. Base commands:
-`/rtp` (alias `/wild`), `/forcertp <player> -c <profile>`,
-`/forcertp <player> -w <world>`, and `/rtp-admin reload|status|reload-messages`.
+`/rtp` (alias `/wild`), `/forcertp <player> [-c <profile> | -w <world>]`,
+and `/rtp-admin reload|status|reload-messages`.
+With only a player name, `/forcertp` selects the highest-priority profile for the target player's current world.
 Tab completion suggests accessible profiles, online players, and world names.
 
 Each enabled, command-enabled file in `plugins/JakesRTP/rtpSettings/` gets a shortcut

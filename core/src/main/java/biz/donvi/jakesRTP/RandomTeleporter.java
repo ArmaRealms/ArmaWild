@@ -40,10 +40,10 @@ public class RandomTeleporter {
     // Dynamic settings
     public final Map<String, DistributionSettings> distributionSettings;
     // First join settings
-    public final boolean firstJoinRtp = false;
+    public final boolean firstJoinRtp;
     public final RtpProfile firstJoinSettings;
     // On death settings
-    public final boolean onDeathRtp = false;
+    public final boolean onDeathRtp;
     public final boolean onDeathRespectBeds;
     public final boolean onDeathRespectAnchors;
     public final boolean onDeathRequirePermission;
@@ -140,12 +140,14 @@ public class RandomTeleporter {
                         "and that all files that do have the 'load-from' have valid settings names as their value." +
                         " ");
         // Static settings:
-        if (firstJoinRtp == globalConfig.getBoolean("rtp-on-first-join.enabled", false)) {
+        firstJoinRtp = globalConfig.getBoolean("rtp-on-first-join.enabled", false);
+        if (firstJoinRtp) {
             firstJoinSettings = getRtpSettingsByName(globalConfig.getString("rtp-on-first-join.settings"));
         } else {
             firstJoinSettings = null;
         }
-        if (onDeathRtp == globalConfig.getBoolean("rtp-on-death.enabled", false)) {
+        onDeathRtp = globalConfig.getBoolean("rtp-on-death.enabled", false);
+        if (onDeathRtp) {
             onDeathRespectBeds = globalConfig.getBoolean("rtp-on-death.respect-beds", true);
             onDeathRespectAnchors = globalConfig.getBoolean("rtp-on-death.respect-anchors", true);
             onDeathSettings = getRtpSettingsByName(globalConfig.getString("rtp-on-death.settings"));

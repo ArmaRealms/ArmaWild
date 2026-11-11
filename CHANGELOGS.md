@@ -2,9 +2,9 @@
 
 O ArmaWild utiliza o [Versionamento Semântico 2.0.0](https://semver.org/lang/pt-BR/spec/v2.0.0.html) no formato `MAJOR.MINOR.PATCH`: MAJOR para mudanças incompatíveis na API pública, MINOR para funcionalidades retrocompatíveis e PATCH para correções retrocompatíveis.
 
-Este histórico parte da versão **0.15.0**. As seções são organizadas por versões **efetivamente publicadas**; **Não lançado** reúne o que entrou na `master` após a última tag, sem atribuir um número ou data de lançamento inexistente. Uma mudança de compatibilidade deve ser avaliada antes da próxima publicação.
+Este histórico parte da versão **0.15.0**. As seções com data correspondem a versões publicadas. A seção **Não lançado** reúne as mudanças na `master` desde a última tag e indica a versão atual do build.
 
-## [Não lançado]
+## [Não lançado] — 2.0.0
 
 ### Adicionado
 - Aliases configuráveis em `config.yml` por perfil `rtpSettings`, disponíveis como comandos diretos (`/minerar`) e subcomandos (`/rtp minerar` e `/wild minerar`). Mantêm permissões e confirmação paga do perfil original; nomes inválidos ou reservados são ignorados. Conflitos com comandos raiz registrados previamente são substituídos sem remover outros aliases do comando anterior. (Este PR)
@@ -20,14 +20,19 @@ Este histórico parte da versão **0.15.0**. As seções são organizadas por ve
 - Simplificada a mensagem padrão do diálogo para **`Deseja teleportar pro <profile> por <value>?`** em português; `<value>` usa a formatação da economia. O placeholder anterior `<cost>` continua reconhecido em mensagens personalizadas. (Este PR)
 
 ### Corrigido
+- Os perfis de RTP no primeiro login e após a morte só são validados quando a opção correspondente está ativada. Uma referência a um perfil ausente em uma opção desativada deixa de interromper a inicialização e o `/rtp-admin reload`.
+- `/forcertp <jogador>` volta a funcionar com apenas o nome do jogador e usa o perfil de maior prioridade aplicável ao mundo atual do alvo. As opções `-c <perfil>` e `-w <mundo>` continuam disponíveis.
 - Corrigidos os testes de confirmação de RTP para verificar a requisição do diálogo sem depender de mock estático da fábrica do Paper. O diálogo exibido aos jogadores permanece inalterado. (Este PR)
-- Evitada a criação de atalhos de perfis com nomes inválidos, reservados ou já ocupados por outro comando no momento do registro. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
+- Evitada a criação de atalhos de perfis com nomes inválidos ou reservados. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Ajustado o argumento `#static` em `/rtp-admin status` para a árvore Brigadier. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14)
 - Removido um registro Bukkit obsoleto do método de recarga de listeners após a migração. [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
 - Ampliados os testes para aliases, permissões, confirmação paga, diálogo, RTP gratuito e saldo insuficiente. [#14](https://github.com/ArmaRealms/ArmaWild/pull/14) [#15](https://github.com/ArmaRealms/ArmaWild/pull/15)
 
+### Removido
+- Removidos os gráficos personalizados do bStats.
+
 ### Compatibilidade e migração
-- O registro Brigadier e os diálogos exigem **Paper**. O projeto utiliza a API **Paper 1.21.11** e Java 25; a migração deixa de depender dos executores de comando tradicionais do Bukkit/Spigot. Avaliar a incompatibilidade de plataforma e API de comandos ao definir a próxima versão MAJOR segundo SemVer.
+- O ArmaWild 2.0.0 exige **Paper** com suporte a comandos Brigadier e diálogos nativos. A versão declarada em `api-version` passa de `1.20` para `1.21`, e o registro de comandos via Bukkit/Spigot foi removido. O projeto é compilado com a API **Paper 1.21.11** e Java 25.
 - A criação, remoção ou renomeação de arquivos de perfil, ou a alteração de `aliases` no `config.yml`, requer reinício para reconstruir os atalhos. `/rtp-admin reload` recarrega as configurações dos perfis existentes.
 - As configurações de RTP do servidor permanecem externas ao JAR. Não foram adicionados perfis fixos de mundos ao plugin.
 
